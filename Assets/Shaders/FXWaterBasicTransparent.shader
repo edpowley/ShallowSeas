@@ -57,6 +57,7 @@ Subshader {
 	Tags { "Queue"="Transparent" "RenderType" = "Transparent" }
     Blend SrcAlpha OneMinusSrcAlpha
     ColorMask RGB
+    ZWrite Off
 	Pass {
 
 CGPROGRAM

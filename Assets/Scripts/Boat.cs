@@ -42,12 +42,12 @@ public class Boat : MonoBehaviour
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
                 
-                if (!Mathf.Approximately(yIntercept.y, 0))
-                    Debug.LogErrorFormat("yIntercept.y == {0} != 0", yIntercept.y);
+                //if (!Mathf.Approximately(yIntercept.y, 0))
+                //    Debug.LogErrorFormat("yIntercept.y == {0} != 0", yIntercept.y);
                 
                 yIntercept.y = 0;
                 
-                Debug.LogFormat("yIntercept: {0}", yIntercept);
+                //Debug.LogFormat("yIntercept: {0}", yIntercept);
 
                 if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
                 {
