@@ -90,7 +90,14 @@ Material:
           name: _GridTex
         second:
           m_Texture: {fileID: 2800000, guid: 83a377952a6a60447a35a777cd9da97c, type: 3}
-          m_Scale: {x: 1024, y: 1024}
+          m_Scale: {x: 256, y: 256}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _LandTex
+        second:
+          m_Texture: {fileID: 2800000, guid: d9ffea430825bbe4590db464bad0fd79, type: 3}
+          m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:
       data:

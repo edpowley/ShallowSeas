@@ -29,8 +29,8 @@ public class CameraZoom : MonoBehaviour
     /// </summary>
     public Vector3 Offset = new Vector3(0, 2, -4);
 
-    public float MidZoomY = 500;
-    public Vector2 MaxZoomHalfArea = new Vector2(512, 512);
+    public float MidZoomY = 100;
+    public Vector2 MaxZoomHalfArea = 0.5f * new Vector2(GameManager.c_gridWidth, GameManager.c_gridHeight);
 
     /// <summary>
     /// The target
