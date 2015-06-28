@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class Boat : MonoBehaviour
 {
@@ -41,36 +42,35 @@ public class Boat : MonoBehaviour
     {
         while (true)
         {
-            while (!Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
-                yield return null;
-            }
+                clearCourse();
+                m_courseBeingDrawn = true;
 
-            // Mouse button is down
-            clearCourse();
-            m_courseBeingDrawn = true;
-
-            while (Input.GetMouseButton(0))
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
-                
-                //if (!Mathf.Approximately(yIntercept.y, 0))
-                //    Debug.LogErrorFormat("yIntercept.y == {0} != 0", yIntercept.y);
-                
-                yIntercept.y = 0;
-                
-                //Debug.LogFormat("yIntercept: {0}", yIntercept);
-
-                if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
+                while (Input.GetMouseButton(0))
                 {
-                    addCoursePoint(yIntercept);
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
+                    
+                    //if (!Mathf.Approximately(yIntercept.y, 0))
+                    //    Debug.LogErrorFormat("yIntercept.y == {0} != 0", yIntercept.y);
+                    
+                    yIntercept.y = 0;
+                    
+                    //Debug.LogFormat("yIntercept: {0}", yIntercept);
+
+                    if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
+                    {
+                        addCoursePoint(yIntercept);
+                    }
+
+                    yield return null;
                 }
 
-                yield return null;
+                m_courseBeingDrawn = false;
             }
 
-            m_courseBeingDrawn = false;
+            yield return null;
         }
     }
 
