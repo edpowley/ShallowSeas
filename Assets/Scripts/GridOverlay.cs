@@ -1,30 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GridOverlay : MonoBehaviour {
-
+public class GridOverlay : MonoBehaviour
+{
     private Texture2D m_maskTexture;
 
 	// Use this for initialization
 	void Start ()
     {
-        m_maskTexture = new Texture2D(1024, 1024);
+        m_maskTexture = new Texture2D(GameManager.c_gridWidth, GameManager.c_gridHeight, TextureFormat.Alpha8, false);
         m_maskTexture.filterMode = FilterMode.Point;
         m_maskTexture.wrapMode = TextureWrapMode.Clamp;
 
-        Terrain terrain = Terrain.activeTerrain;
+        GameManager gm = GameManager.Instance;
 
-        for (int x=0; x<1024; x++)
+        for (int x=0; x<GameManager.c_gridWidth; x++)
         {
-            for (int y=0; y<1024; y++)
+            for (int y=0; y<GameManager.c_gridHeight; y++)
             {
-                float height = terrain.SampleHeight(new Vector3(x-512, 0, y-512));
-                bool isWater = (height < 63.5f);
-                m_maskTexture.SetPixel(x, y, isWater ? Color.white : Color.clear);
-                //m_maskTexture.SetPixel(x, y, new Color(x/1024.0f, y/1024.0f, Random.Range(0.0f, 1.0f)));
+                m_maskTexture.SetPixel(x, y, gm.isWater(x,y) ? Color.white : Color.clear);
             }
         }
-
+ 
         m_maskTexture.Apply();
 
         GetComponent<MeshRenderer>().material.SetTexture("_MaskTex", m_maskTexture);

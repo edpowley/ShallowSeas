@@ -10,18 +10,31 @@ public class Boat : MonoBehaviour
     public float MovementSpeed = 10;
     public float RotationSpeed = 90;
 
-    public MeshFilter CourseLineMeshFilter;
-    private Mesh m_courseLineMesh;
-
-    private LineMesher m_courseLineMesher = new LineMesher();
+    public BoatCourseLine CourseLine;
 
     // Use this for initialization
     void Start()
     {
-        m_courseLineMesh = new Mesh();
-        CourseLineMeshFilter.mesh = m_courseLineMesh;
-
+        CourseLine.setStartPoint(transform.position);
         StartCoroutine(handleMouse());
+    }
+
+    private void addCoursePoint(Vector3 p)
+    {
+        m_course.Add(p);
+        CourseLine.addPoint(p);
+    }
+
+    private void removeFirstCoursePoint()
+    {
+        m_course.RemoveAt(0);
+        CourseLine.removeFirstPoint();
+    }
+
+    private void clearCourse()
+    {
+        m_course.Clear();
+        CourseLine.clearPoints();
     }
 
     private IEnumerator handleMouse()
@@ -34,7 +47,7 @@ public class Boat : MonoBehaviour
             }
 
             // Mouse button is down
-            m_course.Clear();
+            clearCourse();
             m_courseBeingDrawn = true;
 
             while (Input.GetMouseButton(0))
@@ -51,7 +64,7 @@ public class Boat : MonoBehaviour
 
                 if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
                 {
-                    m_course.Add(yIntercept);
+                    addCoursePoint(yIntercept);
                 }
 
                 yield return null;
@@ -78,7 +91,7 @@ public class Boat : MonoBehaviour
                 {
                     transform.position = target;
                     movementStepSize -= deltaSize;
-                    m_course.RemoveAt(0);
+                    removeFirstCoursePoint();
                 }
                 else
                 {
@@ -89,25 +102,8 @@ public class Boat : MonoBehaviour
                 Quaternion targetRotation = Quaternion.FromToRotation(Vector3.right, delta);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
             }
-        }
 
-        if (m_course.Count > 0)
-        {
-            m_courseLineMesher.Clear();
-            List<Vector2> course = new List<Vector2>();
-            course.Add(new Vector2(transform.position.x, transform.position.z));
-            foreach(Vector3 pos in m_course)
-            {
-                course.Add(new Vector2(pos.x, pos.z));
-            }
-
-            m_courseLineMesher.c_radius = 0.25f;
-            m_courseLineMesher.AddLineStripAsSegmentsByAngle(course);
-            m_courseLineMesher.PopulateMesh(m_courseLineMesh);
-        }
-        else
-        {
-            m_courseLineMesh.Clear();
+            CourseLine.setStartPoint(transform.position);
         }
     }
 }

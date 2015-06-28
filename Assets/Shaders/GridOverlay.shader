@@ -2,6 +2,7 @@
 	Properties {
 		_MaskTex ("Mask", 2D) = "white" {}
 		_GridTex ("Grid", 2D) = "white" {}
+		_LandTex ("Land", 2D) = "white" {}
 	}
 
 	SubShader {
@@ -32,7 +33,7 @@
 					UNITY_FOG_COORDS(1)
 				};
 
-				sampler2D _MaskTex, _GridTex;
+				sampler2D _MaskTex, _GridTex, _LandTex;
 				float4 _MaskTex_ST, _GridTex_ST;
 				
 				v2f vert (appdata_t v)
@@ -47,7 +48,9 @@
 				
 				fixed4 frag (v2f i) : SV_Target
 				{
-					fixed4 col = tex2D(_MaskTex, i.texcoord0) * tex2D(_GridTex, i.texcoord1);
+					fixed4 mask = tex2D(_MaskTex, i.texcoord0);
+					fixed4 col = mask.a * tex2D(_GridTex, i.texcoord1);
+					col += (1-mask.a) * tex2D(_LandTex, i.texcoord1);
 					UNITY_APPLY_FOG(i.fogCoord, col);
 					return col;
 				}
