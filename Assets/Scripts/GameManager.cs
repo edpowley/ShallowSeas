@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     public Texture2D FishDensityMap;
 
     public Boat PlayerBoat;
-    public Text TestText;
+    public Text TestText, TestText2;
 
     internal bool isWater(int x, int y)
     {
@@ -75,5 +75,9 @@ public class GameManager : MonoBehaviour
                                       boatX, boatY,
                                       string.Join(", ", (from d in fishDensity select string.Format("{0:0.00}", d)).ToArray())
                                       );
+
+        TestText2.text = string.Format("Catch: {0}",
+                                       string.Join(", ", (from n in PlayerBoat.m_currentCatch select n.ToString()).ToArray())
+                                       );
     }
 }

@@ -13,6 +13,12 @@ public class Boat : MonoBehaviour
 
     public BoatCourseLine CourseLine;
 
+    internal GearItem m_currentCastGear = null;
+
+    public MeshRenderer NetRenderer;
+
+    internal List<int> m_currentCatch = new List<int>{0,0,0};
+
     // Use this for initialization
     void Start()
     {
@@ -77,7 +83,14 @@ public class Boat : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!m_courseBeingDrawn)
+        if (m_currentCastGear != null)
+        {
+            if (!m_currentCastGear.IsCast)
+            {
+                m_currentCastGear = null;
+            }
+        }
+        else if (!m_courseBeingDrawn)
         {
             float movementStepSize = MovementSpeed * Time.deltaTime;
 
@@ -105,5 +118,11 @@ public class Boat : MonoBehaviour
 
             CourseLine.setStartPoint(transform.position);
         }
+    }
+
+    internal void CastGear(GearItem gear)
+    {
+        m_currentCastGear = gear;
+        gear.Cast();
     }
 }
