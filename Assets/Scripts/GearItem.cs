@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GearItem : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class GearItem : MonoBehaviour
 
     internal float Progress { get; private set; }
     private float m_progressPerSecond;
+    private int m_fishCaught;
 
     // Use this for initialization
     void Start()
@@ -23,6 +25,7 @@ public class GearItem : MonoBehaviour
         IsCast = true;
         Progress = 0;
         m_progressPerSecond = 1.0f / CastDuration;
+        m_fishCaught = 0;
     }
     
     // Update is called once per frame
@@ -34,7 +37,20 @@ public class GearItem : MonoBehaviour
         {
             Progress += m_progressPerSecond * Time.deltaTime;
             if (Progress >= 1.0f)
+            {
                 IsCast = false;
+            }
+            else if (m_fishCaught < MaxCatch)
+            {
+                List<float> density = GameManager.Instance.CurrentCellFishDensity;
+                int fishIndex = Random.Range(0, density.Count);
+
+                if (Random.Range(0.0f, 1.0f) < density[fishIndex] * Time.deltaTime * 10)
+                {
+                    GameManager.Instance.PlayerBoat.m_currentCatch[fishIndex]++;
+                    m_fishCaught++;
+                }
+            }
         }
     }
 }
