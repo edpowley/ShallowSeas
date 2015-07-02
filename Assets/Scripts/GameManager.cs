@@ -18,8 +18,11 @@ public class GameManager : MonoBehaviour
 
     public Texture2D FishDensityMap;
 
+    public string[] FishNames = new string[]{ "red fish", "green fish", "blue fish" };
+
     public Boat PlayerBoat;
     public Text TestText, TestText2;
+    public NotificationText Notification;
 
     internal int CurrentCellX { get; private set; }
     internal int CurrentCellY { get; private set; }
@@ -83,5 +86,35 @@ public class GameManager : MonoBehaviour
         TestText2.text = string.Format("Catch: {0}",
                                        string.Join(", ", (from n in PlayerBoat.m_currentCatch select n.ToString()).ToArray())
                                        );
+    }
+
+    public void AddCatch(List<int> fishCaught)
+    {
+        List<string> notificationStrings = new List<string>();
+
+        for (int i=0; i<fishCaught.Count; i++)
+        {
+            PlayerBoat.m_currentCatch[i] += fishCaught[i];
+            if (fishCaught[i] > 0)
+                notificationStrings.Add(string.Format("{0} {1}", fishCaught[i], FishNames[i]));
+        }
+
+        switch (notificationStrings.Count)
+        {
+            case 0:
+                Notification.PutMessage("You caught nothing!");
+                break;
+
+            case 1:
+                Notification.PutMessage("You caught {0}", notificationStrings[0]);
+                break;
+
+            default:
+                Notification.PutMessage("You caught {0} and {1}",
+                                        string.Join(", ", notificationStrings.Take(notificationStrings.Count-1).ToArray()),
+                                        notificationStrings.Last()
+                                        );
+                break;
+        }
     }
 }
