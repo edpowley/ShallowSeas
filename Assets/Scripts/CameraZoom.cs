@@ -92,7 +92,7 @@ public class CameraZoom : MonoBehaviour
         else
         {
             float maxZoomY = MaxZoomHalfArea.y / Mathf.Tan(0.5f * m_camera.fieldOfView * Mathf.Deg2Rad);
-            Vector3 maxZoomPos = new Vector3(0, maxZoomY, 0);
+            Vector3 maxZoomPos = new Vector3(GameManager.c_gridWidth*0.5f, maxZoomY, GameManager.c_gridHeight*0.5f);
 
             transform.position = Vector3.Lerp(lowZoomPos, maxZoomPos, Zoom - 1);
 
