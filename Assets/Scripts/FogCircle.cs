@@ -8,6 +8,7 @@ public class FogCircle : MonoBehaviour
     private Mesh m_mesh;
     public Boat Boat;
     public int Radius = 10;
+    public bool CheckLineOfSight = false;
 
     private IntVector2 m_centre = new IntVector2(-1, -1);
 
@@ -47,6 +48,28 @@ public class FogCircle : MonoBehaviour
             }
         }
 
+        if (CheckLineOfSight)
+        {
+            for (int sx = -Radius; sx <= Radius; sx++)
+            {
+                for (int sy = -Radius; sy <= Radius; sy++)
+                {
+                    if (squares[sx+Radius, sy+Radius])
+                    {
+                        foreach (IntVector2 p in Util.SupercoverLine(0.5f, 0.5f, sx+0.5f, sy+0.5f))
+                        {
+                            if (!squares[p.X+Radius, p.Y+Radius])
+                            {
+                                squares[sx+Radius, sy+Radius] = false;
+                                numSquares--;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Debug.LogFormat("{0} squares = {1} vertices, {2} triangles", numSquares, numSquares * 4, numSquares * 2);
 
         Vector3[] vertices = new Vector3[numSquares * 4];
@@ -65,10 +88,10 @@ public class FogCircle : MonoBehaviour
                     vertices[squareIndex*4+2] = new Vector3(sx+1, 0, sy+1);
                     vertices[squareIndex*4+3] = new Vector3(sx+1, 0, sy+0);
 
-                    uvs[squareIndex*4+0] = new Vector2(0, 0);
-                    uvs[squareIndex*4+1] = new Vector2(0, 1);
-                    uvs[squareIndex*4+2] = new Vector2(1, 1);
-                    uvs[squareIndex*4+3] = new Vector2(1, 0);
+                    uvs[squareIndex*4+0] = new Vector2(sx+0, sy+0);
+                    uvs[squareIndex*4+1] = new Vector2(sx+0, sy+1);
+                    uvs[squareIndex*4+2] = new Vector2(sx+1, sy+1);
+                    uvs[squareIndex*4+3] = new Vector2(sx+1, sy+0);
 
                     triangles[squareIndex*6+0] = squareIndex*4+0;
                     triangles[squareIndex*6+1] = squareIndex*4+1;

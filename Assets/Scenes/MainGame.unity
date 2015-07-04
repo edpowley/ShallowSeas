@@ -2019,6 +2019,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Boat: {fileID: 388772052}
   Radius: 10
+  CheckLineOfSight: 0
 --- !u!33 &2059388536
 MeshFilter:
   m_ObjectHideFlags: 0
