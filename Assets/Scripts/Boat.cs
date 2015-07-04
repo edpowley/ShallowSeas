@@ -69,9 +69,24 @@ public class Boat : MonoBehaviour
                     
                     //Debug.LogFormat("yIntercept: {0}", yIntercept);
 
-                    if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course [m_course.Count - 1]) > 0.5f)
+                    if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
                     {
                         addCoursePoint(yIntercept);
+
+                        /*Vector3 pathStart = (m_course.Count > 0) ? m_course[m_course.Count - 1] : transform.position;
+                        var path = Pathfinder.FindPath(pathStart, yIntercept);
+
+                        if (path != null)
+                        {
+                            bool first = true;
+                            foreach (Vector3 p in path)
+                            {
+                                if (!first)
+                                    addCoursePoint(p);
+
+                                first = false;
+                            }
+                        }*/
                     }
 
                     yield return null;
