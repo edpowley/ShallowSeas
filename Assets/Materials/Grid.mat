@@ -6,12 +6,13 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Fog Of War
-  m_Shader: {fileID: 4800000, guid: aa42f3d1ce512884db686ec87ca0d9ea, type: 3}
-  m_ShaderKeywords: 
+  m_Name: Grid
+  m_Shader: {fileID: 4800000, guid: 53375984f13125e41a7379da22c11711, type: 3}
+  m_ShaderKeywords: _ALPHAPREMULTIPLY_ON
   m_LightmapFlags: 5
   m_CustomRenderQueue: -1
-  stringTagMap: {}
+  stringTagMap:
+    RenderType: Transparent
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs:
@@ -19,7 +20,7 @@ Material:
         first:
           name: _MainTex
         second:
-          m_Texture: {fileID: 2800000, guid: d9ffea430825bbe4590db464bad0fd79, type: 3}
+          m_Texture: {fileID: 2800000, guid: 83a377952a6a60447a35a777cd9da97c, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -86,7 +87,7 @@ Material:
       data:
         first:
           name: _DstBlend
-        second: 0
+        second: 10
       data:
         first:
           name: _Cutoff
@@ -98,7 +99,7 @@ Material:
       data:
         first:
           name: _ZWrite
-        second: 1
+        second: 0
       data:
         first:
           name: _Glossiness
@@ -122,7 +123,7 @@ Material:
       data:
         first:
           name: _Mode
-        second: 0
+        second: 3
       data:
         first:
           name: _Metallic

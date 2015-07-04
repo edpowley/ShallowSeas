@@ -7,17 +7,21 @@ public class Boat : MonoBehaviour
 {
     private List<Vector3> m_course = new List<Vector3>();
     private bool m_courseBeingDrawn = false;
-
     public float MovementSpeed = 10;
     public float RotationSpeed = 90;
-
     public BoatCourseLine CourseLine;
-
     internal GearItem m_currentCastGear = null;
-
     public MeshRenderer NetRenderer;
-
     internal List<int> m_currentCatch = new List<int>{0,0,0};
+
+    public IntVector2 CurrentCell
+    {
+        get
+        {
+            Vector3 pos = transform.position;
+            return new IntVector2(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.z));
+        }
+    }
 
     // Use this for initialization
     void Start()
@@ -65,7 +69,7 @@ public class Boat : MonoBehaviour
                     
                     //Debug.LogFormat("yIntercept: {0}", yIntercept);
 
-                    if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
+                    if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course [m_course.Count - 1]) > 0.5f)
                     {
                         addCoursePoint(yIntercept);
                     }
@@ -96,7 +100,7 @@ public class Boat : MonoBehaviour
 
             while (movementStepSize > 0 && m_course.Count > 0)
             {
-                Vector3 target = m_course[0];
+                Vector3 target = m_course [0];
                 Vector3 delta = target - transform.position;
 
                 float deltaSize = delta.magnitude;

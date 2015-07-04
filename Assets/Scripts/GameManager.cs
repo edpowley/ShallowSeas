@@ -24,8 +24,6 @@ public class GameManager : MonoBehaviour
     public Text TestText, TestText2;
     public NotificationText Notification;
 
-    internal int CurrentCellX { get; private set; }
-    internal int CurrentCellY { get; private set; }
     internal List<float> CurrentCellFishDensity { get; private set; }
 
     internal bool isWater(int x, int y)
@@ -34,6 +32,11 @@ public class GameManager : MonoBehaviour
             return false;
         else
             return m_isWater[x,y];
+    }
+
+    internal bool isWater(IntVector2 p)
+    {
+        return isWater(p.X, p.Y);
     }
 
     public void Awake()
@@ -139,13 +142,11 @@ public class GameManager : MonoBehaviour
     
     public void Update()
     {
-        Vector3 boatPos = PlayerBoat.transform.position;
-        CurrentCellX = Mathf.FloorToInt(boatPos.x);
-        CurrentCellY = Mathf.FloorToInt(boatPos.z);
+        IntVector2 currentCell = PlayerBoat.CurrentCell;
 
-        CurrentCellFishDensity = m_fishDensity[CurrentCellX, CurrentCellY];
-        TestText.text = string.Format("Boat in square {0},{1}\nFish density {2}",
-                                      CurrentCellX, CurrentCellY,
+        CurrentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
+        TestText.text = string.Format("Boat in square {0}\nFish density {1}",
+                                      currentCell,
                                       string.Join(", ", (from d in CurrentCellFishDensity select string.Format("{0:0.00}", d)).ToArray())
                                       );
 
