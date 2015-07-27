@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public static class Pathfinder
 {
@@ -50,6 +51,8 @@ public static class Pathfinder
             m_list.RemoveAt(m_list.Count - 1);
             return result;
         }
+
+        public IEnumerable<OpenSetElement> Elements{ get { return m_list; } }
     }
 
     public static List<Vector3> FindPath(Vector3 start, Vector3 end)
@@ -60,16 +63,37 @@ public static class Pathfinder
         IntVector2 endSquare = new IntVector2(Mathf.FloorToInt(end.x), Mathf.FloorToInt(end.z));
 
         if (!gm.isWater(startSquare) || !gm.isWater(endSquare))
+        {
             return null;
+        }
 
         OpenQueue openSet = new OpenQueue();
         openSet.Add(new OpenSetElement(startSquare, 0, (endSquare-startSquare).Magnitude, null));
         HashSet<IntVector2> closedSet = new HashSet<IntVector2>();
+        closedSet.Add(startSquare);
 
         while (!openSet.IsEmpty)
         {
+            /*yield return null;
+
+            foreach(var v in openSet.Elements)
+            {
+                IntVector2 q = v.m_v;
+                for (var u=v.m_cameFrom; u!=null; u=u.m_cameFrom)
+                {
+                    IntVector2 p = u.m_v;
+                    Debug.DrawLine(new Vector3(p.X,0,p.Y), new Vector3(q.X,0,q.Y), Color.yellow);
+                    q=p;
+                }
+            }
+
+            foreach(var v in closedSet)
+            {
+                Debug.DrawLine(new Vector3(v.X-0.1f, 0, v.Y-0.1f), new Vector3(v.X+0.1f, 0, v.Y+0.1f), Color.red);
+                Debug.DrawLine(new Vector3(v.X-0.1f, 0, v.Y+0.1f), new Vector3(v.X+0.1f, 0, v.Y-0.1f), Color.red);
+            }*/
+            
             OpenSetElement front = openSet.Pop();
-            closedSet.Add(front.m_v);
 
             if (front.m_v.Equals(endSquare))
             {
@@ -84,12 +108,16 @@ public static class Pathfinder
                     if (dx == 0 && dy == 0)
                         continue;
 
+                    if (dx != 0 && dy != 0)
+                        continue;
+
                     IntVector2 d = new IntVector2(dx, dy);
                     IntVector2 neighbour = front.m_v + d;
 
                     if (gm.isWater(neighbour) && !closedSet.Contains(neighbour))
                     {
                         openSet.Add(new OpenSetElement(neighbour, front.m_g + d.Magnitude, (endSquare-neighbour).Magnitude, front));
+                        closedSet.Add(neighbour);
                     }
                 }
             }
@@ -115,5 +143,29 @@ public static class Pathfinder
         return result;
     }
 
+    public static void PullString(List<Vector3> path)
+    {
+        GameManager gm = GameManager.Instance;
+
+        for (int i = 1; i < path.Count - 1; i++)
+        {
+            if (straightLinePathIsClear(gm, path[i-1], path[i+1]))
+            {
+                path.RemoveAt(i);
+                i--;
+            }
+        }
+    }
+
+    private static bool straightLinePathIsClear(GameManager gm, Vector3 a, Vector3 b)
+    {
+        foreach (IntVector2 s in Util.SupercoverLine(a.x, a.z, b.x, b.z))
+        {
+            if (!gm.isWater(s))
+                return false;
+        }
+
+        return true;
+    }
 }
 

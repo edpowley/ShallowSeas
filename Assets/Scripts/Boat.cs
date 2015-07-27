@@ -71,13 +71,14 @@ public class Boat : MonoBehaviour
 
                     if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
                     {
-                        addCoursePoint(yIntercept);
+                        // addCoursePoint(yIntercept);
 
-                        /*Vector3 pathStart = (m_course.Count > 0) ? m_course[m_course.Count - 1] : transform.position;
-                        var path = Pathfinder.FindPath(pathStart, yIntercept);
-
+                        Vector3 pathStart = (m_course.Count > 0) ? m_course[m_course.Count - 1] : transform.position;
+                        List<Vector3> path = Pathfinder.FindPath(pathStart, yIntercept);
                         if (path != null)
                         {
+                            Pathfinder.PullString(path);
+
                             bool first = true;
                             foreach (Vector3 p in path)
                             {
@@ -86,7 +87,7 @@ public class Boat : MonoBehaviour
 
                                 first = false;
                             }
-                        }*/
+                        }
                     }
 
                     yield return null;
@@ -112,6 +113,9 @@ public class Boat : MonoBehaviour
         else if (!m_courseBeingDrawn)
         {
             float movementStepSize = MovementSpeed * Time.deltaTime;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                movementStepSize *= 20;
 
             while (movementStepSize > 0 && m_course.Count > 0)
             {
