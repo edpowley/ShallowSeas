@@ -7,8 +7,6 @@ using System.Linq;
 
 public class Boat : MonoBehaviour
 {
-    //private List<Vector3> m_course = new List<Vector3>();
-    private bool m_courseBeingDrawn = false;
     public float MovementSpeed = 10;
     public float RotationSpeed = 90;
     public MeshRenderer NetRenderer;
@@ -62,48 +60,7 @@ public class Boat : MonoBehaviour
             // do nothing
         }
     }
-    
-    /*private void addCoursePoint(Vector3 p)
-    {
-        Player.Course.Add(new CoursePoint(p.x, p.z));
-        if (isLocalPlayer)
-            GameManager.Instance.CourseLine.addPoint(p);
-    }
 
-    private void removeFirstCoursePoint()
-    {
-        Player.Course.RemoveAt(0);
-        if (isLocalPlayer)
-            GameManager.Instance.CourseLine.removeFirstPoint();
-    }
-
-    private void clearCourse()
-    {
-        Player.Course.Clear();
-        if (isLocalPlayer)
-            GameManager.Instance.CourseLine.clearPoints();
-    }
-
-    private bool isCourseEmpty()
-    {
-        return Player.Course.Count == 0;
-    }
-
-    private Vector3 getFirstCoursePoint()
-    {
-        return Player.Course [0].toVector3();
-    }
-    
-    private Vector3 getLastCoursePoint()
-    {
-        return Player.Course [Player.Course.Count - 1].toVector3();
-    }
-    
-    private Vector3 getLastCoursePointOrDefault(Vector3 def)
-    {
-        return isCourseEmpty() ? def : getLastCoursePoint();
-    }*/
-    
     private IEnumerator handleMouse()
     {
         while (true)
@@ -113,7 +70,6 @@ public class Boat : MonoBehaviour
                 Player.ClearCourse();
                 List<Vector3> course = new List<Vector3>();
                 course.Add(transform.position);
-                m_courseBeingDrawn = true;
 
                 while (Input.GetMouseButton(0))
                 {
@@ -144,11 +100,6 @@ public class Boat : MonoBehaviour
 
                     yield return null;
                 }
-
-                m_courseBeingDrawn = false;
-                /*Player.Course.Clear();
-                foreach (Vector3 p in course)
-                    Player.Course.Add(new CoursePoint(p.x, p.z));*/
 
                 Player.SetCourse(course);
             }
