@@ -4,7 +4,6 @@ using System.Collections;
 /// <summary>
 /// Camera control script for tracking and zooming on an object.
 /// </summary>
-[ExecuteInEditMode]
 public class CameraZoom : MonoBehaviour
 {
     private Camera m_camera;
@@ -31,11 +30,6 @@ public class CameraZoom : MonoBehaviour
 
     public float MidZoomY = 100;
     public Vector2 MaxZoomHalfArea = 0.5f * new Vector2(GameManager.c_gridWidth, GameManager.c_gridHeight);
-
-    /// <summary>
-    /// The target
-    /// </summary>
-    public Transform Target;
 
     void Start()
     {
@@ -76,10 +70,10 @@ public class CameraZoom : MonoBehaviour
 
         // Get target position
         Vector3 targetPos;
-        if (Target != null)
-            targetPos = Target.position;
+        if (GameManager.Instance.m_localPlayerBoat != null)
+            targetPos = GameManager.Instance.m_localPlayerBoat.transform.position;
         else 
-            targetPos = Vector3.zero;
+            targetPos = new Vector3(GameManager.c_gridWidth / 2, 0, GameManager.c_gridHeight / 2);
 
         // Update camera position and rotation
         Vector3 lowZoomPos = new Vector3(targetPos.x, Mathf.Clamp01(Zoom) * MidZoomY, targetPos.z) + Offset;

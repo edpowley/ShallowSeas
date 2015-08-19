@@ -6,7 +6,11 @@ public class CastGearButton : MonoBehaviour
 {
     private Button m_button;
     public Image ProgressBarImage;
-    public GearItem Gear;
+
+    public string GearName;
+    public float CastDuration;
+    public int MaxCatch;
+    public int[] CatchMultiplier = new int[] { 1, 1, 1 };
 
     public void Start()
     {
@@ -17,21 +21,30 @@ public class CastGearButton : MonoBehaviour
 
     public void OnButtonClick()
     {
-        GameManager.Instance.PlayerBoat.CastGear(this.Gear);
+        if (GameManager.Instance.m_localPlayerBoat != null)
+            GameManager.Instance.m_localPlayerBoat.CastGear(this);
     }
 
     public void Update()
     {
-        Boat playerBoat = GameManager.Instance.PlayerBoat;
+        Boat playerBoat = GameManager.Instance.m_localPlayerBoat;
 
-        m_button.interactable = (playerBoat.m_currentCastGear == null);
-
-        if (playerBoat.m_currentCastGear == this.Gear)
+        if (playerBoat != null)
         {
-            ProgressBarImage.fillAmount = playerBoat.m_currentCastGear.Progress;
+            m_button.interactable = (playerBoat.m_castGear == null);
+
+            if (playerBoat.m_castGear == this.GearName)
+            {
+                ProgressBarImage.fillAmount = playerBoat.m_castProgress;
+            }
+            else
+            {
+                ProgressBarImage.fillAmount = 0;
+            }
         }
         else
         {
+            m_button.interactable = false;
             ProgressBarImage.fillAmount = 0;
         }
     }

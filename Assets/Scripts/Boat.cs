@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 
 public class Boat : MonoBehaviour
 {
@@ -9,10 +10,13 @@ public class Boat : MonoBehaviour
     private bool m_courseBeingDrawn = false;
     public float MovementSpeed = 10;
     public float RotationSpeed = 90;
-    public BoatCourseLine CourseLine;
-    internal GearItem m_currentCastGear = null;
     public MeshRenderer NetRenderer;
     internal List<int> m_currentCatch = new List<int>{0,0,0};
+
+    internal string m_castGear = null;
+    internal float m_castProgress;
+
+    public MyNetworkPlayer Player;
 
     public IntVector2 CurrentCell
     {
@@ -23,29 +27,60 @@ public class Boat : MonoBehaviour
         }
     }
 
+    private new bool isLocalPlayer { get { return Player != null && Player.isLocalPlayer; } }
+
     // Use this for initialization
     void Start()
     {
-        CourseLine.setStartPoint(transform.position);
-        StartCoroutine(handleMouse());
+        if (isLocalPlayer)
+        {
+            GameManager.Instance.m_localPlayerBoat = this;
+            GameManager.Instance.CourseLine.setStartPoint(transform.position);
+            StartCoroutine(handleMouse());
+        }
     }
 
+    internal void setColour(Color colour)
+    {
+        foreach (Renderer renderer in transform.GetComponentsInChildren<Renderer>())
+        {
+            foreach (Material material in renderer.materials)
+                material.color = colour;
+        }
+    }
+
+    void OnDestroy()
+    {
+        try
+        {
+            if (GameManager.Instance.m_localPlayerBoat == this)
+                GameManager.Instance.m_localPlayerBoat = null;
+        }
+        catch (System.NullReferenceException)
+        {
+            // do nothing
+        }
+    }
+    
     private void addCoursePoint(Vector3 p)
     {
         m_course.Add(p);
-        CourseLine.addPoint(p);
+        if (isLocalPlayer)
+            GameManager.Instance.CourseLine.addPoint(p);
     }
 
     private void removeFirstCoursePoint()
     {
         m_course.RemoveAt(0);
-        CourseLine.removeFirstPoint();
+        if (isLocalPlayer)
+            GameManager.Instance.CourseLine.removeFirstPoint();
     }
 
     private void clearCourse()
     {
         m_course.Clear();
-        CourseLine.clearPoints();
+        if (isLocalPlayer)
+            GameManager.Instance.CourseLine.clearPoints();
     }
 
     private IEnumerator handleMouse()
@@ -103,12 +138,9 @@ public class Boat : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_currentCastGear != null)
+        if (m_castGear != null)
         {
-            if (!m_currentCastGear.IsCast)
-            {
-                m_currentCastGear = null;
-            }
+            // do nothing (prevent boat from moving whilst gear is cast)
         }
         else if (!m_courseBeingDrawn)
         {
@@ -139,13 +171,50 @@ public class Boat : MonoBehaviour
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
             }
 
-            CourseLine.setStartPoint(transform.position);
+            if (isLocalPlayer)
+                GameManager.Instance.CourseLine.setStartPoint(transform.position);
         }
     }
 
-    internal void CastGear(GearItem gear)
+    internal void CastGear(CastGearButton gear)
     {
-        m_currentCastGear = gear;
-        gear.Cast();
+        StartCoroutine(castCoroutine(gear));
+    }
+
+    private IEnumerator castCoroutine(CastGearButton gear)
+    {
+        m_castGear = gear.GearName;
+        m_castProgress = 0;
+        float progressPerSecond = 1.0f / gear.CastDuration;
+        int totalFishCaught = 0;
+        List<int> fishCaught = new List<int>();
+        
+        List<float> density = GameManager.Instance.getFishDensity(CurrentCell);
+        for (int i=0; i<density.Count; i++)
+        {
+            fishCaught.Add(0);
+        }
+        
+        while (m_castProgress < 1.0f)
+        {
+            m_castProgress += progressPerSecond * Time.deltaTime;
+            
+            if (totalFishCaught < gear.MaxCatch)
+            {
+                int fishIndex = Random.Range(0, density.Count);
+                
+                if (Random.Range(0.0f, 1.0f) < density[fishIndex] * Time.deltaTime * gear.CatchMultiplier[fishIndex])
+                {
+                    fishCaught[fishIndex]++;
+                    totalFishCaught++;
+                }
+            }
+            
+            yield return null;
+        }
+        
+        m_castGear = null;
+        GameManager.Instance.AddCatch(fishCaught);
     }
 }
+

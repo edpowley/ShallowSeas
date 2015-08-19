@@ -20,11 +20,11 @@ public class GameManager : MonoBehaviour
 
     public string[] FishNames = new string[]{ "red fish", "green fish", "blue fish" };
 
-    public Boat PlayerBoat;
+    public Boat m_localPlayerBoat;
+    public BoatCourseLine CourseLine;
+
     public Text TestText, TestText2;
     public NotificationText Notification;
-
-    internal List<float> CurrentCellFishDensity { get; private set; }
 
     internal bool isWater(int x, int y)
     {
@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        bool[,] reachable = getReachability(Mathf.FloorToInt(PlayerBoat.transform.position.x), Mathf.FloorToInt(PlayerBoat.transform.position.z));
+        bool[,] reachable = getReachability(c_gridWidth/2, c_gridHeight/2);
 
         for (int x=0; x<c_gridWidth; x++)
         {
@@ -139,10 +139,15 @@ public class GameManager : MonoBehaviour
 
         return result;
     }
-    
+
+    internal List<float> getFishDensity(IntVector2 cell)
+    {
+        return m_fishDensity[cell.X, cell.Y];
+    }
+
     public void Update()
     {
-        IntVector2 currentCell = PlayerBoat.CurrentCell;
+        /*IntVector2 currentCell = PlayerBoat.CurrentCell;
 
         CurrentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
         TestText.text = string.Format("Boat in square {0}\nFish density {1}",
@@ -152,12 +157,12 @@ public class GameManager : MonoBehaviour
 
         TestText2.text = string.Format("Catch: {0}",
                                        string.Join(", ", (from n in PlayerBoat.m_currentCatch select n.ToString()).ToArray())
-                                       );
+                                       );*/
     }
 
     public void AddCatch(List<int> fishCaught)
     {
-        List<string> notificationStrings = new List<string>();
+        /*List<string> notificationStrings = new List<string>();
 
         for (int i=0; i<fishCaught.Count; i++)
         {
@@ -182,6 +187,6 @@ public class GameManager : MonoBehaviour
                                         notificationStrings.Last()
                                         );
                 break;
-        }
+        }*/
     }
 }

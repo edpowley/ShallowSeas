@@ -6,26 +6,39 @@ using System.Collections.Generic;
 public class FogCircle : MonoBehaviour
 {
     private Mesh m_mesh;
-    public Boat Boat;
     public int Radius = 10;
     public bool CheckLineOfSight = false;
 
     private IntVector2 m_centre = new IntVector2(-1, -1);
 
+    private Renderer m_renderer;
+
     void Start()
     {
+        m_renderer = GetComponent<Renderer>();
+        m_renderer.enabled = false;
+
         m_mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = m_mesh;
     }
 
     void Update()
     {
-        IntVector2 boatCell = Boat.CurrentCell;
-        if (boatCell != m_centre)
+        if (GameManager.Instance.m_localPlayerBoat != null)
         {
-            m_centre = boatCell;
-            updateMesh();
-            transform.position = new Vector3(m_centre.X, transform.position.y, m_centre.Y);
+            m_renderer.enabled = true;
+
+            IntVector2 boatCell = GameManager.Instance.m_localPlayerBoat.CurrentCell;
+            if (boatCell != m_centre)
+            {
+                m_centre = boatCell;
+                transform.position = new Vector3(m_centre.X, transform.position.y, m_centre.Y);
+                updateMesh();
+            }
+        }
+        else
+        {
+            m_renderer.enabled = false;
         }
     }
 
