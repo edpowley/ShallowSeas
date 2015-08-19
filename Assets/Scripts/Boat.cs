@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using System.Linq;
 
 public class Boat : MonoBehaviour
 {
-    private List<Vector3> m_course = new List<Vector3>();
+    //private List<Vector3> m_course = new List<Vector3>();
     private bool m_courseBeingDrawn = false;
     public float MovementSpeed = 10;
     public float RotationSpeed = 90;
@@ -27,7 +28,7 @@ public class Boat : MonoBehaviour
         }
     }
 
-    private new bool isLocalPlayer { get { return Player != null && Player.isLocalPlayer; } }
+    private bool isLocalPlayer { get { return Player != null && Player.isLocalPlayer; } }
 
     // Use this for initialization
     void Start()
@@ -62,34 +63,55 @@ public class Boat : MonoBehaviour
         }
     }
     
-    private void addCoursePoint(Vector3 p)
+    /*private void addCoursePoint(Vector3 p)
     {
-        m_course.Add(p);
+        Player.Course.Add(new CoursePoint(p.x, p.z));
         if (isLocalPlayer)
             GameManager.Instance.CourseLine.addPoint(p);
     }
 
     private void removeFirstCoursePoint()
     {
-        m_course.RemoveAt(0);
+        Player.Course.RemoveAt(0);
         if (isLocalPlayer)
             GameManager.Instance.CourseLine.removeFirstPoint();
     }
 
     private void clearCourse()
     {
-        m_course.Clear();
+        Player.Course.Clear();
         if (isLocalPlayer)
             GameManager.Instance.CourseLine.clearPoints();
     }
 
+    private bool isCourseEmpty()
+    {
+        return Player.Course.Count == 0;
+    }
+
+    private Vector3 getFirstCoursePoint()
+    {
+        return Player.Course [0].toVector3();
+    }
+    
+    private Vector3 getLastCoursePoint()
+    {
+        return Player.Course [Player.Course.Count - 1].toVector3();
+    }
+    
+    private Vector3 getLastCoursePointOrDefault(Vector3 def)
+    {
+        return isCourseEmpty() ? def : getLastCoursePoint();
+    }*/
+    
     private IEnumerator handleMouse()
     {
         while (true)
         {
             if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
-                clearCourse();
+                List<Vector3> course = new List<Vector3>();
+                course.Add(transform.position);
                 m_courseBeingDrawn = true;
 
                 while (Input.GetMouseButton(0))
@@ -104,24 +126,18 @@ public class Boat : MonoBehaviour
                     
                     //Debug.LogFormat("yIntercept: {0}", yIntercept);
 
-                    if (m_course.Count == 0 || Vector3.Distance(yIntercept, m_course[m_course.Count - 1]) > 0.5f)
+                    if (Vector3.Distance(yIntercept, course.Last()) > 0.5f)
                     {
                         // addCoursePoint(yIntercept);
 
-                        Vector3 pathStart = (m_course.Count > 0) ? m_course[m_course.Count - 1] : transform.position;
+                        Vector3 pathStart = course.Last();
                         List<Vector3> path = Pathfinder.FindPath(pathStart, yIntercept);
                         if (path != null)
                         {
                             Pathfinder.PullString(path);
 
-                            bool first = true;
-                            foreach (Vector3 p in path)
-                            {
-                                if (!first)
-                                    addCoursePoint(p);
-
-                                first = false;
-                            }
+                            // First element of path is the start position
+                            course.AddRange(path.Skip(1));
                         }
                     }
 
@@ -129,6 +145,11 @@ public class Boat : MonoBehaviour
                 }
 
                 m_courseBeingDrawn = false;
+                /*Player.Course.Clear();
+                foreach (Vector3 p in course)
+                    Player.Course.Add(new CoursePoint(p.x, p.z));*/
+
+                Player.SetCourse(course);
             }
 
             yield return null;
@@ -144,14 +165,14 @@ public class Boat : MonoBehaviour
         }
         else if (!m_courseBeingDrawn)
         {
-            float movementStepSize = MovementSpeed * Time.deltaTime;
+            /*float movementStepSize = MovementSpeed * Time.deltaTime;
 
             if (Input.GetKey(KeyCode.LeftShift))
                 movementStepSize *= 20;
 
-            while (movementStepSize > 0 && m_course.Count > 0)
+            while (movementStepSize > 0 && !isCourseEmpty())
             {
-                Vector3 target = m_course [0];
+                Vector3 target = getFirstCoursePoint();
                 Vector3 delta = target - transform.position;
 
                 float deltaSize = delta.magnitude;
@@ -172,7 +193,7 @@ public class Boat : MonoBehaviour
             }
 
             if (isLocalPlayer)
-                GameManager.Instance.CourseLine.setStartPoint(transform.position);
+                GameManager.Instance.CourseLine.setStartPoint(transform.position);*/
         }
     }
 

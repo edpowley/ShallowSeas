@@ -7,8 +7,6 @@ public class MyNetworkManager : NetworkManager
     //public static MyNetworkManager Instance { get { return FindObjectOfType<MyNetworkManager>(); } }
     public static MyNetworkManager Instance { get; private set; }
 
-    public GameObject BoatPrefab;
-
     public bool isClient { get; private set; }
     public bool isServer { get; private set; }
 
@@ -49,20 +47,6 @@ public class MyNetworkManager : NetworkManager
         Debug.Log("OnStartServer");
         isServer = true;
         base.OnStartServer();
-
-        //StartCoroutine(foo());
-    }
-
-    private IEnumerator foo()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1);
-
-            Debug.Log("Spawning a boat");
-            GameObject ob = (GameObject)Instantiate(BoatPrefab, UnityEngine.Random.insideUnitSphere * 5, UnityEngine.Random.rotationUniform);
-            NetworkServer.Spawn(ob);
-        }
     }
 
     public override void OnStopClient()

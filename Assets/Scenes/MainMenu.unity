@@ -2493,7 +2493,6 @@ MonoBehaviour:
   matchMaker: {fileID: 0}
   matchName: default
   matchSize: 4
-  BoatPrefab: {fileID: 129558, guid: 8feee275ed87a094ba49edc1a8ae5e6d, type: 2}
 --- !u!114 &1903836766
 MonoBehaviour:
   m_ObjectHideFlags: 0
