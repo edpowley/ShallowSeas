@@ -3,34 +3,13 @@ using System.Collections;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 using System.Text;
-
-public struct CoursePoint
-{
-    public float x, y;
-
-    public CoursePoint(float x, float y)
-    {
-        this.x = x;
-        this.y = y;
-    }
-
-    public Vector3 toVector3()
-    {
-        return new Vector3(x, 0, y);
-    }
-
-    public override string ToString()
-    {
-        return string.Format("({0}, {1})", x, y);
-    }
-}
-
-public class SyncListCoursePoint : SyncListStruct<CoursePoint> {}
+using System.Linq;
 
 public class MyNetworkPlayer : NetworkBehaviour
 {
-    //public SyncListCoursePoint Course = new SyncListCoursePoint();
     internal List<Vector3> m_course = new List<Vector3>();
+    internal List<float> m_courseSegmentCumulativeLengths = new List<float>();
+    internal float m_courseStartTime, m_courseEndTime;
 
     public static MyNetworkPlayer LocalInstance { get; private set; }
     private static List<MyNetworkPlayer> s_instances = new List<MyNetworkPlayer>();
@@ -64,50 +43,52 @@ public class MyNetworkPlayer : NetworkBehaviour
             CmdSetName(name);
     }
 
-    private string serializeCourse(List<Vector3> course)
-    {
-        string[] strings = new string[course.Count];
-        for (int i=0; i<course.Count; i++)
-        {
-            strings[i] = string.Format("{0},{1}", course[i].x, course[i].z);
-        }
-
-        return string.Join(";", strings);
-    }
-
-    private IEnumerable<Vector3> deserializeCourse(string str)
-    {
-        foreach (string p in str.Split(';'))
-        {
-            string[] q = p.Split(',');
-            float x = float.Parse(q [0]);
-            float z = float.Parse(q [1]);
-            yield return new Vector3(x, 0, z);
-        }
-    }
+    #region Course
 
     [ClientRpc]
-    public void RpcSetCourse(string course)
+    public void RpcSetCourse(Vector3[] course, Vector3 pos, float timestamp)
     {
-        Debug.LogFormat("RpcSetCourse('{0}')", course);
+        Debug.LogFormat("RpcSetCourse('{0}', {1}) -- time is now {2}", course, timestamp, Time.timeSinceLevelLoad);
 
         m_course.Clear();
-        m_course.AddRange(deserializeCourse(course));
+        m_course.AddRange(course);
+        m_courseStartTime = timestamp;
+
+        m_courseSegmentCumulativeLengths.Clear();
+        float len = 0;
+        m_courseSegmentCumulativeLengths.Add(0);
+        for (int i=1; i<m_course.Count; i++)
+        {
+            len += Vector3.Distance(m_course[i], m_course[i-1]);
+            m_courseSegmentCumulativeLengths.Add(len);
+        }
+
+        m_courseEndTime = timestamp + len / m_boat.MovementSpeed;
+
+        m_boat.transform.position = pos;
     }
 
     [Command]
-    public void CmdSetCourse(string course)
+    public void CmdSetCourse(Vector3[] course)
     {
         Debug.LogFormat("CmdSetCourse('{0}')", course);
 
-        RpcSetCourse(course);
+        RpcSetCourse(course, m_boat.transform.position, Time.timeSinceLevelLoad);
     }
 
     internal void SetCourse(List<Vector3> course)
     {
         Debug.LogFormat("[Cmd] Set a course of {0} points", course.Count);
-        CmdSetCourse(serializeCourse(course));
+
+        CmdSetCourse(course.ToArray());
     }
+
+    internal void ClearCourse()
+    {
+        CmdSetCourse(new Vector3[0]);
+    }
+
+    #endregion
 
     public override void OnStartLocalPlayer()
     {
@@ -132,6 +113,14 @@ public class MyNetworkPlayer : NetworkBehaviour
 
     public void Update()
     {
+        if (isServer)
+        {
+            if (m_course.Count > 0 && Time.timeSinceLevelLoad >= m_courseEndTime)
+            {
+                RpcSetCourse(new Vector3[0], m_course.Last(), Time.timeSinceLevelLoad);
+            }
+        }
+
         if (m_course.Count > 0)
         {
             Vector3 q = m_course[0];

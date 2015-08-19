@@ -110,6 +110,7 @@ public class Boat : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
+                Player.ClearCourse();
                 List<Vector3> course = new List<Vector3>();
                 course.Add(transform.position);
                 m_courseBeingDrawn = true;
@@ -159,42 +160,43 @@ public class Boat : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Quaternion targetRotation = Quaternion.identity;
+
         if (m_castGear != null)
         {
             // do nothing (prevent boat from moving whilst gear is cast)
         }
-        else if (!m_courseBeingDrawn)
+        else if (Player.m_course.Count > 0)
         {
-            /*float movementStepSize = MovementSpeed * Time.deltaTime;
+            float lengthAlongCourse = (Time.timeSinceLevelLoad - Player.m_courseStartTime) * MovementSpeed;
 
-            if (Input.GetKey(KeyCode.LeftShift))
-                movementStepSize *= 20;
-
-            while (movementStepSize > 0 && !isCourseEmpty())
+            if (lengthAlongCourse <= 0)
             {
-                Vector3 target = getFirstCoursePoint();
-                Vector3 delta = target - transform.position;
-
-                float deltaSize = delta.magnitude;
-                if (deltaSize < movementStepSize)
-                {
-                    transform.position = target;
-                    movementStepSize -= deltaSize;
-                    removeFirstCoursePoint();
-                }
-                else
-                {
-                    transform.position += delta / deltaSize * movementStepSize;
-                    movementStepSize = 0;
-                }
-
-                Quaternion targetRotation = Quaternion.FromToRotation(Vector3.right, delta);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+                transform.position = Player.m_course [0];
             }
-
-            if (isLocalPlayer)
-                GameManager.Instance.CourseLine.setStartPoint(transform.position);*/
+            else if (lengthAlongCourse >= Player.m_courseSegmentCumulativeLengths.Last())
+            {
+                transform.position = Player.m_course.Last();
+            }
+            else
+            {
+                for (int i=1; i<Player.m_course.Count; i++)
+                {
+                    if (lengthAlongCourse < Player.m_courseSegmentCumulativeLengths [i])
+                    {
+                        // Between segments i-1 and i
+                        float a = Player.m_courseSegmentCumulativeLengths [i - 1];
+                        float b = Player.m_courseSegmentCumulativeLengths [i];
+                        float p = (lengthAlongCourse - a) / (b - a);
+                        transform.position = Vector3.Lerp(Player.m_course [i - 1], Player.m_course [i], p);
+                        targetRotation = Quaternion.FromToRotation(Vector3.right, Player.m_course[i] - Player.m_course[i-1]);
+                        break;
+                    }
+                }
+            }
         }
+
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
     }
 
     internal void CastGear(CastGearButton gear)
