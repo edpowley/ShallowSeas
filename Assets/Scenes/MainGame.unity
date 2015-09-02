@@ -1714,7 +1714,6 @@ MonoBehaviour:
   - red fish
   - green fish
   - blue fish
-  m_localPlayerBoat: {fileID: 0}
   CourseLine: {fileID: 1969254703}
   DrawingLine: {fileID: 240473623}
   TestText: {fileID: 124898186}

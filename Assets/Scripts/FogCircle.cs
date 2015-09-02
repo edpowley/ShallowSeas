@@ -24,21 +24,14 @@ public class FogCircle : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.m_localPlayerBoat != null)
-        {
-            m_renderer.enabled = true;
+        m_renderer.enabled = true;
 
-            IntVector2 boatCell = GameManager.Instance.m_localPlayerBoat.CurrentCell;
-            if (boatCell != m_centre)
-            {
-                m_centre = boatCell;
-                transform.position = new Vector3(m_centre.X, transform.position.y, m_centre.Y);
-                updateMesh();
-            }
-        }
-        else
+        IntVector2 boatCell = MyNetworkPlayer.LocalInstance.m_boat.CurrentCell;
+        if (boatCell != m_centre)
         {
-            m_renderer.enabled = false;
+            m_centre = boatCell;
+            transform.position = new Vector3(m_centre.X, transform.position.y, m_centre.Y);
+            updateMesh();
         }
     }
 

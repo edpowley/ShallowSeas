@@ -11,6 +11,8 @@ public class MyNetworkPlayer : NetworkBehaviour
     internal List<float> m_courseSegmentCumulativeLengths = new List<float>();
     internal float m_courseStartTime, m_courseEndTime;
 
+    internal List<int> m_currentCatch = new List<int>{0,0,0};
+
     public static MyNetworkPlayer LocalInstance { get; private set; }
     private static List<MyNetworkPlayer> s_instances = new List<MyNetworkPlayer>();
 

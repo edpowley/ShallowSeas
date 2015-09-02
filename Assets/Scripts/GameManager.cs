@@ -20,7 +20,6 @@ public class GameManager : MonoBehaviour
 
     public string[] FishNames = new string[]{ "red fish", "green fish", "blue fish" };
 
-    public Boat m_localPlayerBoat;
     public BoatCourseLine CourseLine, DrawingLine;
 
     public Text TestText, TestText2;
@@ -152,17 +151,17 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        /*IntVector2 currentCell = PlayerBoat.CurrentCell;
+        IntVector2 currentCell = MyNetworkPlayer.LocalInstance.m_boat.CurrentCell;
 
-        CurrentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
+        var currentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
         TestText.text = string.Format("Boat in square {0}\nFish density {1}",
                                       currentCell,
-                                      string.Join(", ", (from d in CurrentCellFishDensity select string.Format("{0:0.00}", d)).ToArray())
+                                      string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray())
                                       );
 
         TestText2.text = string.Format("Catch: {0}",
-                                       string.Join(", ", (from n in PlayerBoat.m_currentCatch select n.ToString()).ToArray())
-                                       );*/
+                                       string.Join(", ", (from n in MyNetworkPlayer.LocalInstance.m_currentCatch select n.ToString()).ToArray())
+                                       );
     }
 
     public void AddCatch(List<int> fishCaught)

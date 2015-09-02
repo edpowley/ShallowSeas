@@ -10,7 +10,6 @@ public class Boat : MonoBehaviour
     public float MovementSpeed = 10;
     public float RotationSpeed = 90;
     public MeshRenderer NetRenderer;
-    internal List<int> m_currentCatch = new List<int>{0,0,0};
 
     internal string m_castGear = null;
     internal float m_castProgress;
@@ -35,7 +34,6 @@ public class Boat : MonoBehaviour
     {
         if (isLocalPlayer)
         {
-            GameManager.Instance.m_localPlayerBoat = this;
             StartCoroutine(handleMouse());
         }
 
@@ -54,15 +52,6 @@ public class Boat : MonoBehaviour
 
     void OnDestroy()
     {
-        try
-        {
-            if (GameManager.Instance.m_localPlayerBoat == this)
-                GameManager.Instance.m_localPlayerBoat = null;
-        }
-        catch (System.NullReferenceException)
-        {
-            // do nothing
-        }
     }
 
     private IEnumerator handleMouse()

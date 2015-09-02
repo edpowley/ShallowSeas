@@ -21,13 +21,12 @@ public class CastGearButton : MonoBehaviour
 
     public void OnButtonClick()
     {
-        if (GameManager.Instance.m_localPlayerBoat != null)
-            GameManager.Instance.m_localPlayerBoat.CastGear(this);
+        MyNetworkPlayer.LocalInstance.m_boat.CastGear(this);
     }
 
     public void Update()
     {
-        Boat playerBoat = GameManager.Instance.m_localPlayerBoat;
+        Boat playerBoat = MyNetworkPlayer.LocalInstance.m_boat;
 
         if (playerBoat != null)
         {
