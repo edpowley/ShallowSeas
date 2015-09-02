@@ -21,29 +21,19 @@ public class CastGearButton : MonoBehaviour
 
     public void OnButtonClick()
     {
-        MyNetworkPlayer.LocalInstance.m_boat.CastGear(this);
+        MyNetworkPlayer.LocalInstance.CastGear(this);
     }
 
     public void Update()
     {
-        Boat playerBoat = MyNetworkPlayer.LocalInstance.m_boat;
+        m_button.interactable = (MyNetworkPlayer.LocalInstance.m_castGear == null);
 
-        if (playerBoat != null)
+        if (MyNetworkPlayer.LocalInstance.m_castGear == this.GearName)
         {
-            m_button.interactable = (playerBoat.m_castGear == null);
-
-            if (playerBoat.m_castGear == this.GearName)
-            {
-                ProgressBarImage.fillAmount = playerBoat.m_castProgress;
-            }
-            else
-            {
-                ProgressBarImage.fillAmount = 0;
-            }
+            ProgressBarImage.fillAmount = MyNetworkPlayer.LocalInstance.m_castProgress;
         }
         else
         {
-            m_button.interactable = false;
             ProgressBarImage.fillAmount = 0;
         }
     }

@@ -11,9 +11,6 @@ public class Boat : MonoBehaviour
     public float RotationSpeed = 90;
     public MeshRenderer NetRenderer;
 
-    internal string m_castGear = null;
-    internal float m_castProgress;
-
     public MyNetworkPlayer Player;
 
     public UnityEngine.UI.Text NameLabel;
@@ -113,7 +110,7 @@ public class Boat : MonoBehaviour
     {
         Quaternion targetRotation = Quaternion.identity;
 
-        if (m_castGear != null)
+        if (Player.m_castGear != null)
         {
             // do nothing (prevent boat from moving whilst gear is cast)
         }
@@ -154,47 +151,6 @@ public class Boat : MonoBehaviour
         }
 
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
-    }
-
-    internal void CastGear(CastGearButton gear)
-    {
-        StartCoroutine(castCoroutine(gear));
-    }
-
-    private IEnumerator castCoroutine(CastGearButton gear)
-    {
-        m_castGear = gear.GearName;
-        m_castProgress = 0;
-        float progressPerSecond = 1.0f / gear.CastDuration;
-        int totalFishCaught = 0;
-        List<int> fishCaught = new List<int>();
-        
-        List<float> density = GameManager.Instance.getFishDensity(CurrentCell);
-        for (int i=0; i<density.Count; i++)
-        {
-            fishCaught.Add(0);
-        }
-        
-        while (m_castProgress < 1.0f)
-        {
-            m_castProgress += progressPerSecond * Time.deltaTime;
-            
-            if (totalFishCaught < gear.MaxCatch)
-            {
-                int fishIndex = Random.Range(0, density.Count);
-                
-                if (Random.Range(0.0f, 1.0f) < density[fishIndex] * Time.deltaTime * gear.CatchMultiplier[fishIndex])
-                {
-                    fishCaught[fishIndex]++;
-                    totalFishCaught++;
-                }
-            }
-            
-            yield return null;
-        }
-        
-        m_castGear = null;
-        GameManager.Instance.AddCatch(fishCaught);
     }
 }
 

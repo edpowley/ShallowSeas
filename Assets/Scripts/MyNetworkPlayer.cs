@@ -97,6 +97,84 @@ public class MyNetworkPlayer : NetworkBehaviour
 
     #endregion
 
+    #region Gear casting
+
+    internal string m_castGear = null;
+    internal float m_castProgress;
+    
+    internal void CastGear(CastGearButton gear)
+    {
+        StartCoroutine(castCoroutine(gear));
+    }
+    
+    private IEnumerator castCoroutine(CastGearButton gear)
+    {
+        m_castGear = gear.GearName;
+        m_castProgress = 0;
+        float progressPerSecond = 1.0f / gear.CastDuration;
+        int totalFishCaught = 0;
+        List<int> fishCaught = new List<int>();
+        
+        List<float> density = GameManager.Instance.getFishDensity(m_boat.CurrentCell);
+        for (int i=0; i<density.Count; i++)
+        {
+            fishCaught.Add(0);
+        }
+        
+        while (m_castProgress < 1.0f)
+        {
+            m_castProgress += progressPerSecond * Time.deltaTime;
+            
+            if (totalFishCaught < gear.MaxCatch)
+            {
+                int fishIndex = Random.Range(0, density.Count);
+                
+                if (Random.Range(0.0f, 1.0f) < density[fishIndex] * Time.deltaTime * gear.CatchMultiplier[fishIndex])
+                {
+                    fishCaught[fishIndex]++;
+                    totalFishCaught++;
+                }
+            }
+            
+            yield return null;
+        }
+        
+        m_castGear = null;
+        AddCatch(fishCaught);
+    }
+
+    public void AddCatch(List<int> fishCaught)
+    {
+        List<string> notificationStrings = new List<string>();
+
+        for (int i=0; i<fishCaught.Count; i++)
+        {
+            m_currentCatch[i] += fishCaught[i];
+            if (fishCaught[i] > 0)
+                notificationStrings.Add(string.Format("{0} {1}", fishCaught[i], GameManager.Instance.FishNames[i]));
+        }
+
+        switch (notificationStrings.Count)
+        {
+            case 0:
+                GameManager.Instance.Notification.PutMessage("You caught nothing!");
+                break;
+
+            case 1:
+                GameManager.Instance.Notification.PutMessage("You caught {0}", notificationStrings[0]);
+                break;
+
+            default:
+                GameManager.Instance.Notification.PutMessage("You caught {0} and {1}",
+                                        string.Join(", ", notificationStrings.Take(notificationStrings.Count-1).ToArray()),
+                                        notificationStrings.Last()
+                                        );
+                break;
+        }
+    }
+
+    #endregion
+
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
