@@ -66,6 +66,11 @@ public class MyNetworkPlayer : NetworkBehaviour
         m_courseEndTime = timestamp + len / m_boat.MovementSpeed;
 
         m_boat.transform.position = pos;
+
+        if (isLocalPlayer)
+        {
+            GameManager.Instance.CourseLine.setCourse(m_course);
+        }
     }
 
     [Command]

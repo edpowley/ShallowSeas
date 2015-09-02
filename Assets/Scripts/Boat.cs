@@ -34,7 +34,6 @@ public class Boat : MonoBehaviour
         if (isLocalPlayer)
         {
             GameManager.Instance.m_localPlayerBoat = this;
-            GameManager.Instance.CourseLine.setStartPoint(transform.position);
             StartCoroutine(handleMouse());
         }
     }
@@ -68,9 +67,14 @@ public class Boat : MonoBehaviour
             if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
                 Player.ClearCourse();
+
                 List<Vector3> course = new List<Vector3>();
                 course.Add(transform.position);
 
+                BoatCourseLine courseLine = GameManager.Instance.DrawingLine;
+                courseLine.clearPoints();
+                courseLine.addPoint(transform.position);
+                
                 while (Input.GetMouseButton(0))
                 {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -95,12 +99,14 @@ public class Boat : MonoBehaviour
 
                             // First element of path is the start position
                             course.AddRange(path.Skip(1));
+                            courseLine.addPoints(path.Skip(1));
                         }
                     }
 
                     yield return null;
                 }
 
+                courseLine.clearPoints();
                 Player.SetCourse(course);
             }
 
@@ -141,6 +147,12 @@ public class Boat : MonoBehaviour
                         float p = (lengthAlongCourse - a) / (b - a);
                         transform.position = Vector3.Lerp(Player.m_course [i - 1], Player.m_course [i], p);
                         targetRotation = Quaternion.FromToRotation(Vector3.right, Player.m_course[i] - Player.m_course[i-1]);
+
+                        if (isLocalPlayer)
+                        {
+                            GameManager.Instance.CourseLine.setOffset(i-1 + p);
+                        }
+
                         break;
                     }
                 }

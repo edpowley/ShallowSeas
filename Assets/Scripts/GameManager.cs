@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
     public string[] FishNames = new string[]{ "red fish", "green fish", "blue fish" };
 
     public Boat m_localPlayerBoat;
-    public BoatCourseLine CourseLine;
+    public BoatCourseLine CourseLine, DrawingLine;
 
     public Text TestText, TestText2;
     public NotificationText Notification;
@@ -45,6 +45,11 @@ public class GameManager : MonoBehaviour
             throw new InvalidOperationException("GameManager should be a singleton");
 
         Instance = this;
+
+        // If the network manager isn't running, go back to the main menu
+        // (shouldn't happen in game, but is useful for testing in the Unity editor)
+        if (MyNetworkManager.Instance == null)
+            Application.LoadLevel((int)Level.MainMenu);
     }
 
     public void OnDestroy()
