@@ -17,6 +17,8 @@ public class Boat : MonoBehaviour
 
     public MyNetworkPlayer Player;
 
+    public UnityEngine.UI.Text NameLabel;
+
     public IntVector2 CurrentCell
     {
         get
@@ -36,6 +38,9 @@ public class Boat : MonoBehaviour
             GameManager.Instance.m_localPlayerBoat = this;
             StartCoroutine(handleMouse());
         }
+
+        NameLabel.text = Player.PlayerName;
+        NameLabel.color = Player.PlayerColour;
     }
 
     internal void setColour(Color colour)
