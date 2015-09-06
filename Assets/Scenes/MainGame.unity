@@ -517,6 +517,18 @@ Prefab:
       propertyPath: GearName
       value: Single Line
       objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_gearName
+      value: Single Line
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_castDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_maxCatch
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
   m_IsPrefabParent: 0
@@ -699,6 +711,22 @@ Prefab:
     - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
       propertyPath: CatchMultiplier.Array.data[2]
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_gearName
+      value: Small Net
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_castDuration
+      value: 7.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_maxCatch
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_catchMultiplier.Array.data[0]
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
@@ -1638,6 +1666,18 @@ Prefab:
     - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
       propertyPath: GearName
       value: Big Net
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_gearName
+      value: Big Net
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_castDuration
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400508, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}
+      propertyPath: m_gearInfo.m_maxCatch
+      value: 25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 63b301e6290a0754d92543bac49e5dcb, type: 2}

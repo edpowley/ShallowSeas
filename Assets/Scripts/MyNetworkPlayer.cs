@@ -101,17 +101,17 @@ public class MyNetworkPlayer : NetworkBehaviour
 
     internal string m_castGear = null;
     internal float m_castProgress;
-    
-    internal void CastGear(CastGearButton gear)
+
+    internal void CastGear(GearInfo gear)
     {
         StartCoroutine(castCoroutine(gear));
     }
     
-    private IEnumerator castCoroutine(CastGearButton gear)
+    private IEnumerator castCoroutine(GearInfo gear)
     {
-        m_castGear = gear.GearName;
+        m_castGear = gear.m_gearName;
         m_castProgress = 0;
-        float progressPerSecond = 1.0f / gear.CastDuration;
+        float progressPerSecond = 1.0f / gear.m_castDuration;
         int totalFishCaught = 0;
         List<int> fishCaught = new List<int>();
         
@@ -125,11 +125,11 @@ public class MyNetworkPlayer : NetworkBehaviour
         {
             m_castProgress += progressPerSecond * Time.deltaTime;
             
-            if (totalFishCaught < gear.MaxCatch)
+            if (totalFishCaught < gear.m_maxCatch)
             {
                 int fishIndex = Random.Range(0, density.Count);
                 
-                if (Random.Range(0.0f, 1.0f) < density[fishIndex] * Time.deltaTime * gear.CatchMultiplier[fishIndex])
+                if (Random.Range(0.0f, 1.0f) < density[fishIndex] * Time.deltaTime * gear.m_catchMultiplier[fishIndex])
                 {
                     fishCaught[fishIndex]++;
                     totalFishCaught++;
