@@ -7,7 +7,7 @@ public class CastGearButton : MonoBehaviour
     private Button m_button;
     public Image ProgressBarImage;
 
-    public GearInfo m_gearInfo;
+    public GearType m_gearType;
 
     public void Start()
     {
@@ -18,16 +18,19 @@ public class CastGearButton : MonoBehaviour
 
     public void OnButtonClick()
     {
-        MyNetworkPlayer.LocalInstance.CastGear(m_gearInfo);
+        MyNetworkPlayer.LocalInstance.CastGear(m_gearType);
     }
 
     public void Update()
     {
-        m_button.interactable = (MyNetworkPlayer.LocalInstance.m_castGear == null);
+        m_button.interactable = (MyNetworkPlayer.LocalInstance.m_castGear == GearType.None);
 
-        if (MyNetworkPlayer.LocalInstance.m_castGear == m_gearInfo.m_gearName)
+        if (MyNetworkPlayer.LocalInstance.m_castGear == m_gearType)
         {
-            ProgressBarImage.fillAmount = MyNetworkPlayer.LocalInstance.m_castProgress;
+            float start = MyNetworkPlayer.LocalInstance.m_castStartTime;
+            float end = MyNetworkPlayer.LocalInstance.m_castEndTime;
+            float now = Time.timeSinceLevelLoad;
+            ProgressBarImage.fillAmount = (now - start) / (end - start);
         }
         else
         {

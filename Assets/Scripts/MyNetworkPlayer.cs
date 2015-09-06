@@ -7,11 +7,7 @@ using System.Linq;
 
 public class MyNetworkPlayer : NetworkBehaviour
 {
-    internal List<Vector3> m_course = new List<Vector3>();
-    internal List<float> m_courseSegmentCumulativeLengths = new List<float>();
-    internal float m_courseStartTime, m_courseEndTime;
-
-    internal List<int> m_currentCatch = new List<int>{0,0,0};
+    public SyncListInt m_currentCatch = new SyncListInt();
 
     public static MyNetworkPlayer LocalInstance { get; private set; }
     private static List<MyNetworkPlayer> s_instances = new List<MyNetworkPlayer>();
@@ -47,6 +43,10 @@ public class MyNetworkPlayer : NetworkBehaviour
 
     #region Course
 
+    internal List<Vector3> m_course = new List<Vector3>();
+    internal List<float> m_courseSegmentCumulativeLengths = new List<float>();
+    internal float m_courseStartTime, m_courseEndTime;
+    
     [ClientRpc]
     public void RpcSetCourse(Vector3[] course, Vector3 pos, float timestamp)
     {
@@ -99,18 +99,32 @@ public class MyNetworkPlayer : NetworkBehaviour
 
     #region Gear casting
 
-    internal string m_castGear = null;
-    internal float m_castProgress;
+    [SyncVar]
+    internal GearType m_castGear = GearType.None;
 
-    internal void CastGear(GearInfo gear)
+    [SyncVar]
+    internal float m_castStartTime, m_castEndTime;
+
+    internal void CastGear(GearType gear)
+    {
+        CmdCastGear(gear);
+    }
+
+    [Command]
+    private void CmdCastGear(GearType gear)
     {
         StartCoroutine(castCoroutine(gear));
     }
-    
-    private IEnumerator castCoroutine(GearInfo gear)
+
+    private IEnumerator castCoroutine(GearType gearType)
     {
-        m_castGear = gear.m_gearName;
-        m_castProgress = 0;
+        GearInfo gear = GearInfo.getInfo(gearType);
+
+        m_castGear = gearType;
+        m_castStartTime = Time.timeSinceLevelLoad;
+        m_castEndTime = m_castStartTime + gear.m_castDuration;
+
+        float castProgress = 0;
         float progressPerSecond = 1.0f / gear.m_castDuration;
         int totalFishCaught = 0;
         List<int> fishCaught = new List<int>();
@@ -121,9 +135,9 @@ public class MyNetworkPlayer : NetworkBehaviour
             fishCaught.Add(0);
         }
         
-        while (m_castProgress < 1.0f)
+        while (castProgress < 1.0f)
         {
-            m_castProgress += progressPerSecond * Time.deltaTime;
+            castProgress += progressPerSecond * Time.deltaTime;
             
             if (totalFishCaught < gear.m_maxCatch)
             {
@@ -139,11 +153,15 @@ public class MyNetworkPlayer : NetworkBehaviour
             yield return null;
         }
         
-        m_castGear = null;
-        AddCatch(fishCaught);
+        m_castGear = GearType.None;
+
+        for (int i=0; i<fishCaught.Count; i++)
+        {
+            m_currentCatch [i] += fishCaught [i];
+        }
     }
 
-    public void AddCatch(List<int> fishCaught)
+    /*public void AddCatch(List<int> fishCaught)
     {
         List<string> notificationStrings = new List<string>();
 
@@ -171,7 +189,7 @@ public class MyNetworkPlayer : NetworkBehaviour
                                         );
                 break;
         }
-    }
+    }*/
 
     #endregion
 
@@ -193,6 +211,9 @@ public class MyNetworkPlayer : NetworkBehaviour
 
     public void Start()
     {
+        while (m_currentCatch.Count < 3)
+            m_currentCatch.Add(0);
+
         OnLevelWasLoaded(Application.loadedLevel);
     }
 

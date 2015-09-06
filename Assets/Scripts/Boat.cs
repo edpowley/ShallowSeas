@@ -110,7 +110,7 @@ public class Boat : MonoBehaviour
     {
         Quaternion targetRotation = Quaternion.identity;
 
-        if (Player.m_castGear != null)
+        if (Player.m_castGear != GearType.None)
         {
             // do nothing (prevent boat from moving whilst gear is cast)
         }
