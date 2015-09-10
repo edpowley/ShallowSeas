@@ -98,7 +98,11 @@ public class Boat : MonoBehaviour
                 }
 
                 courseLine.clearPoints();
-                Player.SetCourse(course);
+
+                if (Player.m_castGear == GearType.None)
+                {
+                    Player.SetCourse(course);
+                }
             }
 
             yield return null;
