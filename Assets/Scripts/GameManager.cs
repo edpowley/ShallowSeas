@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
     public Text TestText, TestText2;
     public NotificationText Notification;
 
+    public FogCircle m_fogCircle;
+
     internal bool isWater(int x, int y)
     {
         if (x < 0 || x >= c_gridWidth || y < 0 || y >= c_gridHeight)

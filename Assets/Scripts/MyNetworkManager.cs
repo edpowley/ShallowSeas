@@ -81,21 +81,21 @@ public class MyNetworkManager : NetworkManager
     {
         Debug.Log("OnServerAddPlayer");
         base.OnServerAddPlayer(conn, playerControllerId);
-        MyNetworkPlayer.updateColours();
+        MyNetworkPlayer.updatePlayers();
     }
 
     public override void OnServerRemovePlayer(NetworkConnection conn, PlayerController player)
     {
         Debug.Log("OnServerRemovePlayer");
         base.OnServerRemovePlayer(conn, player);
-        MyNetworkPlayer.updateColours();
+        MyNetworkPlayer.updatePlayers();
     }
 
     public override void OnServerDisconnect(NetworkConnection conn)
     {
         Debug.Log("OnServerDisconnect");
         base.OnServerDisconnect(conn);
-        MyNetworkPlayer.updateColours();
+        MyNetworkPlayer.updatePlayers();
     }
 
     public void Update()

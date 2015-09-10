@@ -24,6 +24,9 @@ public class MyNetworkPlayer : NetworkBehaviour
     [SyncVar]
     public Color PlayerColour;
 
+    [SyncVar]
+    public Vector3 PlayerStartPos;
+
     [Command]
     public void CmdSetName(string name)
     {
@@ -267,6 +270,7 @@ public class MyNetworkPlayer : NetworkBehaviour
                 m_boat = Util.InstantiatePrefab(PlayerBoatPrefab);
                 m_boat.Player = this;
                 m_boat.setColour(PlayerColour);
+                m_boat.transform.position = PlayerStartPos;
             }
             else
             {
@@ -295,19 +299,15 @@ public class MyNetworkPlayer : NetworkBehaviour
         s_instances.Remove(this);
     }
 
-    public static void updateColours()
+    public static void updatePlayers()
     {
         for (int i=0; i<s_instances.Count; i++)
         {
             float hue = (float)i / (float)s_instances.Count;
-
             s_instances[i].PlayerColour = Util.HSVToRGB(hue, 0.7f, 1.0f);
-        }
-    }
 
-    private void createBoat()
-    {
-        Boat boat = Util.InstantiatePrefab(PlayerBoatPrefab);
-        NetworkServer.Spawn(boat.gameObject);
+            float angle = (float)i / (float)s_instances.Count * 2.0f * Mathf.PI;
+            s_instances[i].PlayerStartPos = new Vector3(130.5f + Mathf.Cos(angle), 0, 128.5f + Mathf.Sin(angle));
+        }
     }
 }

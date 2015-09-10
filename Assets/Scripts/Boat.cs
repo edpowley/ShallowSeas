@@ -45,6 +45,25 @@ public class Boat : MonoBehaviour
             foreach (Material material in renderer.materials)
                 material.color = colour;
         }
+
+        NameLabel.color = colour;
+    }
+
+    private bool m_isVisible = true;
+
+    internal void setVisible(bool value)
+    {
+        if (value != m_isVisible)
+        {
+            foreach (Renderer renderer in transform.GetComponentsInChildren<Renderer>())
+            {
+                renderer.enabled = value;
+            }
+            
+            NameLabel.enabled = value;
+        }
+
+        m_isVisible = value;
     }
 
     void OnDestroy()
@@ -117,20 +136,17 @@ public class Boat : MonoBehaviour
         if (Player.m_castGear != GearType.None)
         {
             // do nothing (prevent boat from moving whilst gear is cast)
-        }
-        else if (Player.m_course.Count > 0)
+        } else if (Player.m_course.Count > 0)
         {
             float lengthAlongCourse = (Time.timeSinceLevelLoad - Player.m_courseStartTime) * MovementSpeed;
 
             if (lengthAlongCourse <= 0)
             {
                 transform.position = Player.m_course [0];
-            }
-            else if (lengthAlongCourse >= Player.m_courseSegmentCumulativeLengths.Last())
+            } else if (lengthAlongCourse >= Player.m_courseSegmentCumulativeLengths.Last())
             {
                 transform.position = Player.m_course.Last();
-            }
-            else
+            } else
             {
                 for (int i=1; i<Player.m_course.Count; i++)
                 {
@@ -141,11 +157,11 @@ public class Boat : MonoBehaviour
                         float b = Player.m_courseSegmentCumulativeLengths [i];
                         float p = (lengthAlongCourse - a) / (b - a);
                         transform.position = Vector3.Lerp(Player.m_course [i - 1], Player.m_course [i], p);
-                        targetRotation = Quaternion.FromToRotation(Vector3.right, Player.m_course[i] - Player.m_course[i-1]);
+                        targetRotation = Quaternion.FromToRotation(Vector3.right, Player.m_course [i] - Player.m_course [i - 1]);
 
                         if (isLocalPlayer)
                         {
-                            GameManager.Instance.CourseLine.setOffset(i-1 + p);
+                            GameManager.Instance.CourseLine.setOffset(i - 1 + p);
                         }
 
                         break;
@@ -155,6 +171,11 @@ public class Boat : MonoBehaviour
         }
 
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+
+        if (!isLocalPlayer)
+        {
+            setVisible(GameManager.Instance.m_fogCircle.cellIsVisible(this.CurrentCell));
+        }
     }
 }
 
