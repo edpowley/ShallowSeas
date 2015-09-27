@@ -1,17 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.Networking;
+using ShallowNet;
 
-public class MyNetworkManager : NetworkManager
+public class MyNetworkManager : MonoBehaviour
 {
-    //public static MyNetworkManager Instance { get { return FindObjectOfType<MyNetworkManager>(); } }
     public static MyNetworkManager Instance { get; private set; }
 
-    public bool isClient { get; private set; }
-    public bool isServer { get; private set; }
+    internal ClientWrapper m_client = null;
+
+    public bool IsConnected { get { return m_client != null; } }
 
     public void Awake()
     {
+        ShallowNet.DebugLog.s_printFunc = Debug.Log;
+
         Debug.LogFormat("{0} Awake", this.GetInstanceID());
         if (Instance != null)
         {
@@ -23,61 +27,35 @@ public class MyNetworkManager : NetworkManager
             Instance = this;
         }
 
-        isClient = isServer = false;
-
         DontDestroyOnLoad(this.gameObject);
     }
     
     public void OnDestroy()
     {
+        if (m_client != null)
+        {
+            m_client.Dispose();
+            m_client = null;
+        }
+
         if (Instance == this)
             Instance = null;
     }
 
-    public override void OnStartClient(NetworkClient client)
+    public void JoinServer(string hostName, int port)
     {
-        Debug.Log("OnStartClient");
-        isClient = true;
-        //ClientScene.RegisterPrefab(BoatPrefab);
-        base.OnStartClient(client);
-    }
+        if (m_client != null)
+            m_client.Dispose();
 
-    public override void OnStartServer()
-    {
-        Debug.Log("OnStartServer");
-        isServer = true;
-        base.OnStartServer();
-    }
-
-    public override void OnStopClient()
-    {
-        Debug.Log("OnStopClient");
-        base.OnStopClient();
-        isClient = false;
-    }
-
-    public override void OnStopServer()
-    {
-        Debug.Log("OnStopServer");
-        base.OnStopServer();
-        isServer = false;
-    }
-
-    public void Stop()
-    {
-        if (isClient)
-            StopClient();
-
-        if (isServer)
-            StopServer();
+        m_client = ClientWrapper.Connect(hostName, port);
     }
 
     public void ChangeLevel(Level level)
     {
-        ServerChangeScene(level.ToString());
+        //ServerChangeScene(level.ToString());
     }
 
-    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
+    /*public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
     {
         Debug.Log("OnServerAddPlayer");
         base.OnServerAddPlayer(conn, playerControllerId);
@@ -96,7 +74,7 @@ public class MyNetworkManager : NetworkManager
         Debug.Log("OnServerDisconnect");
         base.OnServerDisconnect(conn);
         MyNetworkPlayer.updatePlayers();
-    }
+    }*/
 
     public void Update()
     {

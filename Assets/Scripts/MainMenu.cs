@@ -5,32 +5,34 @@ using UnityEngine.UI;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using ShallowNet;
 
 public class MainMenu : MonoBehaviour
 {
     public InputField PlayerNameInput, ServerIpInput, ServerPortInput;
-    public Button HostButton, JoinButton, StartButton, LeaveButton;
+    public Button JoinButton;
     public MainMenuPlayerListEntry PlayerListEntryPrefab;
     public RectTransform PlayerListParent;
+
+    public string m_serverHost;
+    public int m_serverPort;
 
     private List<MainMenuPlayerListEntry> m_playerListEntries = new List<MainMenuPlayerListEntry>();
 
     public void Start()
     {
-        ServerIpInput.text = MyNetworkManager.Instance.networkAddress;
-        ServerPortInput.text = MyNetworkManager.Instance.networkPort.ToString();
+        ServerIpInput.text = m_serverHost;
+        ServerPortInput.text = m_serverPort.ToString();
     }
 
     public void Update()
     {
-        bool isConnected = MyNetworkManager.Instance.isNetworkActive;
+        bool isConnected = MyNetworkManager.Instance.IsConnected;
 
         ServerIpInput.interactable = !isConnected;
         ServerPortInput.interactable = !isConnected;
-        HostButton.interactable = !isConnected;
         JoinButton.interactable = !isConnected;
-        StartButton.interactable = isConnected && MyNetworkManager.Instance.isServer;
-        LeaveButton.interactable = isConnected;
 
         if (MyNetworkPlayer.LocalInstance != null)
         {
@@ -87,32 +89,16 @@ public class MainMenu : MonoBehaviour
     
     public void OnServerIpChanged(string value)
     {
-        MyNetworkManager.Instance.networkAddress = value;
+        m_serverHost = value;
     }
     
     public void OnServerPortChanged(string value)
     {
-        MyNetworkManager.Instance.networkPort = int.Parse(value);
+        m_serverPort = int.Parse(value);
     }
 
-    public void OnHostClicked()
-    {
-        MyNetworkManager.Instance.StartHost();
-    }
-    
     public void OnJoinClicked()
     {
-        MyNetworkManager.Instance.StartClient();
-    }
-
-    public void OnStartClicked()
-    {
-        Debug.Log("OnStartClicked");
-        MyNetworkManager.Instance.ChangeLevel(Level.MainGame);
-    }
-    
-    public void OnLeaveClicked()
-    {
-        MyNetworkManager.Instance.Stop();
+        MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort);
     }
 }
