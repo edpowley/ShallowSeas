@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShallowNet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,7 +15,7 @@ namespace ShallowSeasServer
 
 		static bool s_stopListening = false;
 
-		static List<Player> s_players = new List<Player>();
+		static Game s_game = new Game();
 
 		static void listen(int port)
 		{
@@ -29,11 +30,9 @@ namespace ShallowSeasServer
 				if (listener.Pending())
 				{
 					Console.WriteLine("Got a connection request");
-					TcpClient client = listener.AcceptTcpClient();
+					ClientWrapper client = new ClientWrapper(listener.AcceptTcpClient());
+					s_game.addPendingClient(client);
 					Console.WriteLine("Accepted connection request");
-
-					Player player = new Player(client);
-					s_players.Add(player);
 				}
 
 				Thread.Sleep(100);
@@ -57,11 +56,10 @@ namespace ShallowSeasServer
 			Thread listenThread = new Thread(new ThreadStart(() => listen(port)));
 			listenThread.Start();
 
-			bool exit = false;
+			s_game.run();
 
-			while (!exit)
-			{
-				Console.Write("> ");
+
+				/*Console.Write("> ");
 				string line = Console.ReadLine();
 				string[] commandLine = line.Split(' ');
 				string command = commandLine[0].ToLower();
@@ -80,8 +78,7 @@ namespace ShallowSeasServer
 					default:
 						Console.WriteLine("Unknown command '{0}'", command);
 						break;
-				}
-			}
+				}*/
 
 			s_stopListening = true;
 			listenThread.Join();

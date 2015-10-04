@@ -9,6 +9,7 @@ public class MyNetworkManager : MonoBehaviour
     public static MyNetworkManager Instance { get; private set; }
 
     internal ClientWrapper m_client = null;
+    internal string m_localPlayerId;
 
     public bool IsConnected { get { return m_client != null; } }
 
@@ -78,5 +79,8 @@ public class MyNetworkManager : MonoBehaviour
 
     public void Update()
     {
+        if (m_client != null)
+        {
+        }
     }
 }

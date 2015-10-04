@@ -85,6 +85,10 @@ public class MainMenu : MonoBehaviour
 
     public void OnPlayerNameChanged(string value)
     {
+        if (MyNetworkManager.Instance.IsConnected)
+        {
+            MyNetworkManager.Instance.m_client.sendMessage(new SetPlayerName() { NewName = value });
+        }
     }
     
     public void OnServerIpChanged(string value)
@@ -99,6 +103,23 @@ public class MainMenu : MonoBehaviour
 
     public void OnJoinClicked()
     {
+        StartCoroutine(joinGameCoroutine());
+    }
+
+    private IEnumerator joinGameCoroutine()
+    {
         MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort);
+        //MyNetworkManager.Instance.m_client.sendMessage(new SetPlayerName() { NewName = PlayerNameInput.text });
+        MyNetworkManager.Instance.m_client.sendMessage(new PlayerJoinRequest() { PlayerName = PlayerNameInput.text });
+
+        WelcomePlayer welcomeMsg = null;
+        while (welcomeMsg == null)
+        {
+            yield return null;
+            welcomeMsg = MyNetworkManager.Instance.m_client.popMessage<WelcomePlayer>();
+        }
+
+        Debug.LogFormat("Joined as player id {0}", welcomeMsg.PlayerId);
+        MyNetworkManager.Instance.m_localPlayerId = welcomeMsg.PlayerId;
     }
 }

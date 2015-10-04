@@ -16,8 +16,10 @@ namespace ShallowNet
 		private List<byte> m_readBuffer = new List<byte>();
 		private bool m_disconnecting = false;
 
+		public bool Connected { get; private set; }
+
 		private Queue<Message> m_messagesToSend = new Queue<Message>();
-		private Queue<Message> m_messagesReceived = new Queue<Message>();
+		private List<Message> m_messagesReceived = new List<Message>();
 
 		public static ClientWrapper Connect(string host, int port)
 		{
@@ -51,25 +53,28 @@ namespace ShallowNet
 			}
 		}
 
-		public Message getMessage()
+		public T popMessage<T>() where T : Message
 		{
 			lock (m_messagesReceived)
 			{
-				return m_messagesReceived.Dequeue();
+				for (int i = 0; i < m_messagesReceived.Count; i++)
+				{
+					T msg = m_messagesReceived[i] as T;
+					if (msg != null)
+					{
+						m_messagesReceived.RemoveAt(i);
+						return msg;
+					}
+				}
 			}
-		}
 
-		public IEnumerable<Message> getMessages()
-		{
-			lock (m_messagesReceived)
-			{
-				while (m_messagesReceived.Count > 0)
-					yield return m_messagesReceived.Dequeue();
-			}
+			return null;
 		}
 
 		private void threadFunc()
 		{
+			Connected = true;
+
 			while (m_client.Connected && !m_disconnecting)
 			{
 				// Send messages
@@ -119,12 +124,13 @@ namespace ShallowNet
 
 						lock (m_messagesReceived)
 						{
-							m_messagesReceived.Enqueue(msg);
+							m_messagesReceived.Add(msg);
 						}
 					}
 				}
 			}
 
+			Connected = false;
 			DebugLog.WriteLine("Client disconnected");
 		}
 	}

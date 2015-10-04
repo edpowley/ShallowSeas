@@ -10,20 +10,17 @@ namespace ShallowSeasServer
 {
 	class Player
 	{
-		private ClientWrapper m_client;
-		private string m_name;
+		private Game m_game;
+		public readonly string m_id;
+		public ClientWrapper m_client;
+		public string Name { get; set; }
 
-		public Player(TcpClient client)
+		public Player(Game game, ClientWrapper client, string name)
 		{
-			m_client = new ClientWrapper(client);
-			m_name = "Anonymous";
-
-			m_client.sendMessage(new TestMessage() { Text = "Howdy" });
-		}
-
-		public void ping()
-		{
-			m_client.sendMessage(new TestMessage() { Text = "Ping!" });
+			m_game = game;
+			m_id = Guid.NewGuid().ToString();
+			m_client = client;
+			Name = name;
 		}
 	}
 }
