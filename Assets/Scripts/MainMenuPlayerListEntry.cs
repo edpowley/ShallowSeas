@@ -4,13 +4,14 @@ using UnityEngine.UI;
 
 public class MainMenuPlayerListEntry : MonoBehaviour
 {
-    public MyNetworkPlayer Player;
+    public string PlayerId;
     public Image Icon;
     public Text PlayerName;
 
-    public void Update()
+    public void setPlayerInfo(ShallowNet.PlayerInfo info)
     {
-        PlayerName.text = Player.PlayerName;
-        Icon.color = Player.PlayerColour;
+        PlayerId = info.Id;
+        PlayerName.text = info.Name;
+        //Icon.color = Player.PlayerColour;
     }
 }

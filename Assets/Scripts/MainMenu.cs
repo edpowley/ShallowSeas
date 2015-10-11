@@ -26,6 +26,12 @@ public class MainMenu : MonoBehaviour
         ServerPortInput.text = m_serverPort.ToString();
     }
 
+    public void OnDestroy()
+    {
+        if (MyNetworkManager.Instance != null && MyNetworkManager.Instance.m_client != null)
+            MyNetworkManager.Instance.m_client.removeMessageHandlers(this);
+    }
+
     public void Update()
     {
         bool isConnected = MyNetworkManager.Instance.IsConnected;
@@ -38,56 +44,52 @@ public class MainMenu : MonoBehaviour
         {
             MyNetworkPlayer.LocalInstance.SetName(PlayerNameInput.text);
         }
-
-        checkPlayerList();
     }
 
-    private void checkPlayerList()
-    {
-        if (m_playerListEntries.Count != MyNetworkPlayer.Instances.Count())
-        {
-            rebuildPlayerList();
-            return;
-        }
-
-        int i = 0;
-        foreach (MyNetworkPlayer player in MyNetworkPlayer.Instances)
-        {
-            if (m_playerListEntries[i].Player != player)
-            {
-                rebuildPlayerList();
-                return;
-            }
-
-            i++;
-        }
-    }
-
-    private void rebuildPlayerList()
+    private bool handlePlayerList(ClientWrapper client, SetPlayerList msg)
     {
         foreach (var entry in m_playerListEntries)
         {
             DestroyObject(entry.gameObject);
         }
-
+        
         m_playerListEntries.Clear();
-
-        foreach (MyNetworkPlayer player in MyNetworkPlayer.Instances)
+        
+        foreach(PlayerInfo info in msg.Players)
         {
             var entry = Util.InstantiatePrefab(PlayerListEntryPrefab);
             entry.transform.SetParent(PlayerListParent, false);
-            entry.Player = player;
+            entry.setPlayerInfo(info);
             m_playerListEntries.Add(entry);
-
-            entry.Update();
         }
+        
+        return true;
     }
+    
+    private bool handlePlayerInfo(ClientWrapper client, SetPlayerInfo msg)
+    {
+        var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == msg.Player.Id);
+        if (entry != null)
+        {
+            entry.setPlayerInfo(msg.Player);
+        }
+        else
+        {
+            Debug.LogFormat("No entry for id {0}", msg.Player.Id);
+        }
 
+        return true;
+    }
+    
     public void OnPlayerNameChanged(string value)
     {
         if (MyNetworkManager.Instance.IsConnected)
         {
             MyNetworkManager.Instance.m_client.sendMessage(new SetPlayerName() { NewName = value });
+
+            var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == MyNetworkManager.Instance.m_localPlayerId);
+            if (entry != null)
+                entry.PlayerName.text = value;
         }
     }
     
@@ -104,7 +106,11 @@ public class MainMenu : MonoBehaviour
     public void OnJoinClicked()
     {
         MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort);
+
         MyNetworkManager.Instance.m_client.addMessageHandler<WelcomePlayer>(this, handleWelcomeMessage);
+        MyNetworkManager.Instance.m_client.addMessageHandler<SetPlayerList>(this, handlePlayerList);
+        MyNetworkManager.Instance.m_client.addMessageHandler<SetPlayerInfo>(this, handlePlayerInfo);
+
         MyNetworkManager.Instance.m_client.sendMessage(new PlayerJoinRequest() { PlayerName = PlayerNameInput.text });
     }
 
