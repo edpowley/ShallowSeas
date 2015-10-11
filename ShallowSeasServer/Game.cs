@@ -14,6 +14,9 @@ namespace ShallowSeasServer
 		private List<Player> m_players = new List<Player>();
 		public DateTime m_lastPingTime = DateTime.FromFileTime(0);
 
+		private bool m_quit = false;
+		public void quit() { m_quit = true; }
+
 		public void addPendingClient(ClientWrapper client)
 		{
 			lock (m_pendingClients)
@@ -54,7 +57,7 @@ namespace ShallowSeasServer
 					if (msg != null)
 					{
 						Player player = new Player(this, client, msg.PlayerName);
-						Console.WriteLine("Adding player named {0} with id {1}", player.Name, player.m_id);
+						ShallowSeasServer.log(System.Drawing.Color.Black, "Adding player named {0} with id {1}", player.Name, player.m_id);
 						m_players.Add(player);
 
 						player.m_client.sendMessage(new WelcomePlayer() { PlayerId = player.m_id });
@@ -83,7 +86,7 @@ namespace ShallowSeasServer
 
 				if (!player.m_client.Connected)
 				{
-					Console.WriteLine("Removing player {0}", player.m_id);
+					ShallowSeasServer.log(System.Drawing.Color.Black, "Removing player {0}", player.m_id);
 					m_players.RemoveAt(playerIndex);
 					playerIndex--;
 
@@ -94,7 +97,8 @@ namespace ShallowSeasServer
 
 		public void run()
 		{
-			while (true)
+			m_quit = false;
+			while (!m_quit)
 			{
 				handlePendingClients();
 				pingPlayers();

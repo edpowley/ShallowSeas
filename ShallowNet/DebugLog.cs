@@ -9,7 +9,7 @@ namespace ShallowNet
 	{
 		public static Action<string> s_printFunc = null;
 
-		public static void WriteLine(string str)
+		internal static void WriteLine(string str)
 		{
 			if (s_printFunc == null)
 			{
@@ -19,7 +19,7 @@ namespace ShallowNet
 			s_printFunc(str);
 		}
 
-		public static void WriteLine(string fmt, params object[] args)
+		internal static void WriteLine(string fmt, params object[] args)
 		{
 			string str = String.Format(fmt, args);
 			WriteLine(str);
