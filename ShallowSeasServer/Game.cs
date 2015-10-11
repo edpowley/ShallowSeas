@@ -27,9 +27,18 @@ namespace ShallowSeasServer
 
 		private void broadcastMessageToAllPlayers(Message msg)
 		{
-			foreach(Player player in m_players)
+			foreach (Player player in m_players)
 			{
 				player.m_client.sendMessage(msg);
+			}
+		}
+
+		private void broadcastMessageToAllPlayersExcept(Player except, Message msg)
+		{
+			foreach (Player player in m_players)
+			{
+				if (player != except)
+					player.m_client.sendMessage(msg);
 			}
 		}
 
@@ -39,10 +48,15 @@ namespace ShallowSeasServer
 
 			foreach(Player player in m_players)
 			{
-				result.Add(new PlayerInfo() { Id = player.m_id, Name = player.Name });
+				result.Add(player.getInfo());
 			}
 
 			return result;
+		}
+
+		internal void playerInfoHasChanged(Player player)
+		{
+			broadcastMessageToAllPlayersExcept(player, new SetPlayerInfo() { Player = player.getInfo() });
 		}
 
 		private void handlePendingClients()
@@ -102,6 +116,11 @@ namespace ShallowSeasServer
 			{
 				handlePendingClients();
 				pingPlayers();
+				
+				foreach (Player player in m_players)
+				{
+					player.handleMessages();
+				}
 
 				Thread.Sleep(0);
 			}

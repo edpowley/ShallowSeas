@@ -22,5 +22,20 @@ namespace ShallowSeasServer
 			m_client = client;
 			Name = name;
 		}
+
+		public PlayerInfo getInfo()
+		{
+			return new PlayerInfo { Id = m_id, Name = Name };
+		}
+
+		public void handleMessages()
+		{
+			SetPlayerName msg = m_client.popMessage<SetPlayerName>();
+			if (msg != null)
+			{
+				Name = msg.NewName;
+				m_game.playerInfoHasChanged(this);
+			}
+		}
 	}
 }
