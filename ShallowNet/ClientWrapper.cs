@@ -21,6 +21,26 @@ namespace ShallowNet
 		private Queue<Message> m_messagesToSend = new Queue<Message>();
 		private List<Message> m_messagesReceived = new List<Message>();
 
+		private abstract class MessageHandler
+		{
+			public object m_owner;
+			public abstract bool handleMessage(ClientWrapper client, Message msg);
+		}
+
+		private class MessageHandlerFunc<T> : MessageHandler where T : Message
+		{
+			public Func<ClientWrapper, T, bool> m_func;
+			public override bool handleMessage(ClientWrapper client, Message msg)
+			{
+				if (msg is T)
+					return m_func(client, (T)msg);
+				else
+					return false;
+			}
+		}
+
+		private List<MessageHandler> m_messageHandlers = new List<MessageHandler>();
+
 		public static ClientWrapper Connect(string host, int port)
 		{
 			TcpClient client = new TcpClient(host, port);
@@ -53,22 +73,37 @@ namespace ShallowNet
 			}
 		}
 
-		public T popMessage<T>() where T : Message
+		public void addMessageHandler<MessageType>(object owner, Func<ClientWrapper, MessageType, bool> handler) where MessageType : Message
+		{
+			m_messageHandlers.Add(new MessageHandlerFunc<MessageType> { m_owner = owner, m_func = handler });
+		}
+
+		public void removeMessageHandlers(object owner)
+		{
+			m_messageHandlers.RemoveAll(handler => handler.m_owner == owner);
+		}
+
+		public void pumpMessages()
 		{
 			lock (m_messagesReceived)
 			{
-				for (int i = 0; i < m_messagesReceived.Count; i++)
+				foreach (Message msg in m_messagesReceived)
 				{
-					T msg = m_messagesReceived[i] as T;
-					if (msg != null)
+					bool handled = false;
+					foreach(MessageHandler handler in m_messageHandlers)
 					{
-						m_messagesReceived.RemoveAt(i);
-						return msg;
+						handled = handler.handleMessage(this, msg);
+						if (handled) break;
+					}
+
+					if (!handled)
+					{
+						DebugLog.WriteLine("WARNING: Unhandled message {0}", msg);
 					}
 				}
-			}
 
-			return null;
+				m_messagesReceived.Clear();
+			}
 		}
 
 		private void threadFunc()

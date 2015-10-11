@@ -103,23 +103,15 @@ public class MainMenu : MonoBehaviour
 
     public void OnJoinClicked()
     {
-        StartCoroutine(joinGameCoroutine());
+        MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort);
+        MyNetworkManager.Instance.m_client.addMessageHandler<WelcomePlayer>(this, handleWelcomeMessage);
+        MyNetworkManager.Instance.m_client.sendMessage(new PlayerJoinRequest() { PlayerName = PlayerNameInput.text });
     }
 
-    private IEnumerator joinGameCoroutine()
+    private bool handleWelcomeMessage(ClientWrapper client, WelcomePlayer msg)
     {
-        MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort);
-        //MyNetworkManager.Instance.m_client.sendMessage(new SetPlayerName() { NewName = PlayerNameInput.text });
-        MyNetworkManager.Instance.m_client.sendMessage(new PlayerJoinRequest() { PlayerName = PlayerNameInput.text });
-
-        WelcomePlayer welcomeMsg = null;
-        while (welcomeMsg == null)
-        {
-            yield return null;
-            welcomeMsg = MyNetworkManager.Instance.m_client.popMessage<WelcomePlayer>();
-        }
-
-        Debug.LogFormat("Joined as player id {0}", welcomeMsg.PlayerId);
-        MyNetworkManager.Instance.m_localPlayerId = welcomeMsg.PlayerId;
+        Debug.LogFormat("Joined as player id {0}", msg.PlayerId);
+        MyNetworkManager.Instance.m_localPlayerId = msg.PlayerId;
+        return true;
     }
 }

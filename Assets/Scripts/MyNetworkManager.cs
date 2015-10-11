@@ -81,6 +81,7 @@ public class MyNetworkManager : MonoBehaviour
     {
         if (m_client != null)
         {
+            m_client.pumpMessages();
         }
     }
 }

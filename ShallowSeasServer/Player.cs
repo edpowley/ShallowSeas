@@ -21,6 +21,8 @@ namespace ShallowSeasServer
 			m_id = Guid.NewGuid().ToString();
 			m_client = client;
 			Name = name;
+
+			m_client.addMessageHandler<SetPlayerName>(this, handleSetName);
 		}
 
 		public PlayerInfo getInfo()
@@ -28,14 +30,11 @@ namespace ShallowSeasServer
 			return new PlayerInfo { Id = m_id, Name = Name };
 		}
 
-		public void handleMessages()
+		private bool handleSetName(ClientWrapper client, SetPlayerName msg)
 		{
-			SetPlayerName msg = m_client.popMessage<SetPlayerName>();
-			if (msg != null)
-			{
-				Name = msg.NewName;
-				m_game.playerInfoHasChanged(this);
-			}
+			Name = msg.NewName;
+			m_game.playerInfoHasChanged(this);
+			return true;
 		}
 	}
 }

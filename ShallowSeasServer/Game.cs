@@ -22,6 +22,7 @@ namespace ShallowSeasServer
 			lock (m_pendingClients)
 			{
 				m_pendingClients.Add(client);
+				client.addMessageHandler<PlayerJoinRequest>(this, handlePlayerJoinRequest);
 			}
 		}
 
@@ -58,6 +59,20 @@ namespace ShallowSeasServer
 		{
 			broadcastMessageToAllPlayersExcept(player, new SetPlayerInfo() { Player = player.getInfo() });
 		}
+		
+		private bool handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest msg)
+		{
+			Player player = new Player(this, client, msg.PlayerName);
+			ShallowSeasServer.log(System.Drawing.Color.Black, "Adding player named {0} with id {1}", player.Name, player.m_id);
+			m_players.Add(player);
+
+			player.m_client.sendMessage(new WelcomePlayer() { PlayerId = player.m_id });
+			broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
+
+			m_pendingClients.Remove(client);
+
+			return true;
+		}
 
 		private void handlePendingClients()
 		{
@@ -66,20 +81,7 @@ namespace ShallowSeasServer
 				for (int clientIndex = 0; clientIndex < m_pendingClients.Count; clientIndex++)
 				{
 					ClientWrapper client = m_pendingClients[clientIndex];
-
-					PlayerJoinRequest msg = client.popMessage<PlayerJoinRequest>();
-					if (msg != null)
-					{
-						Player player = new Player(this, client, msg.PlayerName);
-						ShallowSeasServer.log(System.Drawing.Color.Black, "Adding player named {0} with id {1}", player.Name, player.m_id);
-						m_players.Add(player);
-
-						player.m_client.sendMessage(new WelcomePlayer() { PlayerId = player.m_id });
-						broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
-
-						m_pendingClients.RemoveAt(clientIndex);
-						clientIndex--;
-					}
+					client.pumpMessages();
 				}
 			}
 		}
@@ -119,7 +121,7 @@ namespace ShallowSeasServer
 				
 				foreach (Player player in m_players)
 				{
-					player.handleMessages();
+					player.m_client.pumpMessages();
 				}
 
 				Thread.Sleep(0);
