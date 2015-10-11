@@ -74,6 +74,7 @@ namespace ShallowSeasServer
 			if (DateTime.Now - m_lastPingTime > c_pingInterval)
 			{
 				broadcastMessageToAllPlayers(new Ping());
+				m_lastPingTime = DateTime.Now;
 			}
 
 			for (int playerIndex = 0; playerIndex < m_players.Count; playerIndex++)
