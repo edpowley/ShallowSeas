@@ -69,10 +69,23 @@ namespace ShallowSeasServer
 			ShallowSeasServer.log(System.Drawing.Color.Black, "Adding player named {0} with id {1}", player.Name, player.m_id);
 			m_players.Add(player);
 
+			updatePlayerColours();
+
 			player.m_client.sendMessage(new WelcomePlayer() { PlayerId = player.m_id });
 			broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
 
 			m_pendingClients.Remove(client);
+		}
+
+		private void updatePlayerColours()
+		{
+			for (int i=0; i<m_players.Count; i++)
+			{
+				var player = m_players[i];
+				player.m_colourH = (float)i / (float)m_players.Count;
+				player.m_colourS = 1;
+				player.m_colourV = 1;
+			}
 		}
 
 		private void handlePendingClients()
@@ -107,6 +120,7 @@ namespace ShallowSeasServer
 					m_players.RemoveAt(playerIndex);
 					playerIndex--;
 
+					updatePlayerColours();
 					broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
 				}
 			}

@@ -12,6 +12,6 @@ public class MainMenuPlayerListEntry : MonoBehaviour
     {
         PlayerId = info.Id;
         PlayerName.text = info.Name;
-        //Icon.color = Player.PlayerColour;
+        Icon.color = Util.HSVToRGB(info.ColourH, info.ColourS, info.ColourV);
     }
 }

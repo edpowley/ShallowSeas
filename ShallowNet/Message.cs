@@ -36,6 +36,9 @@ namespace ShallowNet
 	{
 		public string Id { get; set; }
 		public string Name { get; set; }
+		public float ColourH { get; set; }
+		public float ColourS { get; set; }
+		public float ColourV { get; set; }
 	}
 
 	public class WelcomePlayer : ServerToClientMessage

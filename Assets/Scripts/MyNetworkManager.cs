@@ -14,7 +14,7 @@ public class MyNetworkManager : MonoBehaviour
     internal string LocalPlayerId { get; private set; }
     internal List<PlayerInfo> m_players = new List<PlayerInfo>();
 
-    internal PlayerInfo LocalPlayer{ get { return m_players.Single(p => p.Id == LocalPlayerId); } }
+    internal PlayerInfo LocalPlayer { get { return m_players.Single(p => p.Id == LocalPlayerId); } }
 
     public bool IsConnected { get { return m_client != null; } }
 

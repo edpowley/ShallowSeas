@@ -14,6 +14,7 @@ namespace ShallowSeasServer
 		public readonly string m_id;
 		public ClientWrapper m_client;
 		public string Name { get; set; }
+		public float m_colourH, m_colourS, m_colourV;
 
 		public bool m_waitingForSceneLoad = false;
 
@@ -29,7 +30,7 @@ namespace ShallowSeasServer
 
 		public PlayerInfo getInfo()
 		{
-			return new PlayerInfo { Id = m_id, Name = Name };
+			return new PlayerInfo { Id = m_id, Name = Name, ColourH = m_colourH, ColourS = m_colourS, ColourV = m_colourV };
 		}
 
 		private void handleSetName(ClientWrapper client, SetPlayerName msg)

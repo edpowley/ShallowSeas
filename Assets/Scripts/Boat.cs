@@ -36,7 +36,7 @@ public class Boat : MonoBehaviour
 
         var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
         NameLabel.text = playerInfo.Name;
-        //NameLabel.color = Player.PlayerColour;
+        NameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
     }
 
     internal void setColour(Color colour)
