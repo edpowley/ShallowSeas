@@ -27,7 +27,7 @@ public class FogCircle : MonoBehaviour
     {
         m_renderer.enabled = true;
 
-        IntVector2 boatCell = MyNetworkPlayer.LocalInstance.m_boat.CurrentCell;
+        IntVector2 boatCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
         if (boatCell != m_centre)
         {
             m_centre = boatCell;

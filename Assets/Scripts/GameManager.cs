@@ -4,6 +4,7 @@ using System;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using ShallowNet;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,12 +21,18 @@ public class GameManager : MonoBehaviour
 
     public string[] FishNames = new string[]{ "red fish", "green fish", "blue fish" };
 
+    public Boat m_boatPrefab;
+
+    public Boat LocalPlayerBoat { get; private set; }
+
     public BoatCourseLine CourseLine, DrawingLine;
 
-    public Text TestText, TestText2;
-    public NotificationText Notification;
+    public Text m_textTopLeft, m_textTopRight, m_textWaitingForGameStart;
+    public NotificationText m_notification;
 
     public FogCircle m_fogCircle;
+
+    private bool m_waitingForStart = true;
 
     internal bool isWater(int x, int y)
     {
@@ -63,6 +70,30 @@ public class GameManager : MonoBehaviour
     {
         initIsWater();
         initFishDensity();
+
+        var client = MyNetworkManager.Instance.m_client;
+        client.addMessageHandler<StartMainGame>(this, handleStartMainGame);
+        client.sendMessage(new SceneLoaded());
+    }
+
+    private void handleStartMainGame(ClientWrapper client, StartMainGame msg)
+    {
+        m_textWaitingForGameStart.enabled = false;
+        m_waitingForStart = false;
+
+        for (int i=0; i<MyNetworkManager.Instance.m_players.Count; i++)
+        {
+            PlayerInfo player = MyNetworkManager.Instance.m_players [i];
+            SNVector2 startPos = msg.StartPositions [i];
+            Vector3 startPos3 = new Vector3(startPos.x, 0, startPos.y);
+
+            Boat boat = Util.InstantiatePrefab(m_boatPrefab, startPos3, Quaternion.identity);
+            boat.PlayerId = player.Id;
+            if (player.Id == MyNetworkManager.Instance.LocalPlayerId)
+            {
+                LocalPlayerBoat = boat;
+            }
+        }
     }
 
     private void initFishDensity()
@@ -153,16 +184,19 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        IntVector2 currentCell = MyNetworkPlayer.LocalInstance.m_boat.CurrentCell;
+        if (!m_waitingForStart)
+        {
+            IntVector2 currentCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
 
-        var currentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
-        TestText.text = string.Format("Boat in square {0}\nFish density {1}",
+            var currentCellFishDensity = m_fishDensity [currentCell.X, currentCell.Y];
+            m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}",
                                       currentCell,
                                       string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray())
-                                      );
+            );
 
-        TestText2.text = string.Format("Catch: {0}",
+            /*m_textTopRight.text = string.Format("Catch: {0}",
                                        string.Join(", ", (from n in MyNetworkPlayer.LocalInstance.m_currentCatch select n.ToString()).ToArray())
-                                       );
+                                       );*/
+        }
     }
 }

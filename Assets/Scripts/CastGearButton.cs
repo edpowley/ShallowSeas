@@ -18,23 +18,23 @@ public class CastGearButton : MonoBehaviour
 
     public void OnButtonClick()
     {
-        MyNetworkPlayer.LocalInstance.CastGear(m_gearType);
+        //GameManager.Instance.LocalPlayerBoat.CastGear(m_gearType);
     }
 
     public void Update()
     {
-        m_button.interactable = (MyNetworkPlayer.LocalInstance.m_castGear == GearType.None);
+        /*m_button.interactable = (GameManager.Instance.LocalPlayerBoat.m_castGear == GearType.None);
 
-        if (MyNetworkPlayer.LocalInstance.m_castGear == m_gearType)
+        if (GameManager.Instance.LocalPlayerBoat.m_castGear == m_gearType)
         {
-            float start = MyNetworkPlayer.LocalInstance.m_castStartTime;
-            float end = MyNetworkPlayer.LocalInstance.m_castEndTime;
+            float start = GameManager.Instance.LocalPlayerBoat.m_castStartTime;
+            float end = GameManager.Instance.LocalPlayerBoat.m_castEndTime;
             float now = Time.timeSinceLevelLoad;
             ProgressBarImage.fillAmount = (now - start) / (end - start);
         }
         else
         {
             ProgressBarImage.fillAmount = 0;
-        }
+        }*/
     }
 }

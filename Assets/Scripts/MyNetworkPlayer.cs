@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
+#if FALSE
 public class MyNetworkPlayer : NetworkBehaviour
 {
     public SyncListInt m_currentCatch = new SyncListInt();
@@ -311,3 +312,4 @@ public class MyNetworkPlayer : NetworkBehaviour
         }
     }
 }
+#endif

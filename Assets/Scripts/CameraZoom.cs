@@ -70,8 +70,8 @@ public class CameraZoom : MonoBehaviour
 
         // Get target position
         Vector3 targetPos;
-        if (MyNetworkPlayer.LocalInstance != null && MyNetworkPlayer.LocalInstance.m_boat != null)
-            targetPos = MyNetworkPlayer.LocalInstance.m_boat.transform.position;
+        if (GameManager.Instance != null && GameManager.Instance.LocalPlayerBoat != null)
+            targetPos = GameManager.Instance.LocalPlayerBoat.transform.position;
         else 
             targetPos = new Vector3(GameManager.c_gridWidth / 2, 0, GameManager.c_gridHeight / 2);
 

@@ -39,14 +39,9 @@ public class MainMenu : MonoBehaviour
         ServerIpInput.interactable = !isConnected;
         ServerPortInput.interactable = !isConnected;
         JoinButton.interactable = !isConnected;
-
-        if (MyNetworkPlayer.LocalInstance != null)
-        {
-            MyNetworkPlayer.LocalInstance.SetName(PlayerNameInput.text);
-        }
     }
 
-    private bool handlePlayerList(ClientWrapper client, SetPlayerList msg)
+    private void handlePlayerList(ClientWrapper client, SetPlayerList msg)
     {
         foreach (var entry in m_playerListEntries)
         {
@@ -62,11 +57,9 @@ public class MainMenu : MonoBehaviour
             entry.setPlayerInfo(info);
             m_playerListEntries.Add(entry);
         }
-        
-        return true;
     }
     
-    private bool handlePlayerInfo(ClientWrapper client, SetPlayerInfo msg)
+    private void handlePlayerInfo(ClientWrapper client, SetPlayerInfo msg)
     {
         var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == msg.Player.Id);
         if (entry != null)
@@ -77,17 +70,17 @@ public class MainMenu : MonoBehaviour
         {
             Debug.LogFormat("No entry for id {0}", msg.Player.Id);
         }
-
-        return true;
     }
     
     public void OnPlayerNameChanged(string value)
     {
         if (MyNetworkManager.Instance.IsConnected)
         {
+            MyNetworkManager.Instance.LocalPlayer.Name = value;
+
             MyNetworkManager.Instance.m_client.sendMessage(new SetPlayerName() { NewName = value });
 
-            var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == MyNetworkManager.Instance.m_localPlayerId);
+            var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == MyNetworkManager.Instance.LocalPlayerId);
             if (entry != null)
                 entry.PlayerName.text = value;
         }
@@ -107,17 +100,9 @@ public class MainMenu : MonoBehaviour
     {
         MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort);
 
-        MyNetworkManager.Instance.m_client.addMessageHandler<WelcomePlayer>(this, handleWelcomeMessage);
         MyNetworkManager.Instance.m_client.addMessageHandler<SetPlayerList>(this, handlePlayerList);
         MyNetworkManager.Instance.m_client.addMessageHandler<SetPlayerInfo>(this, handlePlayerInfo);
 
         MyNetworkManager.Instance.m_client.sendMessage(new PlayerJoinRequest() { PlayerName = PlayerNameInput.text });
-    }
-
-    private bool handleWelcomeMessage(ClientWrapper client, WelcomePlayer msg)
-    {
-        Debug.LogFormat("Joined as player id {0}", msg.PlayerId);
-        MyNetworkManager.Instance.m_localPlayerId = msg.PlayerId;
-        return true;
     }
 }

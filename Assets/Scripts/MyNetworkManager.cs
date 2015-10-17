@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Networking;
 using ShallowNet;
 
@@ -9,7 +10,11 @@ public class MyNetworkManager : MonoBehaviour
     public static MyNetworkManager Instance { get; private set; }
 
     internal ClientWrapper m_client = null;
-    internal string m_localPlayerId;
+
+    internal string LocalPlayerId { get; private set; }
+    internal List<PlayerInfo> m_players = new List<PlayerInfo>();
+
+    internal PlayerInfo LocalPlayer{ get { return m_players.Single(p => p.Id == LocalPlayerId); } }
 
     public bool IsConnected { get { return m_client != null; } }
 
@@ -49,6 +54,39 @@ public class MyNetworkManager : MonoBehaviour
             m_client.Dispose();
 
         m_client = ClientWrapper.Connect(hostName, port);
+        m_client.addMessageHandler<SetPlayerList>(this, handleSetPlayerList);
+        m_client.addMessageHandler<SetPlayerInfo>(this, handleSetPlayerInfo);
+        m_client.addMessageHandler<WelcomePlayer>(this, handleWelcomeMessage);
+        m_client.addMessageHandler<ReadyToStart>(this, handleReadyToStart);
+    }
+
+    void handleSetPlayerList(ClientWrapper client, SetPlayerList msg)
+    {
+        m_players = msg.Players;
+    }
+    
+    void handleSetPlayerInfo(ClientWrapper client, SetPlayerInfo msg)
+    {
+        int index = m_players.FindIndex(p => p.Id == msg.Player.Id);
+        if (index != -1)
+        {
+            m_players [index] = msg.Player;
+        }
+        else
+        {
+            Debug.LogErrorFormat("Player id {0} not in players list", msg.Player.Id);
+        }
+    }
+
+    private void handleWelcomeMessage(ClientWrapper client, WelcomePlayer msg)
+    {
+        Debug.LogFormat("Joined as player id {0}", msg.PlayerId);
+        MyNetworkManager.Instance.LocalPlayerId = msg.PlayerId;
+    }
+    
+    private void handleReadyToStart(ClientWrapper client, ReadyToStart msg)
+    {
+        Application.LoadLevel((int)Level.MainGame);
     }
 
     public void ChangeLevel(Level level)
@@ -83,5 +121,10 @@ public class MyNetworkManager : MonoBehaviour
         {
             m_client.pumpMessages();
         }
+    }
+
+    internal PlayerInfo getPlayerInfo(string id)
+    {
+        return m_players.SingleOrDefault(p => p.Id == id);
     }
 }

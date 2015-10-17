@@ -57,4 +57,17 @@ namespace ShallowNet
 	{
 		public string NewName { get; set; }
 	}
+
+	public class ReadyToStart : ServerToClientMessage
+	{
+	}
+
+	public class SceneLoaded : ClientToServerMessage
+	{
+	}
+
+	public class StartMainGame : ServerToClientMessage
+	{
+		public List<SNVector2> StartPositions { get; set; }
+	}
 }

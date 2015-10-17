@@ -15,6 +15,8 @@ namespace ShallowSeasServer
 		public ClientWrapper m_client;
 		public string Name { get; set; }
 
+		public bool m_waitingForSceneLoad = false;
+
 		public Player(Game game, ClientWrapper client, string name)
 		{
 			m_game = game;
@@ -30,11 +32,10 @@ namespace ShallowSeasServer
 			return new PlayerInfo { Id = m_id, Name = Name };
 		}
 
-		private bool handleSetName(ClientWrapper client, SetPlayerName msg)
+		private void handleSetName(ClientWrapper client, SetPlayerName msg)
 		{
 			Name = msg.NewName;
 			m_game.playerInfoHasChanged(this);
-			return true;
 		}
 	}
 }

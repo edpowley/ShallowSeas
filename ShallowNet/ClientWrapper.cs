@@ -23,19 +23,29 @@ namespace ShallowNet
 
 		private abstract class MessageHandler
 		{
+			protected MessageHandler(object owner, Type type)
+			{
+				m_owner = owner;
+				m_type = type;
+			}
+
 			public object m_owner;
-			public abstract bool handleMessage(ClientWrapper client, Message msg);
+			public Type m_type;
+			public abstract void handleMessage(ClientWrapper client, Message msg);
 		}
 
-		private class MessageHandlerFunc<T> : MessageHandler where T : Message
+		private class MessageHandler<T> : MessageHandler where T : Message
 		{
-			public Func<ClientWrapper, T, bool> m_func;
-			public override bool handleMessage(ClientWrapper client, Message msg)
+			public MessageHandler(object owner, Action<ClientWrapper, T> func) : base(owner, typeof(T))
+			{
+				m_func = func;
+			}
+
+			private Action<ClientWrapper, T> m_func;
+			public override void handleMessage(ClientWrapper client, Message msg)
 			{
 				if (msg is T)
-					return m_func(client, (T)msg);
-				else
-					return false;
+					m_func(client, (T)msg);
 			}
 		}
 
@@ -73,9 +83,9 @@ namespace ShallowNet
 			}
 		}
 
-		public void addMessageHandler<MessageType>(object owner, Func<ClientWrapper, MessageType, bool> handler) where MessageType : Message
+		public void addMessageHandler<MessageType>(object owner, Action<ClientWrapper, MessageType> handler) where MessageType : Message
 		{
-			m_messageHandlers.Add(new MessageHandlerFunc<MessageType> { m_owner = owner, m_func = handler });
+			m_messageHandlers.Add(new MessageHandler<MessageType>(owner, handler));
 		}
 
 		public void removeMessageHandlers(object owner)
@@ -90,15 +100,19 @@ namespace ShallowNet
 				foreach (Message msg in m_messagesReceived)
 				{
 					bool handled = false;
-					foreach(MessageHandler handler in m_messageHandlers)
+					List<MessageHandler> handlers = new List<MessageHandler>(m_messageHandlers);
+					foreach(MessageHandler handler in handlers)
 					{
-						handled = handler.handleMessage(this, msg);
-						if (handled) break;
+						if (handler.m_type.IsInstanceOfType(msg))
+						{
+							handler.handleMessage(this, msg);
+							handled = true;
+						}
 					}
 
 					if (!handled)
 					{
-						DebugLog.WriteLine("WARNING: Unhandled message {0}", msg);
+						DebugLog.WriteLine("WARNING: No handler found for message {0}", msg);
 					}
 				}
 

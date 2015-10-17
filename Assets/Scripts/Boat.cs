@@ -11,7 +11,7 @@ public class Boat : MonoBehaviour
     public float RotationSpeed = 90;
     public MeshRenderer NetRenderer;
 
-    public MyNetworkPlayer Player;
+    public string PlayerId { get; set; }
 
     public UnityEngine.UI.Text NameLabel;
 
@@ -24,7 +24,7 @@ public class Boat : MonoBehaviour
         }
     }
 
-    private bool isLocalPlayer { get { return Player != null && Player.isLocalPlayer; } }
+    private bool isLocalPlayer { get { return PlayerId == MyNetworkManager.Instance.LocalPlayerId; } }
 
     // Use this for initialization
     void Start()
@@ -34,8 +34,9 @@ public class Boat : MonoBehaviour
             StartCoroutine(handleMouse());
         }
 
-        NameLabel.text = Player.PlayerName;
-        NameLabel.color = Player.PlayerColour;
+        var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
+        NameLabel.text = playerInfo.Name;
+        //NameLabel.color = Player.PlayerColour;
     }
 
     internal void setColour(Color colour)
@@ -74,7 +75,7 @@ public class Boat : MonoBehaviour
     {
         while (true)
         {
-            if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+            /*if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
                 Player.ClearCourse();
 
@@ -122,7 +123,7 @@ public class Boat : MonoBehaviour
                 {
                     Player.SetCourse(course);
                 }
-            }
+            }*/
 
             yield return null;
         }
@@ -131,7 +132,7 @@ public class Boat : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Quaternion targetRotation = Quaternion.identity;
+        /*Quaternion targetRotation = Quaternion.identity;
 
         if (Player.m_castGear != GearType.None)
         {
@@ -175,7 +176,7 @@ public class Boat : MonoBehaviour
         if (!isLocalPlayer)
         {
             setVisible(GameManager.Instance.m_fogCircle.cellIsVisible(this.CurrentCell));
-        }
+        }*/
     }
 }
 

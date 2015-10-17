@@ -17,6 +17,9 @@ namespace ShallowSeasServer
 		private bool m_quit = false;
 		public void quit() { m_quit = true; }
 
+		enum State { WaitingForPlayers, StartingGame, InGame }
+		private State m_state = State.WaitingForPlayers;
+
 		public void addPendingClient(ClientWrapper client)
 		{
 			lock (m_pendingClients)
@@ -60,7 +63,7 @@ namespace ShallowSeasServer
 			broadcastMessageToAllPlayersExcept(player, new SetPlayerInfo() { Player = player.getInfo() });
 		}
 		
-		private bool handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest msg)
+		private void handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest msg)
 		{
 			Player player = new Player(this, client, msg.PlayerName);
 			ShallowSeasServer.log(System.Drawing.Color.Black, "Adding player named {0} with id {1}", player.Name, player.m_id);
@@ -70,8 +73,6 @@ namespace ShallowSeasServer
 			broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
 
 			m_pendingClients.Remove(client);
-
-			return true;
 		}
 
 		private void handlePendingClients()
@@ -120,11 +121,64 @@ namespace ShallowSeasServer
 				pingPlayers();
 				
 				foreach (Player player in m_players)
-				{
 					player.m_client.pumpMessages();
-				}
 
 				Thread.Sleep(0);
+			}
+		}
+
+		public void readyToStart()
+		{
+			if (m_state != State.WaitingForPlayers)
+			{
+				ShallowSeasServer.log(System.Drawing.Color.Red, "Game is already in progress");
+				return;
+			}
+
+			m_state = State.StartingGame;
+			foreach (Player player in m_players)
+			{
+				player.m_client.addMessageHandler<SceneLoaded>(this, handleSceneLoaded);
+				player.m_waitingForSceneLoad = true;
+				player.m_client.sendMessage(new ReadyToStart());
+			}
+		}
+
+		void handleSceneLoaded(ClientWrapper client, SceneLoaded msg)
+		{
+			Player player = m_players.Single(p => p.m_client == client);
+			player.m_waitingForSceneLoad = false;
+
+			if (m_players.All(p => p.m_waitingForSceneLoad == false))
+			{
+				ShallowSeasServer.log(System.Drawing.Color.Black, "All players are in game");
+				startGame();
+			}
+		}
+
+		void startGame()
+		{
+			m_state = State.InGame;
+
+			StartMainGame msg = new StartMainGame();
+			msg.StartPositions = getStartPositions(new SNVector2(129.5f, 127.5f), 1.0f, m_players.Count).ToList();
+
+			broadcastMessageToAllPlayers(msg);
+		}
+
+		IEnumerable<SNVector2> getStartPositions(SNVector2 centre, float radius, int numPlayers)
+		{
+			if (numPlayers == 0)
+				yield break;
+			else if (numPlayers == 1)
+				yield return centre;
+			else
+			{
+				for (int i=0; i<numPlayers; i++)
+				{
+					float angle = (float)i / numPlayers * 2.0f * (float)Math.PI;
+					yield return centre + radius * new SNVector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+				}
 			}
 		}
 	}
