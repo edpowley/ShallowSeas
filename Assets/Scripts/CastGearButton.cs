@@ -29,7 +29,7 @@ public class CastGearButton : MonoBehaviour
         {
             float start = GameManager.Instance.LocalPlayerBoat.m_castStartTime;
             float end = GameManager.Instance.LocalPlayerBoat.m_castEndTime;
-            float now = Time.timeSinceLevelLoad;
+            float now = GameManager.Instance.CurrentTime;
             ProgressBarImage.fillAmount = (now - start) / (end - start);
         }
         else

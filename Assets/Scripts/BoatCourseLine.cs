@@ -31,10 +31,16 @@ public class BoatCourseLine : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
-                //Player.ClearCourse();
+                Vector3 startPos = GameManager.Instance.LocalPlayerBoat.transform.position;
+
+                {
+                    RequestCourse msg = new RequestCourse();
+                    msg.Course = new List<SNVector2> { new SNVector2(startPos.x, startPos.z) };
+                    MyNetworkManager.Instance.m_client.sendMessage(msg);
+                }
 
                 clearPoints();
-                addPoint(GameManager.Instance.LocalPlayerBoat.transform.position);
+                addPoint(startPos);
                 
                 while (Input.GetMouseButton(0))
                 {
@@ -59,9 +65,11 @@ public class BoatCourseLine : MonoBehaviour
                     yield return null;
                 }
 
-                RequestCourse msg = new RequestCourse();
-                msg.Course = new List<SNVector2>(from p in m_points select new SNVector2(p.x, p.z));
-                MyNetworkManager.Instance.m_client.sendMessage(msg);
+                {
+                    RequestCourse msg = new RequestCourse();
+                    msg.Course = new List<SNVector2>(from p in m_points select new SNVector2(p.x, p.z));
+                    MyNetworkManager.Instance.m_client.sendMessage(msg);
+                }
 
                 /*if (Player.m_castGear == GearType.None)
                 {
@@ -116,6 +124,12 @@ public class BoatCourseLine : MonoBehaviour
         m_lines.Clear();
         m_points.Clear();
         m_offset = 0;
+
+        if (m_firstLine != null)
+        {
+            Destroy(m_firstLine);
+            m_firstLine = null;
+        }
     }
 
     internal void setOffset(float offset)

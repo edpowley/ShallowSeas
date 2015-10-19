@@ -110,7 +110,7 @@ public class Boat : MonoBehaviour
             // do nothing (prevent boat from moving whilst gear is cast)
         } else if (m_course.Count > 0)
         {
-            float lengthAlongCourse = (Time.timeSinceLevelLoad - m_courseStartTime) * MovementSpeed;
+            float lengthAlongCourse = (GameManager.Instance.CurrentTime - m_courseStartTime) * MovementSpeed;
 
             if (lengthAlongCourse <= 0)
             {

@@ -14,6 +14,7 @@ namespace ShallowSeasServer
 		{
 			Debug,
 			GameStatus,
+			GameEvent,
 			Network,
 			ConsoleCommand,
 			Error,
@@ -23,6 +24,7 @@ namespace ShallowSeasServer
 		{
 			{ Category.Debug, Color.LightGray },
 			{ Category.GameStatus, Color.Navy },
+			{ Category.GameEvent, Color.Indigo },
 			{ Category.Network, Color.Goldenrod },
 			{ Category.ConsoleCommand, Color.Blue },
 			{ Category.Error, Color.Red }

@@ -83,4 +83,15 @@ namespace ShallowNet
 		public string PlayerId { get; set; }
 		public List<SNVector2> Course { get; set; }
 	}
+
+	public class RequestCastGear : ClientToServerMessage
+	{
+		public SNVector2 Position { get; set; }
+		public float CastDuration { get; set; }
+	}
+
+	public class NotifyCatch : ServerToClientMessage
+	{
+		public List<int> FishCaught { get; set; }
+	}
 }

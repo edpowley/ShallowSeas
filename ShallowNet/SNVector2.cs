@@ -23,7 +23,7 @@ namespace ShallowNet
 
 		public override string ToString()
 		{
-			return string.Format("Vector2({0}, {1})", x, y);
+			return string.Format("({0}, {1})", x, y);
 		}
 
 		public static SNVector2 operator +(SNVector2 a, SNVector2 b)
