@@ -69,7 +69,7 @@ namespace ShallowSeasServer
 		private void handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest msg)
 		{
 			Player player = new Player(this, client, msg.PlayerName);
-			ShallowSeasServer.log(System.Drawing.Color.Black, "Adding player named {0} with id {1}", player.Name, player.m_id);
+			Log.log(Log.Category.GameStatus, "Adding player named {0} with id {1}", player.Name, player.m_id);
 			m_players.Add(player);
 
 			updatePlayerColours();
@@ -119,7 +119,7 @@ namespace ShallowSeasServer
 
 				if (!player.m_client.Connected)
 				{
-					ShallowSeasServer.log(System.Drawing.Color.Black, "Removing player {0}", player.m_id);
+					Log.log(Log.Category.GameStatus, "Removing player {0}", player.m_id);
 					m_players.RemoveAt(playerIndex);
 					playerIndex--;
 
@@ -153,7 +153,7 @@ namespace ShallowSeasServer
 		{
 			if (m_state != State.WaitingForPlayers)
 			{
-				ShallowSeasServer.log(System.Drawing.Color.Red, "Game is already in progress");
+				Log.log(Log.Category.Error, "Game is already in progress");
 				return;
 			}
 
@@ -173,7 +173,7 @@ namespace ShallowSeasServer
 
 			if (m_players.All(p => p.m_waitingForSceneLoad == false))
 			{
-				ShallowSeasServer.log(System.Drawing.Color.Black, "All players are in game");
+				Log.log(Log.Category.GameStatus, "All players are in game");
 				startGame();
 			}
 		}

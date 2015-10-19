@@ -18,43 +18,33 @@ namespace ShallowSeasServer
 		static Thread s_listenThread, s_gameThread;
 		static bool s_stopListening = false;
 
-		static MainForm s_mainForm;
+		internal static MainForm s_mainForm { get; private set; }
 		static Game s_game = new Game();
-
-		static internal void log(Color color, string message)
-		{
-			s_mainForm.logWriteLine(color, message);
-		}
-
-		static internal void log(Color color, string format, params object[] args)
-		{
-			s_mainForm.logWriteLine(color, String.Format(format, args));
-		}
 
 		static void listen(int port)
 		{
-			ShallowSeasServer.log(Color.Black, "About to start listening on port {0}", port);
+			Log.log(Log.Category.Network, "About to start listening on port {0}", port);
 			s_stopListening = false;
 			TcpListener listener = new TcpListener(IPAddress.Any, port);
 			listener.Start();
-			ShallowSeasServer.log(Color.Black, "Now listening");
+			Log.log(Log.Category.Network, "Now listening");
 
 			while (!s_stopListening)
 			{
 				if (listener.Pending())
 				{
-					ShallowSeasServer.log(Color.Black, "Got a connection request");
+					Log.log(Log.Category.Network, "Got a connection request");
 					ClientWrapper client = new ClientWrapper(listener.AcceptTcpClient());
 					s_game.addPendingClient(client);
-					ShallowSeasServer.log(Color.Black, "Accepted connection request");
+					Log.log(Log.Category.Network, "Accepted connection request");
 				}
 
 				Thread.Sleep(100);
 			}
 
-			ShallowSeasServer.log(Color.Black, "About to stop listening");
+			Log.log(Log.Category.Network, "About to stop listening");
 			listener.Stop();
-			ShallowSeasServer.log(Color.Black, "Stopped listening");
+			Log.log(Log.Category.Network, "Stopped listening");
 		}
 
 		static internal void executeCommand(string command, List<string> args)
@@ -71,7 +61,7 @@ namespace ShallowSeasServer
 					break;
 
 				default:
-					ShallowSeasServer.log(Color.Red, "Unknown command '{0}'", command);
+					Log.log(Log.Category.Error, "Unknown command '{0}'", command);
 					break;
 			}
 		}
@@ -86,7 +76,7 @@ namespace ShallowSeasServer
 			Application.SetCompatibleTextRenderingDefault(false);
 
 			s_mainForm = new MainForm();
-			DebugLog.s_printFunc = (message => s_mainForm.logWriteLine(Color.Goldenrod, message));
+			DebugLog.s_printFunc = (message => Log.log(Log.Category.Debug, message));
 
 			int port = c_defaultPort;
 			s_listenThread = new Thread(new ThreadStart(() => listen(port)));

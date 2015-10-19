@@ -62,7 +62,7 @@ namespace ShallowSeasServer
 
 		private void executeCommand(string commandLine)
 		{
-			logWriteLine(Color.Blue, commandLine);
+			Log.log(Log.Category.ConsoleCommand, commandLine);
 
 			commandLine = commandLine.Trim();
 
