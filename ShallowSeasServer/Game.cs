@@ -20,6 +20,9 @@ namespace ShallowSeasServer
 		enum State { WaitingForPlayers, StartingGame, InGame }
 		private State m_state = State.WaitingForPlayers;
 
+		public float CurrentTimestamp { get; private set; }
+		private DateTime? m_startTime = null;
+
 		public void addPendingClient(ClientWrapper client)
 		{
 			lock (m_pendingClients)
@@ -29,7 +32,7 @@ namespace ShallowSeasServer
 			}
 		}
 
-		private void broadcastMessageToAllPlayers(Message msg)
+		internal void broadcastMessageToAllPlayers(Message msg)
 		{
 			foreach (Player player in m_players)
 			{
@@ -37,7 +40,7 @@ namespace ShallowSeasServer
 			}
 		}
 
-		private void broadcastMessageToAllPlayersExcept(Player except, Message msg)
+		internal void broadcastMessageToAllPlayersExcept(Player except, Message msg)
 		{
 			foreach (Player player in m_players)
 			{
@@ -100,13 +103,13 @@ namespace ShallowSeasServer
 			}
 		}
 
-		private static readonly TimeSpan c_pingInterval = TimeSpan.FromSeconds(5);
+		private static readonly TimeSpan c_pingInterval = TimeSpan.FromSeconds(1);
 
 		private void pingPlayers()
 		{
 			if (DateTime.Now - m_lastPingTime > c_pingInterval)
 			{
-				broadcastMessageToAllPlayers(new Ping());
+				broadcastMessageToAllPlayers(new Ping() { Timestamp = CurrentTimestamp });
 				m_lastPingTime = DateTime.Now;
 			}
 
@@ -131,6 +134,11 @@ namespace ShallowSeasServer
 			m_quit = false;
 			while (!m_quit)
 			{
+				if (m_startTime != null)
+					CurrentTimestamp = (float)(DateTime.Now - m_startTime.Value).TotalSeconds;
+				else
+					CurrentTimestamp = -1;
+
 				handlePendingClients();
 				pingPlayers();
 				
@@ -173,6 +181,7 @@ namespace ShallowSeasServer
 		void startGame()
 		{
 			m_state = State.InGame;
+			m_startTime = DateTime.Now;
 
 			StartMainGame msg = new StartMainGame();
 			msg.StartPositions = getStartPositions(new SNVector2(129.5f, 127.5f), 1.0f, m_players.Count).ToList();

@@ -20,7 +20,8 @@ public class MyNetworkManager : MonoBehaviour
 
     public void Awake()
     {
-        ShallowNet.DebugLog.s_printFunc = Debug.Log;
+        //ShallowNet.DebugLog.s_printFunc = Debug.Log;
+        ShallowNet.DebugLog.s_printFunc = (msg => {});
 
         Debug.LogFormat("{0} Awake", this.GetInstanceID());
         if (Instance != null)

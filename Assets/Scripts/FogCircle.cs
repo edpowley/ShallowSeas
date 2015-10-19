@@ -77,8 +77,6 @@ public class FogCircle : MonoBehaviour
             }
         }
 
-        Debug.LogFormat("{0} squares = {1} vertices, {2} triangles", numSquares, numSquares * 4, numSquares * 2);
-
         Vector3[] vertices = new Vector3[numSquares * 4];
         Vector2[] uvs = new Vector2[numSquares * 4];
         int[] triangles = new int[numSquares * 6];

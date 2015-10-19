@@ -133,8 +133,7 @@ namespace ShallowNet
 					{
 						Message msg = m_messagesToSend.Peek();
 						string str = JSON.ToJSON(msg);
-						DebugLog.WriteLine("Sending:");
-						DebugLog.WriteLine(str);
+						DebugLog.WriteLine("Sending: {0}", str);
 
 						byte[] data = Encoding.UTF8.GetBytes(str);
 
@@ -164,8 +163,7 @@ namespace ShallowNet
 					else
 					{
 						string str = Encoding.UTF8.GetString(m_readBuffer.ToArray());
-						DebugLog.WriteLine("Received:");
-						DebugLog.WriteLine(str);
+						DebugLog.WriteLine("Received: {0}", str);
 						m_readBuffer.Clear();
 
 						Message msg = JSON.ToObject<Message>(str);

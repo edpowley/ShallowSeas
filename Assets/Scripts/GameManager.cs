@@ -23,7 +23,9 @@ public class GameManager : MonoBehaviour
 
     public Boat m_boatPrefab;
 
-    public Boat LocalPlayerBoat { get; private set; }
+    private Dictionary<string, Boat> m_playerBoats = new Dictionary<string, Boat>();
+
+    internal Boat LocalPlayerBoat { get; private set; }
 
     public BoatCourseLine CourseLine, DrawingLine;
 
@@ -32,7 +34,11 @@ public class GameManager : MonoBehaviour
 
     public FogCircle m_fogCircle;
 
-    private bool m_waitingForStart = true;
+    internal bool IsWaitingForStart { get; private set; }
+
+    private float m_timestampOffset = 0;
+
+    internal float CurrentTime { get { return Time.timeSinceLevelLoad + m_timestampOffset; } }
 
     internal bool isWater(int x, int y)
     {
@@ -49,6 +55,8 @@ public class GameManager : MonoBehaviour
 
     public void Awake()
     {
+        IsWaitingForStart = true;
+
         if (Instance != null)
             throw new InvalidOperationException("GameManager should be a singleton");
 
@@ -60,12 +68,6 @@ public class GameManager : MonoBehaviour
             Application.LoadLevel((int)Level.MainMenu);
     }
 
-    public void OnDestroy()
-    {
-        if (Instance == this)
-            Instance = null;
-    }
-
     public void Start()
     {
         initIsWater();
@@ -73,13 +75,30 @@ public class GameManager : MonoBehaviour
 
         var client = MyNetworkManager.Instance.m_client;
         client.addMessageHandler<StartMainGame>(this, handleStartMainGame);
+        client.addMessageHandler<SetCourse>(this, handleSetCourse);
+        client.addMessageHandler<ShallowNet.Ping>(this, handlePing);
         client.sendMessage(new SceneLoaded());
+    }
+
+    public void OnDestroy()
+    {
+        if (MyNetworkManager.Instance != null && MyNetworkManager.Instance.m_client != null)
+            MyNetworkManager.Instance.m_client.removeMessageHandlers(this);
+        
+        if (Instance == this)
+            Instance = null;
+    }
+
+    private void handlePing(ClientWrapper client, ShallowNet.Ping msg)
+    {
+        m_timestampOffset = msg.Timestamp - Time.timeSinceLevelLoad;
+        Debug.LogFormat("m_timestampOffset = {0}", m_timestampOffset);
     }
 
     private void handleStartMainGame(ClientWrapper client, StartMainGame msg)
     {
         m_textWaitingForGameStart.enabled = false;
-        m_waitingForStart = false;
+        IsWaitingForStart = false;
 
         for (int i=0; i<MyNetworkManager.Instance.m_players.Count; i++)
         {
@@ -89,11 +108,16 @@ public class GameManager : MonoBehaviour
 
             Boat boat = Util.InstantiatePrefab(m_boatPrefab, startPos3, Quaternion.identity);
             boat.PlayerId = player.Id;
+            m_playerBoats.Add(player.Id, boat);
             if (player.Id == MyNetworkManager.Instance.LocalPlayerId)
-            {
                 LocalPlayerBoat = boat;
-            }
         }
+    }
+
+    private void handleSetCourse(ClientWrapper client, SetCourse msg)
+    {
+        Boat boat = m_playerBoats [msg.PlayerId];
+        boat.setCourse(msg);
     }
 
     private void initFishDensity()
@@ -184,7 +208,7 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        if (!m_waitingForStart)
+        if (!IsWaitingForStart)
         {
             IntVector2 currentCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
 

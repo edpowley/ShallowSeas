@@ -9,10 +9,7 @@ namespace ShallowNet
 	{
 		public Message()
 		{
-			IsHandled = false;
 		}
-
-		internal bool IsHandled { get; set; }
 	}
 
 	public abstract class ServerToClientMessage : Message { }
@@ -20,6 +17,7 @@ namespace ShallowNet
 
 	public class Ping : Message
 	{
+		public float Timestamp { get; set; }
 	}
 
 	public class TestMessage : Message
@@ -72,5 +70,17 @@ namespace ShallowNet
 	public class StartMainGame : ServerToClientMessage
 	{
 		public List<SNVector2> StartPositions { get; set; }
+	}
+
+	public class RequestCourse : ClientToServerMessage
+	{
+		public List<SNVector2> Course { get; set; }
+	}
+
+	public class SetCourse : ServerToClientMessage
+	{
+		public float StartTime { get; set; }
+		public string PlayerId { get; set; }
+		public List<SNVector2> Course { get; set; }
 	}
 }

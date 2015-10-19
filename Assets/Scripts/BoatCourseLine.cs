@@ -1,15 +1,79 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.EventSystems;
+using ShallowNet;
 
 public class BoatCourseLine : MonoBehaviour
 {
-    public GameObject LinePrefab;
+    public GameObject m_linePrefab;
+    public bool m_handlesMouse = false;
 
     private List<GameObject> m_lines = new List<GameObject>();
     private GameObject m_firstLine = null;
     private List<Vector3> m_points = new List<Vector3>();
     private float m_offset = 0;
+
+    void Start()
+    {
+        if (m_handlesMouse)
+            StartCoroutine(handleMouse());
+    }
+
+    private IEnumerator handleMouse()
+    {
+        // Wait for game to start properly
+        while (GameManager.Instance.IsWaitingForStart)
+            yield return null;
+
+        while (true)
+        {
+            if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+            {
+                //Player.ClearCourse();
+
+                clearPoints();
+                addPoint(GameManager.Instance.LocalPlayerBoat.transform.position);
+                
+                while (Input.GetMouseButton(0))
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
+                    
+                    yIntercept.y = 0;
+                    
+                    if (Vector3.Distance(yIntercept, m_points.Last()) > 0.5f)
+                    {
+                        Vector3 pathStart = m_points.Last();
+                        List<Vector3> path = Pathfinder.FindPath(pathStart, yIntercept);
+                        if (path != null)
+                        {
+                            Pathfinder.PullString(path);
+
+                            // First element of path is the start position
+                            addPoints(path.Skip(1));
+                        }
+                    }
+
+                    yield return null;
+                }
+
+                RequestCourse msg = new RequestCourse();
+                msg.Course = new List<SNVector2>(from p in m_points select new SNVector2(p.x, p.z));
+                MyNetworkManager.Instance.m_client.sendMessage(msg);
+
+                /*if (Player.m_castGear == GearType.None)
+                {
+                    Player.SetCourse(course);
+                }*/
+
+                clearPoints();
+            }
+            
+            yield return null;
+        }
+    }
 
     private void setLineSegmentTransformation(GameObject line, Vector3 a, Vector3 b)
     {
@@ -25,7 +89,7 @@ public class BoatCourseLine : MonoBehaviour
 
         if (m_points.Count > 0)
         {
-            GameObject newLine = Util.InstantiatePrefab(LinePrefab);
+            GameObject newLine = Util.InstantiatePrefab(m_linePrefab);
             newLine.transform.SetParent(this.transform, worldPositionStays: false);
             setLineSegmentTransformation(newLine, m_points [m_points.Count - 1], p);
             newLine.name = string.Format("m_lines[{0}]", m_lines.Count);
@@ -42,6 +106,8 @@ public class BoatCourseLine : MonoBehaviour
 
     internal void clearPoints()
     {
+        Debug.Log("clearPoints()");
+
         foreach (GameObject line in m_lines)
         {
             Destroy(line);
@@ -68,7 +134,7 @@ public class BoatCourseLine : MonoBehaviour
 
             if (m_firstLine == null)
             {
-                m_firstLine = Util.InstantiatePrefab(LinePrefab);
+                m_firstLine = Util.InstantiatePrefab(m_linePrefab);
                 m_firstLine.transform.SetParent(this.transform, worldPositionStays: false);
                 m_firstLine.name = "m_firstLine";
             }

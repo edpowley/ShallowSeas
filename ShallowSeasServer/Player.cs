@@ -26,6 +26,7 @@ namespace ShallowSeasServer
 			Name = name;
 
 			m_client.addMessageHandler<SetPlayerName>(this, handleSetName);
+			m_client.addMessageHandler<RequestCourse>(this, handleRequestCourse);
 		}
 
 		public PlayerInfo getInfo()
@@ -37,6 +38,16 @@ namespace ShallowSeasServer
 		{
 			Name = msg.NewName;
 			m_game.playerInfoHasChanged(this);
+		}
+
+		private void handleRequestCourse(ClientWrapper client, RequestCourse msg)
+		{
+			SetCourse broadcastMsg = new SetCourse();
+			broadcastMsg.PlayerId = m_id;
+			broadcastMsg.Course = msg.Course;
+			broadcastMsg.StartTime = m_game.CurrentTimestamp;
+
+			m_game.broadcastMessageToAllPlayers(broadcastMsg);
 		}
 	}
 }
