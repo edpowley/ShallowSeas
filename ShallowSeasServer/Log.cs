@@ -80,7 +80,10 @@ namespace ShallowSeasServer
 			if (!s_categoryColours.TryGetValue(category, out color))
 				color = Color.DarkGray;
 
-			ShallowSeasServer.s_mainForm.logWriteLine(color, message);
+			if (category != Category.Debug)
+			{
+				ShallowSeasServer.s_mainForm.logWriteLine(color, message);
+			}
 
 
 			if (s_logWriter != null)
