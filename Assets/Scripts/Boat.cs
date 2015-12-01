@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using UnityEngine.Networking;
 using System.Linq;
 using ShallowNet;
 
@@ -13,6 +12,8 @@ public class Boat : MonoBehaviour
     public MeshRenderer NetRenderer;
 
     public string PlayerId { get; set; }
+
+    internal List<int> m_catch = new List<int>() { 0, 0, 0 };
 
     public UnityEngine.UI.Text NameLabel;
 
@@ -100,15 +101,38 @@ public class Boat : MonoBehaviour
     
     #endregion
 
+    #region Casting
+
+    internal GearType m_castGear = GearType.None;
+    internal float m_castStartTime, m_castEndTime;
+
+    internal void setCasting(SetPlayerCastingGear msg)
+    {
+        m_course.Clear();
+        if (isLocalPlayer)
+            GameManager.Instance.CourseLine.setCourse(m_course);
+
+        transform.position = new Vector3(msg.Position.x, 0, msg.Position.y);
+
+        m_castGear = (GearType)System.Enum.Parse(typeof(GearType), msg.GearName);
+        m_castStartTime = msg.StartTime;
+        m_castEndTime = msg.EndTime;
+    }
+
+    #endregion
+
     // Update is called once per frame
     void Update()
     {
+        if (m_castGear != GearType.None && GameManager.Instance.CurrentTime > m_castEndTime)
+        {
+            m_castGear = GearType.None;
+            m_castStartTime = m_castEndTime = 0;
+        }
+
         Quaternion targetRotation = Quaternion.identity;
 
-        if (false) // Player.m_castGear != GearType.None)
-        {
-            // do nothing (prevent boat from moving whilst gear is cast)
-        } else if (m_course.Count > 0)
+        if (m_course.Count > 0)
         {
             float lengthAlongCourse = (GameManager.Instance.CurrentTime - m_courseStartTime) * MovementSpeed;
 

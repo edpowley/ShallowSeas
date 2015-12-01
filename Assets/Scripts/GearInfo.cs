@@ -15,20 +15,20 @@ public class GearInfo
     public string m_gearName;
     public float m_castDuration;
     public int m_maxCatch;
-    public int[] m_catchMultiplier = new int[] { 1, 1, 1 };
+    public List<float> m_catchMultiplier = new List<float> { 1, 1, 1 };
 
-    private GearInfo(GearType type, string name, float castDuration, int maxCatch, params int[] catchMultiplier)
+    private GearInfo(GearType type, string name, float castDuration, int maxCatch, params float[] catchMultiplier)
     {
         m_type = type;
         m_gearName = name;
         m_castDuration = castDuration;
         m_maxCatch = maxCatch;
-        m_catchMultiplier = catchMultiplier;
+        m_catchMultiplier = new List<float>(catchMultiplier);
     }
 
     static private Dictionary<GearType, GearInfo> s_gearInfo = new Dictionary<GearType, GearInfo>();
     
-    static private void addGear(GearType type, string name, float castDuration, int maxCatch, params int[] catchMultiplier)
+    static private void addGear(GearType type, string name, float castDuration, int maxCatch, params float[] catchMultiplier)
     {
         s_gearInfo.Add(type, new GearInfo(type, name, castDuration, maxCatch, catchMultiplier));
     }

@@ -1,6 +1,7 @@
 ﻿using ShallowNet;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -10,9 +11,13 @@ namespace ShallowSeasServer
 {
 	class Game
 	{
+		internal Random m_rnd = new Random();
+
 		private List<ClientWrapper> m_pendingClients = new List<ClientWrapper>();
 		private List<Player> m_players = new List<Player>();
 		public DateTime m_lastPingTime = DateTime.FromFileTime(0);
+
+		private List<float>[,] m_fishDensity;
 
 		private bool m_quit = false;
 		public void quit() { m_quit = true; }
@@ -141,9 +146,12 @@ namespace ShallowSeasServer
 
 				handlePendingClients();
 				pingPlayers();
-				
+
 				foreach (Player player in m_players)
+				{
 					player.m_client.pumpMessages();
+					player.update();
+				}
 
 				Thread.Sleep(0);
 			}
@@ -186,6 +194,8 @@ namespace ShallowSeasServer
 			StartMainGame msg = new StartMainGame();
 			msg.StartPositions = getStartPositions(new SNVector2(129.5f, 127.5f), 1.0f, m_players.Count).ToList();
 
+			loadFishDensityMap();
+
 			broadcastMessageToAllPlayers(msg);
 		}
 
@@ -203,6 +213,26 @@ namespace ShallowSeasServer
 					yield return centre + radius * new SNVector2((float)Math.Cos(angle), (float)Math.Sin(angle));
 				}
 			}
+		}
+
+		void loadFishDensityMap()
+		{
+			Bitmap bmp = new Bitmap("FishDensity.png");
+
+			m_fishDensity = new List<float>[bmp.Width, bmp.Height];
+			for (int x=0; x<bmp.Width; x++)
+			{
+				for (int y = 0; y < bmp.Height; y++)
+				{
+					Color pixel = bmp.GetPixel(x, bmp.Height - 1 - y);
+					m_fishDensity[x, y] = new List<float>() { pixel.R / 255.0f, pixel.G / 255.0f, pixel.B / 255.0f };
+				}
+			}
+		}
+
+		public List<float> getFishDensity(int x, int y)
+		{
+			return m_fishDensity[x, y];
 		}
 	}
 }

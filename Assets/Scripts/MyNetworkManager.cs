@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Networking;
 using ShallowNet;
 
 public class MyNetworkManager : MonoBehaviour
@@ -16,7 +15,7 @@ public class MyNetworkManager : MonoBehaviour
 
     internal PlayerInfo LocalPlayer { get { return m_players.Single(p => p.Id == LocalPlayerId); } }
 
-    public bool IsConnected { get { return m_client != null; } }
+    public bool IsConnected { get { return m_client != null && m_client.Connected; } }
 
     public void Awake()
     {
@@ -36,7 +35,12 @@ public class MyNetworkManager : MonoBehaviour
 
         DontDestroyOnLoad(this.gameObject);
     }
-    
+
+    public void Start()
+    {
+        StartCoroutine(pingServer());
+    }
+
     public void OnDestroy()
     {
         if (m_client != null)
@@ -121,6 +125,24 @@ public class MyNetworkManager : MonoBehaviour
         if (m_client != null)
         {
             m_client.pumpMessages();
+        }
+    }
+
+    private IEnumerator pingServer()
+    {
+        while (true)
+        {
+            if (IsConnected)
+            {
+                m_client.sendMessage(new ShallowNet.Ping());
+
+                if (!IsConnected)
+                {
+                    Debug.LogWarning("Disconnected from server");
+                }
+            }
+
+            yield return new WaitForSeconds(1.9f);
         }
     }
 

@@ -87,7 +87,19 @@ namespace ShallowNet
 	public class RequestCastGear : ClientToServerMessage
 	{
 		public SNVector2 Position { get; set; }
+		public string GearName { get; set; }
 		public float CastDuration { get; set; }
+		public List<float> CatchMultipliers { get; set; }
+		public int MaxCatch { get; set; }
+	}
+
+	public class SetPlayerCastingGear : ServerToClientMessage
+	{
+		public string PlayerId { get; set; }
+		public SNVector2 Position { get; set; }
+		public string GearName { get; set; }
+		public float StartTime { get; set; }
+		public float EndTime { get; set; }
 	}
 
 	public class NotifyCatch : ServerToClientMessage

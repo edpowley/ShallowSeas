@@ -16,6 +16,11 @@ public class CameraZoom : MonoBehaviour
     [Range(0, 2)]
     public float Zoom = 0.0f;
 
+    public void setZoom(float zoom)
+    {
+        Zoom = zoom;
+    }
+
     /// <summary>
     /// Mouse zoom sensitivity, in zoom units per pixel moved
     /// </summary>

@@ -76,6 +76,8 @@ public class GameManager : MonoBehaviour
         var client = MyNetworkManager.Instance.m_client;
         client.addMessageHandler<StartMainGame>(this, handleStartMainGame);
         client.addMessageHandler<SetCourse>(this, handleSetCourse);
+        client.addMessageHandler<SetPlayerCastingGear>(this, handleSetCasting);
+        client.addMessageHandler<NotifyCatch>(this, handleNotifyCatch);
         client.addMessageHandler<ShallowNet.Ping>(this, handlePing);
         client.sendMessage(new SceneLoaded());
     }
@@ -118,6 +120,22 @@ public class GameManager : MonoBehaviour
     {
         Boat boat = m_playerBoats [msg.PlayerId];
         boat.setCourse(msg);
+    }
+
+    private void handleSetCasting(ClientWrapper client, SetPlayerCastingGear msg)
+    {
+        Boat boat = m_playerBoats [msg.PlayerId];
+        boat.setCasting(msg);
+    }
+
+    private void handleNotifyCatch(ClientWrapper client, NotifyCatch msg)
+    {
+        GameManager.Instance.m_notification.PutMessage("You caught {0} red fish, {1} green fish and {2} blue fish", msg.FishCaught [0], msg.FishCaught [1], msg.FishCaught [2]);
+
+        for (int i=0; i<msg.FishCaught.Count; i++)
+        {
+            LocalPlayerBoat.m_catch [i] += msg.FishCaught [i];
+        }
     }
 
     private void initFishDensity()
@@ -218,9 +236,9 @@ public class GameManager : MonoBehaviour
                                       string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray())
             );
 
-            /*m_textTopRight.text = string.Format("Catch: {0}",
-                                       string.Join(", ", (from n in MyNetworkPlayer.LocalInstance.m_currentCatch select n.ToString()).ToArray())
-                                       );*/
+            m_textTopRight.text = string.Format("Catch: {0}",
+                                       string.Join(", ", (from n in LocalPlayerBoat.m_catch select n.ToString()).ToArray())
+                                       );
         }
     }
 }

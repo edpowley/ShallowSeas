@@ -18,8 +18,12 @@ namespace ShallowSeasServer
 
 		public bool m_waitingForSceneLoad = false;
 
-		private bool m_gearIsCast = false;
+		private string m_castGear = null;
+		private SNVector2 m_castPos;
+		private float m_castStartTime;
 		private float m_castEndTime;
+		private float m_castMaxCatch;
+		private List<float> m_castCatchMultipliers;
 
 		public Player(Game game, ClientWrapper client, string name)
 		{
@@ -40,38 +44,84 @@ namespace ShallowSeasServer
 
 		internal void update()
 		{
-			if (m_gearIsCast && m_game.CurrentTimestamp >= m_castEndTime)
+			if (m_castGear != null && m_game.CurrentTimestamp >= m_castEndTime)
 			{
-				// TODO
-				// m_client.sendMessage(new NotifyCatch());
+				NotifyCatch msg = new NotifyCatch();
+				msg.FishCaught = new List<int>();
+
+				int totalFish = 0;
+				var density = m_game.getFishDensity((int)m_castPos.x, (int)m_castPos.y);
+				for (int i=0; i<density.Count; i++)
+				{
+					int numFish = (int)Math.Round(m_game.m_rnd.NextDouble() * density[i] * (m_castEndTime - m_castStartTime) * m_castCatchMultipliers[i]);
+					msg.FishCaught.Add(numFish);
+					totalFish += numFish;
+				}
+
+				while (totalFish > m_castMaxCatch)
+				{
+					int i = m_game.m_rnd.Next(msg.FishCaught.Count);
+					if (msg.FishCaught[i] > 0)
+					{
+						msg.FishCaught[i]--;
+						totalFish--;
+					}
+				}
+
+				for (int i=0; i<3; i++)
+				{
+					Log.log(Log.Category.GameEvent, "Player {0} caught {1} fish of type {2}", m_id, msg.FishCaught[i], i);
+				}
+
+				m_client.sendMessage(msg);
+				m_castGear = null;
+				m_castEndTime = 0;
+				m_castCatchMultipliers = null;
 			}
 		}
 
 		private void handleSetName(ClientWrapper client, SetPlayerName msg)
 		{
+			Log.log(Log.Category.GameEvent, "Player {0} changed name to '{1}'", m_id, msg.NewName);
 			Name = msg.NewName;
 			m_game.playerInfoHasChanged(this);
 		}
 
 		private void handleRequestCourse(ClientWrapper client, RequestCourse msg)
 		{
-			Log.log(Log.Category.GameEvent, "Player {0} set course {1}", m_id,
-				string.Join("; ", (from p in msg.Course select p.ToString()).ToArray())
-			);
+			if (m_castGear == null)
+			{
+				Log.log(Log.Category.GameEvent, "Player {0} set course {1}", m_id,
+					string.Join("; ", (from p in msg.Course select p.ToString()).ToArray())
+				);
 
-			SetCourse broadcastMsg = new SetCourse();
-			broadcastMsg.PlayerId = m_id;
-			broadcastMsg.Course = msg.Course;
-			broadcastMsg.StartTime = m_game.CurrentTimestamp;
+				SetCourse broadcastMsg = new SetCourse();
+				broadcastMsg.PlayerId = m_id;
+				broadcastMsg.Course = msg.Course;
+				broadcastMsg.StartTime = m_game.CurrentTimestamp;
 
-			m_game.broadcastMessageToAllPlayers(broadcastMsg);
+				m_game.broadcastMessageToAllPlayers(broadcastMsg);
+			}
 		}
 
 		private void handleCastGear(ClientWrapper client, RequestCastGear msg)
 		{
-			Log.log(Log.Category.GameEvent, "Player {0} cast gear {1} at {2}", m_id, msg.CastDuration, msg.Position);
-			m_gearIsCast = true;
-			m_castEndTime = m_game.CurrentTimestamp + msg.CastDuration;
+			Log.log(Log.Category.GameEvent, "Player {0} cast gear {1} at {2}", m_id, msg.GearName, msg.Position);
+			m_castGear = msg.GearName;
+			m_castPos = msg.Position;
+			m_castStartTime = m_game.CurrentTimestamp;
+			m_castEndTime = m_castStartTime + msg.CastDuration;
+			m_castCatchMultipliers = msg.CatchMultipliers;
+			m_castMaxCatch = msg.MaxCatch;
+
+			SetPlayerCastingGear broadcastMsg = new SetPlayerCastingGear();
+			broadcastMsg.PlayerId = m_id;
+			broadcastMsg.Position = msg.Position;
+			broadcastMsg.GearName = msg.GearName;
+			broadcastMsg.StartTime = m_castStartTime;
+			broadcastMsg.EndTime = m_castEndTime;
+
+			m_game.broadcastMessageToAllPlayers(broadcastMsg);
 		}
 	}
 }
