@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using ShallowNet;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -69,7 +70,7 @@ public class GameManager : MonoBehaviour
         // If the network manager isn't running, go back to the main menu
         // (shouldn't happen in game, but is useful for testing in the Unity editor)
         if (MyNetworkManager.Instance == null)
-            Application.LoadLevel((int)Level.MainMenu);
+            SceneManager.LoadScene((int)Level.MainMenu);
     }
 
     public void Start()

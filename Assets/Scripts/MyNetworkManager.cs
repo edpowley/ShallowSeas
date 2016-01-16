@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ShallowNet;
+using UnityEngine.SceneManagement;
 
 public class MyNetworkManager : MonoBehaviour
 {
@@ -91,7 +92,7 @@ public class MyNetworkManager : MonoBehaviour
     
     private void handleReadyToStart(ClientWrapper client, ReadyToStart msg)
     {
-        Application.LoadLevel((int)Level.MainGame);
+        SceneManager.LoadScene((int)Level.MainGame);
     }
 
     public void ChangeLevel(Level level)
