@@ -69,8 +69,14 @@ public class GameManager : MonoBehaviour
 
         // If the network manager isn't running, go back to the main menu
         // (shouldn't happen in game, but is useful for testing in the Unity editor)
-        if (MyNetworkManager.Instance == null)
-            SceneManager.LoadScene((int)Level.MainMenu);
+      //  if (MyNetworkManager.Instance == null)
+      //      StartCoroutine(returnToMainMenuAfterDelay(0.1f));
+    }
+
+    private IEnumerator returnToMainMenuAfterDelay(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        SceneManager.LoadScene((int)Level.MainMenu);
     }
 
     public void Start()
