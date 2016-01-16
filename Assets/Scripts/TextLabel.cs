@@ -10,8 +10,7 @@ public class TextLabel : MonoBehaviour
     private Camera m_sceneCamera;
     private Canvas m_canvas;
 
-	// Use this for initialization
-	void Start ()
+	void Start()
     {
         m_sceneCamera = GameObject.Find(SceneCameraName).GetComponent<Camera>();
         m_canvas = GameObject.Find(CanvasName).GetComponent<Canvas>();
@@ -19,8 +18,7 @@ public class TextLabel : MonoBehaviour
         GuiObject.SetParent(m_canvas.transform, worldPositionStays: false);
 	}
 	
-	// Update is called once per frame
-	void Update ()
+	void LateUpdate()
     {
         Vector3 vpPoint = m_sceneCamera.WorldToViewportPoint(transform.position);
 

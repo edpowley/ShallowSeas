@@ -43,7 +43,7 @@ public class CameraZoom : MonoBehaviour
 
     }
 	
-    void Update()
+    void LateUpdate()
     {
         if (m_isZoomInProgress)
         {

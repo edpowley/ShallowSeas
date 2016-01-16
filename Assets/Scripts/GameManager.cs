@@ -36,7 +36,11 @@ public class GameManager : MonoBehaviour
 
     internal bool IsWaitingForStart { get; private set; }
 
-    private float m_timestampOffset = 0;
+    public float m_timestampOffset = 0;
+    private float m_timestampOffsetTarget = 0;
+
+    [Range(0, 1)]
+    public float m_timestampOffsetSmoothing = 0.5f;
 
     internal float CurrentTime { get { return Time.timeSinceLevelLoad + m_timestampOffset; } }
 
@@ -93,8 +97,8 @@ public class GameManager : MonoBehaviour
 
     private void handlePing(ClientWrapper client, ShallowNet.Ping msg)
     {
-        m_timestampOffset = msg.Timestamp - Time.timeSinceLevelLoad;
-        Debug.LogFormat("m_timestampOffset = {0}", m_timestampOffset);
+        m_timestampOffsetTarget = msg.Timestamp - Time.timeSinceLevelLoad;
+        Debug.LogFormat("m_timestampOffsetTarget = {0}", m_timestampOffsetTarget);
     }
 
     private void handleStartMainGame(ClientWrapper client, StartMainGame msg)
@@ -228,6 +232,8 @@ public class GameManager : MonoBehaviour
     {
         if (!IsWaitingForStart)
         {
+            m_timestampOffset = Mathf.Lerp(m_timestampOffset, m_timestampOffsetTarget, m_timestampOffsetSmoothing);
+
             IntVector2 currentCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
 
             var currentCellFishDensity = m_fishDensity [currentCell.X, currentCell.Y];
