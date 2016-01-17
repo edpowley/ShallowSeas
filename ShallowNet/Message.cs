@@ -104,6 +104,7 @@ namespace ShallowNet
 
 	public class NotifyCatch : ServerToClientMessage
 	{
-		public List<int> FishCaught { get; set; }
+        public string PlayerId { get; set; }
+        public List<int> FishCaught { get; set; }
 	}
 }

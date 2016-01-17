@@ -47,6 +47,7 @@ namespace ShallowSeasServer
 			if (m_castGear != null && m_game.CurrentTimestamp >= m_castEndTime)
 			{
 				NotifyCatch msg = new NotifyCatch();
+                msg.PlayerId = m_id;
 				msg.FishCaught = new List<int>();
 
 				int totalFish = 0;
@@ -73,7 +74,7 @@ namespace ShallowSeasServer
 					Log.log(Log.Category.GameEvent, "Player {0} caught {1} fish of type {2}", m_id, msg.FishCaught[i], i);
 				}
 
-				m_client.sendMessage(msg);
+                m_game.broadcastMessageToAllPlayers(msg);
 				m_castGear = null;
 				m_castEndTime = 0;
 				m_castCatchMultipliers = null;

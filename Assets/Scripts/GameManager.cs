@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
 
     public Texture2D FishDensityMap;
 
-    public string[] FishNames = new string[]{ "red fish", "green fish", "blue fish" };
+    public string[] FishNames = new string[] { "red fish", "green fish", "blue fish" };
 
     public Boat m_boatPrefab;
 
@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
         if (x < 0 || x >= c_gridWidth || y < 0 || y >= c_gridHeight)
             return false;
         else
-            return m_isWater[x,y];
+            return m_isWater[x, y];
     }
 
     internal bool isWater(IntVector2 p)
@@ -69,8 +69,8 @@ public class GameManager : MonoBehaviour
 
         // If the network manager isn't running, go back to the main menu
         // (shouldn't happen in game, but is useful for testing in the Unity editor)
-      //  if (MyNetworkManager.Instance == null)
-      //      StartCoroutine(returnToMainMenuAfterDelay(0.1f));
+        //  if (MyNetworkManager.Instance == null)
+        //      StartCoroutine(returnToMainMenuAfterDelay(0.1f));
     }
 
     private IEnumerator returnToMainMenuAfterDelay(float seconds)
@@ -97,7 +97,7 @@ public class GameManager : MonoBehaviour
     {
         if (MyNetworkManager.Instance != null && MyNetworkManager.Instance.m_client != null)
             MyNetworkManager.Instance.m_client.removeMessageHandlers(this);
-        
+
         if (Instance == this)
             Instance = null;
     }
@@ -113,10 +113,10 @@ public class GameManager : MonoBehaviour
         m_textWaitingForGameStart.enabled = false;
         IsWaitingForStart = false;
 
-        for (int i=0; i<MyNetworkManager.Instance.m_players.Count; i++)
+        for (int i = 0; i < MyNetworkManager.Instance.m_players.Count; i++)
         {
-            PlayerInfo player = MyNetworkManager.Instance.m_players [i];
-            SNVector2 startPos = msg.StartPositions [i];
+            PlayerInfo player = MyNetworkManager.Instance.m_players[i];
+            SNVector2 startPos = msg.StartPositions[i];
             Vector3 startPos3 = new Vector3(startPos.x, 0, startPos.y);
 
             Boat boat = Util.InstantiatePrefab(m_boatPrefab, startPos3, Quaternion.identity);
@@ -129,31 +129,36 @@ public class GameManager : MonoBehaviour
 
     private void handleSetCourse(ClientWrapper client, SetCourse msg)
     {
-        Boat boat = m_playerBoats [msg.PlayerId];
+        Boat boat = m_playerBoats[msg.PlayerId];
         boat.setCourse(msg);
     }
 
     private void handleSetCasting(ClientWrapper client, SetPlayerCastingGear msg)
     {
-        Boat boat = m_playerBoats [msg.PlayerId];
+        Boat boat = m_playerBoats[msg.PlayerId];
         boat.setCasting(msg);
     }
 
     private void handleNotifyCatch(ClientWrapper client, NotifyCatch msg)
     {
-        GameManager.Instance.m_notification.PutMessage("You caught {0} red fish, {1} green fish and {2} blue fish", msg.FishCaught [0], msg.FishCaught [1], msg.FishCaught [2]);
+        Boat boat = m_playerBoats[msg.PlayerId];
 
-        for (int i=0; i<msg.FishCaught.Count; i++)
+        for (int i = 0; i < msg.FishCaught.Count; i++)
         {
-            LocalPlayerBoat.m_catch [i] += msg.FishCaught [i];
+            boat.m_catch[i] += msg.FishCaught[i];
+        }
+
+        if (boat.isLocalPlayer)
+        {
+            GameManager.Instance.m_notification.PutMessage("You caught {0} red fish, {1} green fish and {2} blue fish", msg.FishCaught[0], msg.FishCaught[1], msg.FishCaught[2]);
         }
     }
 
     private void initFishDensity()
     {
-        for (int x=0; x<c_gridWidth; x++)
+        for (int x = 0; x < c_gridWidth; x++)
         {
-            for (int y=0; y<c_gridHeight; y++)
+            for (int y = 0; y < c_gridHeight; y++)
             {
                 List<float> density = new List<float>();
                 Color pixel = FishDensityMap.GetPixel(x, y);
@@ -168,19 +173,19 @@ public class GameManager : MonoBehaviour
     private void initIsWater()
     {
         Terrain terrain = Terrain.activeTerrain;
-        
-        for (int x=0; x<c_gridWidth; x++)
+
+        for (int x = 0; x < c_gridWidth; x++)
         {
-            for (int y=0; y<c_gridHeight; y++)
+            for (int y = 0; y < c_gridHeight; y++)
             {
                 bool isWater = true;
-                
+
                 for (float dx = 0.0f; dx <= 1.0f; dx += 0.5f)
                     for (float dy = 0.0f; dy <= 1.0f; dy += 0.5f)
                         isWater = isWater && (terrain.SampleHeight(new Vector3(x + dx, 0, y + dy)) < 16.0f);
-                
-                m_isWater[x,y] = isWater;
-                
+
+                m_isWater[x, y] = isWater;
+
                 List<float> density = new List<float>();
                 Color pixel = FishDensityMap.GetPixel(x, y);
                 density.Add(pixel.r);
@@ -190,13 +195,13 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        bool[,] reachable = getReachability(c_gridWidth/2, c_gridHeight/2);
+        bool[,] reachable = getReachability(c_gridWidth / 2, c_gridHeight / 2);
 
-        for (int x=0; x<c_gridWidth; x++)
+        for (int x = 0; x < c_gridWidth; x++)
         {
-            for (int y=0; y<c_gridHeight; y++)
+            for (int y = 0; y < c_gridHeight; y++)
             {
-                m_isWater[x,y] = m_isWater[x,y] && reachable[x,y];
+                m_isWater[x, y] = m_isWater[x, y] && reachable[x, y];
             }
         }
     }
@@ -214,17 +219,17 @@ public class GameManager : MonoBehaviour
             int y = (int)p.y;
             result[x, y] = true;
 
-            if (x > 0 && m_isWater[x-1, y] && !result[x-1, y])
-                stack.Push(new Vector2(x-1, y));
+            if (x > 0 && m_isWater[x - 1, y] && !result[x - 1, y])
+                stack.Push(new Vector2(x - 1, y));
 
-            if (y > 0 && m_isWater[x, y-1] && !result[x, y-1])
-                stack.Push(new Vector2(x, y-1));
+            if (y > 0 && m_isWater[x, y - 1] && !result[x, y - 1])
+                stack.Push(new Vector2(x, y - 1));
 
-            if (x < c_gridWidth-1 && m_isWater[x+1, y] && !result[x+1, y])
-                stack.Push(new Vector2(x+1, y));
+            if (x < c_gridWidth - 1 && m_isWater[x + 1, y] && !result[x + 1, y])
+                stack.Push(new Vector2(x + 1, y));
 
-            if (y < c_gridHeight-1 && m_isWater[x, y+1] && !result[x, y+1])
-                stack.Push(new Vector2(x, y+1));
+            if (y < c_gridHeight - 1 && m_isWater[x, y + 1] && !result[x, y + 1])
+                stack.Push(new Vector2(x, y + 1));
         }
 
         return result;
@@ -243,7 +248,7 @@ public class GameManager : MonoBehaviour
 
             IntVector2 currentCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
 
-            var currentCellFishDensity = m_fishDensity [currentCell.X, currentCell.Y];
+            var currentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
             m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}",
                                       currentCell,
                                       string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray())

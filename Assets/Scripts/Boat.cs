@@ -27,7 +27,7 @@ public class Boat : MonoBehaviour
         }
     }
 
-    private bool isLocalPlayer { get { return PlayerId == MyNetworkManager.Instance.LocalPlayerId; } }
+    internal bool isLocalPlayer { get { return PlayerId == MyNetworkManager.Instance.LocalPlayerId; } }
 
     // Use this for initialization
     void Start()
@@ -127,7 +127,6 @@ public class Boat : MonoBehaviour
         var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
         string tooltipText = string.Format("{0}", playerInfo.Name);
 
-        // TODO: m_catch isn't currently updated for non-local players -- needs fixing
         tooltipText += "\nCurrent catch: ";
         tooltipText += string.Join(", ", (from n in m_catch select n.ToString()).ToArray());
 
