@@ -7,15 +7,16 @@ using ShallowNet;
 
 public class Boat : MonoBehaviour
 {
-    public float MovementSpeed = 10;
-    public float RotationSpeed = 90;
-    public MeshRenderer NetRenderer;
+    public float m_movementSpeed = 2.5f;
+    public float m_rotationSpeed = 720;
 
     public string PlayerId { get; set; }
 
     internal List<int> m_catch = new List<int>() { 0, 0, 0 };
 
-    public UnityEngine.UI.Text NameLabel;
+    public UnityEngine.UI.Text m_nameLabel;
+    public UnityEngine.UI.Text m_tooltipLabel;
+    public CanvasGroup m_tooltipGroup;
 
     public IntVector2 CurrentCell
     {
@@ -32,8 +33,8 @@ public class Boat : MonoBehaviour
     void Start()
     {
         var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
-        NameLabel.text = playerInfo.Name;
-        NameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
+        m_nameLabel.text = playerInfo.Name;
+        m_nameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
     }
 
     internal void setColour(Color colour)
@@ -44,7 +45,7 @@ public class Boat : MonoBehaviour
                 material.color = colour;
         }
 
-        NameLabel.color = colour;
+        m_nameLabel.color = colour;
     }
 
     private bool m_isVisible = true;
@@ -58,7 +59,7 @@ public class Boat : MonoBehaviour
                 renderer.enabled = value;
             }
             
-            NameLabel.enabled = value;
+            m_nameLabel.enabled = value;
         }
 
         m_isVisible = value;
@@ -89,7 +90,7 @@ public class Boat : MonoBehaviour
             m_courseSegmentCumulativeLengths.Add(len);
         }
         
-        m_courseEndTime = msg.StartTime + len / MovementSpeed;
+        m_courseEndTime = msg.StartTime + len / m_movementSpeed;
         
         transform.position = m_course[0];
         
@@ -121,6 +122,23 @@ public class Boat : MonoBehaviour
 
     #endregion
 
+    private string getTooltipText()
+    {
+        var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
+        string tooltipText = string.Format("{0}", playerInfo.Name);
+
+        // TODO: m_catch isn't currently updated for non-local players -- needs fixing
+        tooltipText += "\nCurrent catch: ";
+        tooltipText += string.Join(", ", (from n in m_catch select n.ToString()).ToArray());
+
+        if (m_castGear != GearType.None)
+        {
+            tooltipText += string.Format("\nCurrently casting {0}", GearInfo.getInfo(m_castGear).m_gearName);
+        }
+
+        return tooltipText;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -134,7 +152,7 @@ public class Boat : MonoBehaviour
 
         if (m_course.Count > 0)
         {
-            float lengthAlongCourse = (GameManager.Instance.CurrentTime - m_courseStartTime) * MovementSpeed;
+            float lengthAlongCourse = (GameManager.Instance.CurrentTime - m_courseStartTime) * m_movementSpeed;
 
             if (lengthAlongCourse <= 0)
             {
@@ -166,11 +184,29 @@ public class Boat : MonoBehaviour
             }
         }
 
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, m_rotationSpeed * Time.deltaTime);
 
         if (!isLocalPlayer)
         {
-            setVisible(GameManager.Instance.m_fogCircle.cellIsVisible(this.CurrentCell));
+            bool visible = GameManager.Instance.m_fogCircle.cellIsVisible(this.CurrentCell);
+            setVisible(visible);
+
+            if (visible)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
+                yIntercept.y = 0;
+
+                if (Vector3.Distance(yIntercept, transform.position) <= 1)
+                {
+                    m_tooltipGroup.alpha = 1;
+                    m_tooltipLabel.text = getTooltipText();
+                }
+                else
+                {
+                    m_tooltipGroup.alpha = 0;
+                }
+            }
         }
     }
 }

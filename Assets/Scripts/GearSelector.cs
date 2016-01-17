@@ -24,7 +24,7 @@ public class GearSelector : MonoBehaviour
         m_gearTypes.Remove(GearType.None);
 
         m_dropdown.ClearOptions();
-        List<string> gearNames = new List<string>(from gear in m_gearTypes select gear.ToString());
+        List<string> gearNames = new List<string>(from gear in m_gearTypes select GearInfo.getInfo(gear).m_gearName);
         m_dropdown.AddOptions(gearNames);
         m_dropdown.value = 0;
     }
