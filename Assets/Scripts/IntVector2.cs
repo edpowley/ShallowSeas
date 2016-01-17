@@ -31,13 +31,13 @@ public struct IntVector2 : IEquatable<IntVector2>
         return string.Format("({0},{1})", X, Y);
     }
 
-    public static bool operator==(IntVector2 a, IntVector2 b) { return a.X == b.X && a.Y == b.Y; }
-    public static bool operator!=(IntVector2 a, IntVector2 b) { return a.X != b.X || a.Y != b.Y; }
+    public static bool operator ==(IntVector2 a, IntVector2 b) { return a.X == b.X && a.Y == b.Y; }
+    public static bool operator !=(IntVector2 a, IntVector2 b) { return a.X != b.X || a.Y != b.Y; }
 
-    public static IntVector2 operator+(IntVector2 a, IntVector2 b) { return new IntVector2(a.X + b.X, a.Y + b.Y); }
-    public static IntVector2 operator-(IntVector2 a, IntVector2 b) { return new IntVector2(a.X - b.X, a.Y - b.Y); }
+    public static IntVector2 operator +(IntVector2 a, IntVector2 b) { return new IntVector2(a.X + b.X, a.Y + b.Y); }
+    public static IntVector2 operator -(IntVector2 a, IntVector2 b) { return new IntVector2(a.X - b.X, a.Y - b.Y); }
 
-    public int SqrMagnitude { get { return X*X + Y*Y; } }
+    public int SqrMagnitude { get { return X * X + Y * Y; } }
     public float Magnitude { get { return Mathf.Sqrt(SqrMagnitude); } }
 }
 

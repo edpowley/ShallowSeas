@@ -46,10 +46,10 @@ public class MainMenu : MonoBehaviour
         {
             DestroyObject(entry.gameObject);
         }
-        
+
         m_playerListEntries.Clear();
-        
-        foreach(PlayerInfo info in msg.Players)
+
+        foreach (PlayerInfo info in msg.Players)
         {
             var entry = Util.InstantiatePrefab(PlayerListEntryPrefab);
             entry.transform.SetParent(PlayerListParent, false);
@@ -57,7 +57,7 @@ public class MainMenu : MonoBehaviour
             m_playerListEntries.Add(entry);
         }
     }
-    
+
     private void handlePlayerInfo(ClientWrapper client, SetPlayerInfo msg)
     {
         var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == msg.Player.Id);
@@ -70,7 +70,7 @@ public class MainMenu : MonoBehaviour
             Debug.LogFormat("No entry for id {0}", msg.Player.Id);
         }
     }
-    
+
     public void OnPlayerNameChanged(string value)
     {
         if (MyNetworkManager.Instance.IsConnected)
@@ -84,12 +84,12 @@ public class MainMenu : MonoBehaviour
                 entry.PlayerName.text = value;
         }
     }
-    
+
     public void OnServerIpChanged(string value)
     {
         m_serverHost = value;
     }
-    
+
     public void OnServerPortChanged(string value)
     {
         m_serverPort = int.Parse(value);

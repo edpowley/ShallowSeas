@@ -27,12 +27,12 @@ public class GearInfo
     }
 
     static private Dictionary<GearType, GearInfo> s_gearInfo = new Dictionary<GearType, GearInfo>();
-    
+
     static private void addGear(GearType type, string name, float castDuration, int maxCatch, params float[] catchMultiplier)
     {
         s_gearInfo.Add(type, new GearInfo(type, name, castDuration, maxCatch, catchMultiplier));
     }
-    
+
     static GearInfo()
     {
         addGear(GearType.BigNet, "Big Net", 15, 25, 10, 10, 10);
@@ -42,7 +42,7 @@ public class GearInfo
 
     static public GearInfo getInfo(GearType type)
     {
-        return s_gearInfo [type];
+        return s_gearInfo[type];
     }
 }
 

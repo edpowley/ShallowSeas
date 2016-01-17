@@ -37,7 +37,7 @@ public static class Pathfinder
         {
             int index;
             float f = e.F;
-            for (index = m_list.Count; index > 0 && m_list[index-1].F < f; index--)
+            for (index = m_list.Count; index > 0 && m_list[index - 1].F < f; index--)
             {
                 // do nothing
             }
@@ -52,7 +52,7 @@ public static class Pathfinder
             return result;
         }
 
-        public IEnumerable<OpenSetElement> Elements{ get { return m_list; } }
+        public IEnumerable<OpenSetElement> Elements { get { return m_list; } }
     }
 
     public static List<Vector3> FindPath(Vector3 start, Vector3 end)
@@ -68,7 +68,7 @@ public static class Pathfinder
         }
 
         OpenQueue openSet = new OpenQueue();
-        openSet.Add(new OpenSetElement(startSquare, 0, (endSquare-startSquare).Magnitude, null));
+        openSet.Add(new OpenSetElement(startSquare, 0, (endSquare - startSquare).Magnitude, null));
         HashSet<IntVector2> closedSet = new HashSet<IntVector2>();
         closedSet.Add(startSquare);
 
@@ -92,7 +92,7 @@ public static class Pathfinder
                 Debug.DrawLine(new Vector3(v.X-0.1f, 0, v.Y-0.1f), new Vector3(v.X+0.1f, 0, v.Y+0.1f), Color.red);
                 Debug.DrawLine(new Vector3(v.X-0.1f, 0, v.Y+0.1f), new Vector3(v.X+0.1f, 0, v.Y-0.1f), Color.red);
             }*/
-            
+
             OpenSetElement front = openSet.Pop();
 
             if (front.m_v.Equals(endSquare))
@@ -101,9 +101,9 @@ public static class Pathfinder
                 return reconstructPath(start, end, front);
             }
 
-            for (int dx=-1; dx<=1; dx++)
+            for (int dx = -1; dx <= 1; dx++)
             {
-                for (int dy=-1; dy<=1; dy++)
+                for (int dy = -1; dy <= 1; dy++)
                 {
                     if (dx == 0 && dy == 0)
                         continue;
@@ -116,7 +116,7 @@ public static class Pathfinder
 
                     if (gm.isWater(neighbour) && !closedSet.Contains(neighbour))
                     {
-                        openSet.Add(new OpenSetElement(neighbour, front.m_g + d.Magnitude, (endSquare-neighbour).Magnitude, front));
+                        openSet.Add(new OpenSetElement(neighbour, front.m_g + d.Magnitude, (endSquare - neighbour).Magnitude, front));
                         closedSet.Add(neighbour);
                     }
                 }
@@ -130,16 +130,16 @@ public static class Pathfinder
     {
         List<Vector3> result = new List<Vector3>();
         result.Add(end);
-        
+
         for (; e != null; e = e.m_cameFrom)
         {
             result.Add(new Vector3(e.m_v.X + 0.5f, 0, e.m_v.Y + 0.5f));
         }
-        
+
         result.Add(start);
-        
+
         result.Reverse();
-        
+
         return result;
     }
 
@@ -149,7 +149,7 @@ public static class Pathfinder
 
         for (int i = 1; i < path.Count - 1; i++)
         {
-            if (straightLinePathIsClear(gm, path[i-1], path[i+1]))
+            if (straightLinePathIsClear(gm, path[i - 1], path[i + 1]))
             {
                 path.RemoveAt(i);
                 i--;

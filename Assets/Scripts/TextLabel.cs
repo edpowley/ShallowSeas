@@ -11,15 +11,15 @@ public class TextLabel : MonoBehaviour
     private Camera m_sceneCamera;
     private Canvas m_canvas;
 
-	void Start()
+    void Start()
     {
         m_sceneCamera = GameObject.Find(SceneCameraName).GetComponent<Camera>();
         m_canvas = GameObject.Find(CanvasName).GetComponent<Canvas>();
 
         GuiObject.SetParent(m_canvas.transform, worldPositionStays: false);
-	}
-	
-	void LateUpdate()
+    }
+
+    void LateUpdate()
     {
         Vector3 vpPoint = m_sceneCamera.WorldToViewportPoint(transform.position);
 
@@ -45,5 +45,5 @@ public class TextLabel : MonoBehaviour
 
             GuiObject.anchoredPosition += new Vector2(offX, offY);
         }
-	}
+    }
 }

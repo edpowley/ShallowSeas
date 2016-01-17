@@ -13,9 +13,9 @@ public class ZoomSlider : MonoBehaviour
         m_slider = GetComponent<Slider>();
     }
 
-	// Update is called once per frame
-	void Update ()
+    // Update is called once per frame
+    void Update()
     {
         m_slider.value = m_camera.Zoom;
-	}
+    }
 }

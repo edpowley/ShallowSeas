@@ -36,7 +36,8 @@ public class FogCircle : MonoBehaviour
                 transform.position = new Vector3(m_centre.X, transform.position.y, m_centre.Y);
                 updateMesh();
             }
-        } else
+        }
+        else
         {
             m_renderer.enabled = false;
         }
@@ -55,7 +56,7 @@ public class FogCircle : MonoBehaviour
             {
                 if (sx * sx + sy * sy <= maxSqrRadius && GameManager.Instance.isWater(m_centre.X + sx, m_centre.Y + sy))
                 {
-                    squares [sx + Radius, sy + Radius] = true;
+                    squares[sx + Radius, sy + Radius] = true;
                     numSquares++;
                 }
             }
@@ -67,13 +68,13 @@ public class FogCircle : MonoBehaviour
             {
                 for (int sy = -Radius; sy <= Radius; sy++)
                 {
-                    if (squares [sx + Radius, sy + Radius])
+                    if (squares[sx + Radius, sy + Radius])
                     {
-                        foreach (IntVector2 p in Util.SupercoverLine(0.5f, 0.5f, sx+0.5f, sy+0.5f))
+                        foreach (IntVector2 p in Util.SupercoverLine(0.5f, 0.5f, sx + 0.5f, sy + 0.5f))
                         {
-                            if (!squares [p.X + Radius, p.Y + Radius])
+                            if (!squares[p.X + Radius, p.Y + Radius])
                             {
-                                squares [sx + Radius, sy + Radius] = false;
+                                squares[sx + Radius, sy + Radius] = false;
                                 numSquares--;
                                 break;
                             }
@@ -92,24 +93,24 @@ public class FogCircle : MonoBehaviour
         {
             for (int sy = -Radius; sy <= Radius; sy++)
             {
-                if (squares [sx + Radius, sy + Radius])
+                if (squares[sx + Radius, sy + Radius])
                 {
-                    vertices [squareIndex * 4 + 0] = new Vector3(sx + 0, 0, sy + 0);
-                    vertices [squareIndex * 4 + 1] = new Vector3(sx + 0, 0, sy + 1);
-                    vertices [squareIndex * 4 + 2] = new Vector3(sx + 1, 0, sy + 1);
-                    vertices [squareIndex * 4 + 3] = new Vector3(sx + 1, 0, sy + 0);
+                    vertices[squareIndex * 4 + 0] = new Vector3(sx + 0, 0, sy + 0);
+                    vertices[squareIndex * 4 + 1] = new Vector3(sx + 0, 0, sy + 1);
+                    vertices[squareIndex * 4 + 2] = new Vector3(sx + 1, 0, sy + 1);
+                    vertices[squareIndex * 4 + 3] = new Vector3(sx + 1, 0, sy + 0);
 
-                    uvs [squareIndex * 4 + 0] = new Vector2(sx + 0, sy + 0);
-                    uvs [squareIndex * 4 + 1] = new Vector2(sx + 0, sy + 1);
-                    uvs [squareIndex * 4 + 2] = new Vector2(sx + 1, sy + 1);
-                    uvs [squareIndex * 4 + 3] = new Vector2(sx + 1, sy + 0);
+                    uvs[squareIndex * 4 + 0] = new Vector2(sx + 0, sy + 0);
+                    uvs[squareIndex * 4 + 1] = new Vector2(sx + 0, sy + 1);
+                    uvs[squareIndex * 4 + 2] = new Vector2(sx + 1, sy + 1);
+                    uvs[squareIndex * 4 + 3] = new Vector2(sx + 1, sy + 0);
 
-                    triangles [squareIndex * 6 + 0] = squareIndex * 4 + 0;
-                    triangles [squareIndex * 6 + 1] = squareIndex * 4 + 1;
-                    triangles [squareIndex * 6 + 2] = squareIndex * 4 + 2;
-                    triangles [squareIndex * 6 + 3] = squareIndex * 4 + 0;
-                    triangles [squareIndex * 6 + 4] = squareIndex * 4 + 2;
-                    triangles [squareIndex * 6 + 5] = squareIndex * 4 + 3;
+                    triangles[squareIndex * 6 + 0] = squareIndex * 4 + 0;
+                    triangles[squareIndex * 6 + 1] = squareIndex * 4 + 1;
+                    triangles[squareIndex * 6 + 2] = squareIndex * 4 + 2;
+                    triangles[squareIndex * 6 + 3] = squareIndex * 4 + 0;
+                    triangles[squareIndex * 6 + 4] = squareIndex * 4 + 2;
+                    triangles[squareIndex * 6 + 5] = squareIndex * 4 + 3;
 
                     squareIndex++;
                 }
@@ -128,7 +129,7 @@ public class FogCircle : MonoBehaviour
         {
             for (int sy = -Radius; sy <= Radius; sy++)
             {
-                if (squares [sx + Radius, sy + Radius])
+                if (squares[sx + Radius, sy + Radius])
                 {
                     m_visibleCells.Add(m_centre + new IntVector2(sx, sy));
                 }

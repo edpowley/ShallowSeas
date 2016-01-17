@@ -21,7 +21,7 @@ public class MyNetworkManager : MonoBehaviour
     public void Awake()
     {
         //ShallowNet.DebugLog.s_printFunc = Debug.Log;
-        ShallowNet.DebugLog.s_printFunc = (msg => {});
+        ShallowNet.DebugLog.s_printFunc = (msg => { });
 
         Debug.LogFormat("{0} Awake", this.GetInstanceID());
         if (Instance != null)
@@ -70,13 +70,13 @@ public class MyNetworkManager : MonoBehaviour
     {
         m_players = msg.Players;
     }
-    
+
     void handleSetPlayerInfo(ClientWrapper client, SetPlayerInfo msg)
     {
         int index = m_players.FindIndex(p => p.Id == msg.Player.Id);
         if (index != -1)
         {
-            m_players [index] = msg.Player;
+            m_players[index] = msg.Player;
         }
         else
         {
@@ -89,7 +89,7 @@ public class MyNetworkManager : MonoBehaviour
         Debug.LogFormat("Joined as player id {0}", msg.PlayerId);
         MyNetworkManager.Instance.LocalPlayerId = msg.PlayerId;
     }
-    
+
     private void handleReadyToStart(ClientWrapper client, ReadyToStart msg)
     {
         SceneManager.LoadScene((int)Level.MainGame);
