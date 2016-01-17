@@ -35,6 +35,7 @@ namespace ShallowSeasServer
             m_client.addMessageHandler<SetPlayerName>(this, handleSetName);
             m_client.addMessageHandler<RequestCourse>(this, handleRequestCourse);
             m_client.addMessageHandler<RequestCastGear>(this, handleCastGear);
+            m_client.addMessageHandler<RequestAnnounce>(this, handleAnnounce);
         }
 
         public PlayerInfo getInfo()
@@ -123,6 +124,17 @@ namespace ShallowSeasServer
             broadcastMsg.EndTime = m_castEndTime;
 
             m_game.broadcastMessageToAllPlayers(broadcastMsg);
+        }
+
+        private void handleAnnounce(ClientWrapper client, RequestAnnounce msg)
+        {
+            Log.log(Log.Category.GameEvent, "Player {0} announces '{1}' at {2}", m_id, msg.Message, msg.Position);
+
+            Announce broadcastMsg = new Announce();
+            broadcastMsg.PlayerId = m_id;
+            broadcastMsg.Message = msg.Message;
+            broadcastMsg.Position = msg.Position;
+            m_game.broadcastMessageToAllPlayersExcept(this, broadcastMsg);
         }
     }
 }

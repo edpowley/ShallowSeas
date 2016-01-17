@@ -45,6 +45,8 @@ public class GameManager : MonoBehaviour
 
     internal float CurrentTime { get { return Time.timeSinceLevelLoad + m_timestampOffset; } }
 
+    public TextLabel m_chatPopupPrefab;
+
     internal bool isWater(int x, int y)
     {
         if (x < 0 || x >= c_gridWidth || y < 0 || y >= c_gridHeight)
@@ -89,6 +91,7 @@ public class GameManager : MonoBehaviour
         client.addMessageHandler<SetCourse>(this, handleSetCourse);
         client.addMessageHandler<SetPlayerCastingGear>(this, handleSetCasting);
         client.addMessageHandler<NotifyCatch>(this, handleNotifyCatch);
+        client.addMessageHandler<Announce>(this, handleAnnounce);
         client.addMessageHandler<ShallowNet.Ping>(this, handlePing);
         client.sendMessage(new SceneLoaded());
     }
@@ -150,8 +153,24 @@ public class GameManager : MonoBehaviour
 
         if (boat.isLocalPlayer)
         {
-            GameManager.Instance.m_notification.PutMessage("You caught {0} red fish, {1} green fish and {2} blue fish", msg.FishCaught[0], msg.FishCaught[1], msg.FishCaught[2]);
+            RequestAnnounce announceMsg = new RequestAnnounce();
+            announceMsg.Message = string.Format("{0} caught {1} red fish, {2} green fish and {3} blue fish using {4}",
+                MyNetworkManager.Instance.getPlayerInfo(boat.PlayerId).Name,
+                msg.FishCaught[0], msg.FishCaught[1], msg.FishCaught[2],
+                boat.m_castGear);
+            announceMsg.Position = new SNVector2(boat.transform.position.x, boat.transform.position.z);
+
+            GameManager.Instance.m_notification.PutMessage(
+                () => { MyNetworkManager.Instance.m_client.sendMessage(announceMsg); },
+                "You caught {0} red fish, {1} green fish and {2} blue fish", msg.FishCaught[0], msg.FishCaught[1], msg.FishCaught[2]);
         }
+    }
+
+    private void handleAnnounce(ClientWrapper client, Announce msg)
+    {
+        TextLabel popup = Util.InstantiatePrefab(m_chatPopupPrefab);
+        popup.transform.position = new Vector3(msg.Position.x, 0, msg.Position.y);
+        popup.ShowMessage(msg.Message, 30);
     }
 
     private void initFishDensity()

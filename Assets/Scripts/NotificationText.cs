@@ -5,40 +5,48 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Text))]
 public class NotificationText : MonoBehaviour
 {
-
-    private Text m_text;
-    public float Duration = 5;
+    public Text m_text;
+    private CanvasGroup m_canvasGroup;
+    public float m_duration = 5;
     private float m_lifetime = float.PositiveInfinity;
+    private System.Action m_announceCallback;
 
-    // Use this for initialization
     void Start()
     {
-        m_text = GetComponent<Text>();
+        m_canvasGroup = GetComponent<CanvasGroup>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (m_lifetime < Duration)
+        if (m_lifetime < m_duration)
         {
-            Color oldColor = m_text.color;
-            m_text.color = new Color(oldColor.r, oldColor.g, oldColor.b, 1.0f - m_lifetime / Duration);
+            m_canvasGroup.interactable = true;
+            m_canvasGroup.alpha = 1.0f - m_lifetime / m_duration;
             m_lifetime += Time.deltaTime;
         }
         else
         {
-            m_text.text = "";
+            m_canvasGroup.interactable = false;
+            m_canvasGroup.alpha = 0;
+            m_announceCallback = null;
         }
     }
 
-    internal void PutMessage(string msg)
+    internal void PutMessage(System.Action announceCallback, string msg)
     {
         m_text.text = msg;
         m_lifetime = 0;
+        m_announceCallback = announceCallback;
     }
 
-    internal void PutMessage(string fmt, params object[] args)
+    internal void PutMessage(System.Action announceCallback, string fmt, params object[] args)
     {
-        PutMessage(string.Format(fmt, args));
+        PutMessage(announceCallback, string.Format(fmt, args));
+    }
+
+    public void OnAnnounceButton()
+    {
+        if (m_announceCallback != null)
+            m_announceCallback();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class TextLabel : MonoBehaviour
 {
@@ -11,12 +12,41 @@ public class TextLabel : MonoBehaviour
     private Camera m_sceneCamera;
     private Canvas m_canvas;
 
+    public CanvasGroup m_canvasGroup;
+    public Text m_text;
+
+    private float m_duration = float.PositiveInfinity;
+    private float m_lifetime = 0;
+
     void Start()
     {
         m_sceneCamera = GameObject.Find(SceneCameraName).GetComponent<Camera>();
         m_canvas = GameObject.Find(CanvasName).GetComponent<Canvas>();
 
         GuiObject.SetParent(m_canvas.transform, worldPositionStays: false);
+    }
+
+    internal void ShowMessage(string msg, float fadeTime)
+    {
+        m_text.text = msg;
+        m_duration = fadeTime;
+        m_lifetime = 0;
+    }
+
+    void Update()
+    {
+        if (!float.IsPositiveInfinity(m_duration))
+        {
+            if (m_lifetime < m_duration)
+            {
+                m_canvasGroup.alpha = 1.0f - m_lifetime / m_duration;
+                m_lifetime += Time.deltaTime;
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
+        }
     }
 
     void LateUpdate()

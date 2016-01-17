@@ -82,6 +82,8 @@ MonoBehaviour:
   SceneCameraName: Main Camera
   GuiObject: {fileID: 22485960}
   m_stayOnScreen: 1
+  m_canvasGroup: {fileID: 22518198}
+  m_text: {fileID: 11452966}
 --- !u!114 &11440252
 MonoBehaviour:
   m_ObjectHideFlags: 1

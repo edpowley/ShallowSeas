@@ -107,4 +107,17 @@ namespace ShallowNet
         public string PlayerId { get; set; }
         public List<int> FishCaught { get; set; }
     }
+
+    public class RequestAnnounce : ClientToServerMessage
+    {
+        public string Message { get; set; }
+        public SNVector2 Position { get; set; }
+    }
+
+    public class Announce : ServerToClientMessage
+    {
+        public string PlayerId { get; set; }
+        public string Message { get; set; }
+        public SNVector2 Position { get; set; }
+    }
 }
