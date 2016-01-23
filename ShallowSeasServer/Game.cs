@@ -83,6 +83,21 @@ namespace ShallowSeasServer
             broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
 
             m_pendingClients.Remove(client);
+
+            switch (m_state)
+            {
+                case State.WaitingForPlayers:
+                    break;
+
+                case State.StartingGame:
+                    player.m_client.sendMessage(new ReadyToStart());
+                    break;
+
+                case State.InGame:
+                    player.m_client.sendMessage(new ReadyToStart());
+                    player.m_client.sendMessage(new StartMainGame() { StartPositions = getStartPositions(new SNVector2(129.5f, 127.5f), 1.0f, m_players.Count).ToList() });
+                    break;
+            }
         }
 
         private void updatePlayerColours()
@@ -171,6 +186,12 @@ namespace ShallowSeasServer
                 player.m_client.addMessageHandler<SceneLoaded>(this, handleSceneLoaded);
                 player.m_waitingForSceneLoad = true;
                 player.m_client.sendMessage(new ReadyToStart());
+            }
+
+            if (m_players.Count == 0)
+            {
+                Log.log(Log.Category.GameStatus, "No players, so starting immediately");
+                startGame();
             }
         }
 

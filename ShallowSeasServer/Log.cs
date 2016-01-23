@@ -85,17 +85,19 @@ namespace ShallowSeasServer
                 ShallowSeasServer.s_mainForm.logWriteLine(color, message);
             }
 
-
             if (s_logWriter != null)
             {
-                string encodedMsg = message
-                    .Replace("&", "&amp;")
-                    .Replace("<", "&lt;")
-                    .Replace(">", "&gt;")
-                    .Replace("\r\n", "\n")
-                    .Replace("\n", "<br />");
+                lock (s_logWriter)
+                {
+                    string encodedMsg = message
+                        .Replace("&", "&amp;")
+                        .Replace("<", "&lt;")
+                        .Replace(">", "&gt;")
+                        .Replace("\r\n", "\n")
+                        .Replace("\n", "<br />");
 
-                s_logWriter.WriteLine("<div class=\"message {0}\"><span class=\"timestamp\">{1}</span> {2}</div>", category, DateTime.Now, encodedMsg);
+                    s_logWriter.WriteLine("<div class=\"message {0}\"><span class=\"timestamp\">{1}</span> {2}</div>", category, DateTime.Now, encodedMsg);
+                }
             }
         }
 
