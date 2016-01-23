@@ -28,12 +28,10 @@ public class GameManager : MonoBehaviour
 
     public BoatCourseLine CourseLine, DrawingLine;
 
-    public Text m_textTopLeft, m_textTopRight, m_textWaitingForGameStart;
+    public Text m_textTopLeft, m_textTopRight;
     public NotificationText m_notification;
 
     public FogCircle m_fogCircle;
-
-    internal bool IsWaitingForStart { get; private set; }
 
     public float m_timestampOffset = 0;
     private float m_timestampOffsetTarget = 0;
@@ -60,8 +58,6 @@ public class GameManager : MonoBehaviour
 
     public void Awake()
     {
-        IsWaitingForStart = true;
-
         if (Instance != null)
             throw new InvalidOperationException("GameManager should be a singleton");
 
@@ -83,14 +79,20 @@ public class GameManager : MonoBehaviour
     {
         initIsWater();
 
+        foreach (PlayerInfo player in MyNetworkManager.Instance.m_players)
+        {
+            createBoat(player);
+        }
+
         var client = MyNetworkManager.Instance.m_client;
-        client.addMessageHandler<StartMainGame>(this, handleStartMainGame);
         client.addMessageHandler<SetCourse>(this, handleSetCourse);
         client.addMessageHandler<SetPlayerCastingGear>(this, handleSetCasting);
         client.addMessageHandler<NotifyCatch>(this, handleNotifyCatch);
         client.addMessageHandler<Announce>(this, handleAnnounce);
         client.addMessageHandler<ShallowNet.Ping>(this, handlePing);
         client.addMessageHandler<InformFishDensity>(this, handleInformFishDensity);
+        client.addMessageHandler<PlayerJoined>(this, handlePlayerJoined);
+        client.addMessageHandler<PlayerLeft>(this, handlePlayerLeft);
         client.sendMessage(new SceneLoaded());
     }
 
@@ -109,22 +111,30 @@ public class GameManager : MonoBehaviour
         Debug.LogFormat("m_timestampOffsetTarget = {0}", m_timestampOffsetTarget);
     }
 
-    private void handleStartMainGame(ClientWrapper client, StartMainGame msg)
+    private void createBoat(PlayerInfo player)
     {
-        m_textWaitingForGameStart.enabled = false;
-        IsWaitingForStart = false;
+        //SNVector2 startPos =  msg.StartPositions[i];
+        Vector3 startPos3 = new Vector3(128, 0, 128);
 
-        for (int i = 0; i < MyNetworkManager.Instance.m_players.Count; i++)
+        Boat boat = Util.InstantiatePrefab(m_boatPrefab, startPos3, Quaternion.identity);
+        boat.PlayerId = player.Id;
+        m_playerBoats.Add(player.Id, boat);
+        if (player.Id == MyNetworkManager.Instance.LocalPlayerId)
+            LocalPlayerBoat = boat;
+    }
+
+    private void handlePlayerJoined(ClientWrapper client, PlayerJoined msg)
+    {
+        createBoat(msg.Player);
+    }
+
+    private void handlePlayerLeft(ClientWrapper client, PlayerLeft msg)
+    {
+        Boat boat = null;
+        if (m_playerBoats.TryGetValue(msg.PlayerId, out boat))
         {
-            PlayerInfo player = MyNetworkManager.Instance.m_players[i];
-            SNVector2 startPos = msg.StartPositions[i];
-            Vector3 startPos3 = new Vector3(startPos.x, 0, startPos.y);
-
-            Boat boat = Util.InstantiatePrefab(m_boatPrefab, startPos3, Quaternion.identity);
-            boat.PlayerId = player.Id;
-            m_playerBoats.Add(player.Id, boat);
-            if (player.Id == MyNetworkManager.Instance.LocalPlayerId)
-                LocalPlayerBoat = boat;
+            DestroyObject(boat.gameObject);
+            m_playerBoats.Remove(msg.PlayerId);
         }
     }
 
@@ -250,22 +260,19 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        if (!IsWaitingForStart)
-        {
-            m_timestampOffset = Mathf.Lerp(m_timestampOffset, m_timestampOffsetTarget, m_timestampOffsetSmoothing);
+        m_timestampOffset = Mathf.Lerp(m_timestampOffset, m_timestampOffsetTarget, m_timestampOffsetSmoothing);
 
-            IntVector2 currentCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
+        IntVector2 currentCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
 
-            var currentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
-            string densityString = "???";
-            if (currentCellFishDensity != null)
-                densityString = string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray());
+        var currentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
+        string densityString = "???";
+        if (currentCellFishDensity != null)
+            densityString = string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray());
 
-            m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}", currentCell, densityString);
+        m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}", currentCell, densityString);
 
-            m_textTopRight.text = string.Format("Catch: {0}",
-                                       string.Join(", ", (from n in LocalPlayerBoat.m_catch select n.ToString()).ToArray())
-                                       );
-        }
+        m_textTopRight.text = string.Format("Catch: {0}",
+                                    string.Join(", ", (from n in LocalPlayerBoat.m_catch select n.ToString()).ToArray())
+                                    );
     }
 }

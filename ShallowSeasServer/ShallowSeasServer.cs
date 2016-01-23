@@ -51,10 +51,6 @@ namespace ShallowSeasServer
         {
             switch (command)
             {
-                case "start":
-                    s_game.readyToStart();
-                    break;
-
                 case "quit":
                 case "exit":
                     s_mainForm.Close();

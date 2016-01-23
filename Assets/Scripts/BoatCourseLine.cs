@@ -23,10 +23,6 @@ public class BoatCourseLine : MonoBehaviour
 
     private IEnumerator handleMouse()
     {
-        // Wait for game to start properly
-        while (GameManager.Instance.IsWaitingForStart)
-            yield return null;
-
         while (true)
         {
             if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())

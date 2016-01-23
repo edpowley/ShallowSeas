@@ -76,4 +76,9 @@ public class TextLabel : MonoBehaviour
             GuiObject.anchoredPosition += new Vector2(offX, offY);
         }
     }
+
+    void OnDestroy()
+    {
+        Destroy(GuiObject.gameObject);
+    }
 }

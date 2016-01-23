@@ -85,7 +85,7 @@ namespace ShallowSeasServer
                 ShallowSeasServer.s_mainForm.logWriteLine(color, message);
             }
 
-            if (s_logWriter != null)
+            if (s_logWriter != null && category != Category.Debug)
             {
                 lock (s_logWriter)
                 {

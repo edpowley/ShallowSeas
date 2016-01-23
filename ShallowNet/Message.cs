@@ -20,11 +20,6 @@ namespace ShallowNet
         public float Timestamp { get; set; }
     }
 
-    public class TestMessage : Message
-    {
-        public string Text { get; set; }
-    }
-
     public class PlayerJoinRequest : ClientToServerMessage
     {
         public string PlayerName { get; set; }
@@ -42,34 +37,21 @@ namespace ShallowNet
     public class WelcomePlayer : ServerToClientMessage
     {
         public string PlayerId { get; set; }
-    }
-
-    public class SetPlayerList : ServerToClientMessage
-    {
         public List<PlayerInfo> Players { get; set; }
     }
 
-    public class SetPlayerInfo : ServerToClientMessage
+    public class PlayerJoined : ServerToClientMessage
     {
         public PlayerInfo Player { get; set; }
     }
 
-    public class SetPlayerName : ClientToServerMessage
+    public class PlayerLeft : ServerToClientMessage
     {
-        public string NewName { get; set; }
-    }
-
-    public class ReadyToStart : ServerToClientMessage
-    {
+        public string PlayerId { get; set; }
     }
 
     public class SceneLoaded : ClientToServerMessage
     {
-    }
-
-    public class StartMainGame : ServerToClientMessage
-    {
-        public List<SNVector2> StartPositions { get; set; }
     }
 
     public class RequestCourse : ClientToServerMessage

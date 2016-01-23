@@ -32,11 +32,15 @@ namespace ShallowSeasServer
             m_client = client;
             Name = name;
 
-            m_client.addMessageHandler<SetPlayerName>(this, handleSetName);
+            m_client.addMessageHandler<Ping>(this, handlePing);
             m_client.addMessageHandler<RequestCourse>(this, handleRequestCourse);
             m_client.addMessageHandler<RequestCastGear>(this, handleCastGear);
             m_client.addMessageHandler<RequestAnnounce>(this, handleAnnounce);
             m_client.addMessageHandler<RequestFishDensity>(this, handleRequestFishDensity);
+        }
+
+        private void handlePing(ClientWrapper client, Ping msg)
+        {
         }
 
         public PlayerInfo getInfo()
@@ -81,13 +85,6 @@ namespace ShallowSeasServer
                 m_castEndTime = 0;
                 m_castCatchMultipliers = null;
             }
-        }
-
-        private void handleSetName(ClientWrapper client, SetPlayerName msg)
-        {
-            Log.log(Log.Category.GameEvent, "Player {0} changed name to '{1}'", m_id, msg.NewName);
-            Name = msg.NewName;
-            m_game.playerInfoHasChanged(this);
         }
 
         private void handleRequestCourse(ClientWrapper client, RequestCourse msg)

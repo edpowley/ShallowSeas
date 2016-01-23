@@ -22,9 +22,6 @@ namespace ShallowSeasServer
         private bool m_quit = false;
         public void quit() { m_quit = true; }
 
-        enum State { WaitingForPlayers, StartingGame, InGame }
-        private State m_state = State.WaitingForPlayers;
-
         public float CurrentTimestamp { get; private set; }
         private DateTime? m_startTime = null;
 
@@ -66,11 +63,6 @@ namespace ShallowSeasServer
             return result;
         }
 
-        internal void playerInfoHasChanged(Player player)
-        {
-            broadcastMessageToAllPlayersExcept(player, new SetPlayerInfo() { Player = player.getInfo() });
-        }
-
         private void handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest msg)
         {
             Player player = new Player(this, client, msg.PlayerName);
@@ -79,25 +71,10 @@ namespace ShallowSeasServer
 
             updatePlayerColours();
 
-            player.m_client.sendMessage(new WelcomePlayer() { PlayerId = player.m_id });
-            broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
+            player.m_client.sendMessage(new WelcomePlayer() { PlayerId = player.m_id, Players = getPlayerInfoList() });
+            broadcastMessageToAllPlayersExcept(player, new PlayerJoined() { Player = player.getInfo() });
 
             m_pendingClients.Remove(client);
-
-            switch (m_state)
-            {
-                case State.WaitingForPlayers:
-                    break;
-
-                case State.StartingGame:
-                    player.m_client.sendMessage(new ReadyToStart());
-                    break;
-
-                case State.InGame:
-                    player.m_client.sendMessage(new ReadyToStart());
-                    player.m_client.sendMessage(new StartMainGame() { StartPositions = getStartPositions(new SNVector2(129.5f, 127.5f), 1.0f, m_players.Count).ToList() });
-                    break;
-            }
         }
 
         private void updatePlayerColours()
@@ -144,13 +121,15 @@ namespace ShallowSeasServer
                     playerIndex--;
 
                     updatePlayerColours();
-                    broadcastMessageToAllPlayers(new SetPlayerList() { Players = getPlayerInfoList() });
+                    broadcastMessageToAllPlayers(new PlayerLeft() { PlayerId = player.m_id });
                 }
             }
         }
 
         public void run()
         {
+            startGame();
+
             m_quit = false;
             while (!m_quit)
             {
@@ -172,29 +151,6 @@ namespace ShallowSeasServer
             }
         }
 
-        public void readyToStart()
-        {
-            if (m_state != State.WaitingForPlayers)
-            {
-                Log.log(Log.Category.Error, "Game is already in progress");
-                return;
-            }
-
-            m_state = State.StartingGame;
-            foreach (Player player in m_players)
-            {
-                player.m_client.addMessageHandler<SceneLoaded>(this, handleSceneLoaded);
-                player.m_waitingForSceneLoad = true;
-                player.m_client.sendMessage(new ReadyToStart());
-            }
-
-            if (m_players.Count == 0)
-            {
-                Log.log(Log.Category.GameStatus, "No players, so starting immediately");
-                startGame();
-            }
-        }
-
         void handleSceneLoaded(ClientWrapper client, SceneLoaded msg)
         {
             Player player = m_players.Single(p => p.m_client == client);
@@ -209,15 +165,9 @@ namespace ShallowSeasServer
 
         void startGame()
         {
-            m_state = State.InGame;
-            m_startTime = DateTime.Now;
-
-            StartMainGame msg = new StartMainGame();
-            msg.StartPositions = getStartPositions(new SNVector2(129.5f, 127.5f), 1.0f, m_players.Count).ToList();
-
             loadFishDensityMap();
 
-            broadcastMessageToAllPlayers(msg);
+            m_startTime = DateTime.Now;
         }
 
         IEnumerable<SNVector2> getStartPositions(SNVector2 centre, float radius, int numPlayers)
