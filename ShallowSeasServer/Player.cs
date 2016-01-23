@@ -135,7 +135,7 @@ namespace ShallowSeasServer
             broadcastMsg.PlayerId = m_id;
             broadcastMsg.Message = msg.Message;
             broadcastMsg.Position = msg.Position;
-            m_game.broadcastMessageToAllPlayersExcept(this, broadcastMsg);
+            m_game.broadcastMessageToAllPlayers(broadcastMsg);
         }
 
         private void handleRequestFishDensity(ClientWrapper client, RequestFishDensity msg)
