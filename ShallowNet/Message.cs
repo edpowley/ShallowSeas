@@ -120,4 +120,21 @@ namespace ShallowNet
         public string Message { get; set; }
         public SNVector2 Position { get; set; }
     }
+
+    public class RequestFishDensity : ClientToServerMessage
+    {
+        public List<SNVector2> Squares { get; set; }
+    }
+
+    public class InformFishDensity : ServerToClientMessage
+    {
+        public struct Item
+        {
+            public int x { get; set; }
+            public int y { get; set; }
+            public List<float> fish { get; set; }
+        }
+
+        public List<Item> Density { get; set; }
+    }
 }

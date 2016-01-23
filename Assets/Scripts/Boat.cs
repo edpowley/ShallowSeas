@@ -35,6 +35,14 @@ public class Boat : MonoBehaviour
         var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
         m_nameLabel.text = playerInfo.Name;
         m_nameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
+
+        if (isLocalPlayer)
+        {
+            RequestFishDensity msg = new RequestFishDensity();
+            IntVector2 currentCell = CurrentCell;
+            msg.Squares = new List<SNVector2> { new SNVector2(currentCell.X, currentCell.Y) };
+            MyNetworkManager.Instance.m_client.sendMessage(msg);
+        }
     }
 
     internal void setColour(Color colour)

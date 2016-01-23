@@ -18,8 +18,6 @@ public class GameManager : MonoBehaviour
     private bool[,] m_isWater = new bool[c_gridWidth, c_gridHeight];
     private List<float>[,] m_fishDensity = new List<float>[c_gridWidth, c_gridHeight];
 
-    public Texture2D FishDensityMap;
-
     public string[] FishNames = new string[] { "red fish", "green fish", "blue fish" };
 
     public Boat m_boatPrefab;
@@ -84,7 +82,6 @@ public class GameManager : MonoBehaviour
     public void Start()
     {
         initIsWater();
-        initFishDensity();
 
         var client = MyNetworkManager.Instance.m_client;
         client.addMessageHandler<StartMainGame>(this, handleStartMainGame);
@@ -93,6 +90,7 @@ public class GameManager : MonoBehaviour
         client.addMessageHandler<NotifyCatch>(this, handleNotifyCatch);
         client.addMessageHandler<Announce>(this, handleAnnounce);
         client.addMessageHandler<ShallowNet.Ping>(this, handlePing);
+        client.addMessageHandler<InformFishDensity>(this, handleInformFishDensity);
         client.sendMessage(new SceneLoaded());
     }
 
@@ -173,19 +171,12 @@ public class GameManager : MonoBehaviour
         popup.ShowMessage(msg.Message, 30);
     }
 
-    private void initFishDensity()
+    private void handleInformFishDensity(ClientWrapper client, InformFishDensity msg)
     {
-        for (int x = 0; x < c_gridWidth; x++)
+        foreach (var item in msg.Density)
         {
-            for (int y = 0; y < c_gridHeight; y++)
-            {
-                List<float> density = new List<float>();
-                Color pixel = FishDensityMap.GetPixel(x, y);
-                density.Add(pixel.r);
-                density.Add(pixel.g);
-                density.Add(pixel.b);
-                m_fishDensity[x, y] = density;
-            }
+            Debug.LogFormat("Setting density at {0},{1} to {2}", item.x, item.y, item.fish);
+            m_fishDensity[item.x, item.y] = item.fish;
         }
     }
 
@@ -204,13 +195,6 @@ public class GameManager : MonoBehaviour
                         isWater = isWater && (terrain.SampleHeight(new Vector3(x + dx, 0, y + dy)) < 16.0f);
 
                 m_isWater[x, y] = isWater;
-
-                List<float> density = new List<float>();
-                Color pixel = FishDensityMap.GetPixel(x, y);
-                density.Add(pixel.r);
-                density.Add(pixel.g);
-                density.Add(pixel.b);
-                m_fishDensity[x, y] = density;
             }
         }
 
@@ -254,6 +238,11 @@ public class GameManager : MonoBehaviour
         return result;
     }
 
+    internal List<float> getFishDensity(int x, int y)
+    {
+        return m_fishDensity[x, y];
+    }
+
     internal List<float> getFishDensity(IntVector2 cell)
     {
         return m_fishDensity[cell.X, cell.Y];
@@ -268,10 +257,11 @@ public class GameManager : MonoBehaviour
             IntVector2 currentCell = GameManager.Instance.LocalPlayerBoat.CurrentCell;
 
             var currentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
-            m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}",
-                                      currentCell,
-                                      string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray())
-            );
+            string densityString = "???";
+            if (currentCellFishDensity != null)
+                densityString = string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray());
+
+            m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}", currentCell, densityString);
 
             m_textTopRight.text = string.Format("Catch: {0}",
                                        string.Join(", ", (from n in LocalPlayerBoat.m_catch select n.ToString()).ToArray())

@@ -69,6 +69,13 @@ public class BoatCourseLine : MonoBehaviour
                     RequestCourse msg = new RequestCourse();
                     msg.Course = new List<SNVector2>(from p in m_points select new SNVector2(p.x, p.z));
                     MyNetworkManager.Instance.m_client.sendMessage(msg);
+
+                    HashSet<IntVector2> squaresOnCourse = new HashSet<IntVector2>(getSquaresAlongCourse(m_points));
+                    RequestFishDensity densityMsg = new RequestFishDensity()
+                    {
+                        Squares = new List<SNVector2>(from p in squaresOnCourse select new SNVector2(p.X, p.Y))
+                    };
+                    MyNetworkManager.Instance.m_client.sendMessage(densityMsg);
                 }
 
                 /*if (Player.m_castGear == GearType.None)
@@ -80,6 +87,19 @@ public class BoatCourseLine : MonoBehaviour
             }
 
             yield return null;
+        }
+    }
+
+    private static IEnumerable<IntVector2> getSquaresAlongCourse(List<Vector3> points)
+    {
+        if (points.Count > 0)
+        {
+            yield return new IntVector2((int)points[0].x, (int)points[0].z);
+            for (int i = 1; i < points.Count; i++)
+            {
+                foreach (IntVector2 square in Util.SupercoverLine(points[i - 1].x, points[i - 1].z, points[i].x, points[i].z))
+                    yield return square;
+            }
         }
     }
 

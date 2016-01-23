@@ -36,6 +36,7 @@ namespace ShallowSeasServer
             m_client.addMessageHandler<RequestCourse>(this, handleRequestCourse);
             m_client.addMessageHandler<RequestCastGear>(this, handleCastGear);
             m_client.addMessageHandler<RequestAnnounce>(this, handleAnnounce);
+            m_client.addMessageHandler<RequestFishDensity>(this, handleRequestFishDensity);
         }
 
         public PlayerInfo getInfo()
@@ -135,6 +136,22 @@ namespace ShallowSeasServer
             broadcastMsg.Message = msg.Message;
             broadcastMsg.Position = msg.Position;
             m_game.broadcastMessageToAllPlayersExcept(this, broadcastMsg);
+        }
+
+        private void handleRequestFishDensity(ClientWrapper client, RequestFishDensity msg)
+        {
+            InformFishDensity reply = new InformFishDensity();
+            reply.Density = new List<InformFishDensity.Item>();
+
+            foreach (SNVector2 pos in msg.Squares)
+            {
+                int x = (int)pos.x;
+                int y = (int)pos.y;
+                var fish = m_game.getFishDensity(x,y);
+                reply.Density.Add(new InformFishDensity.Item() { x = x, y = y, fish = fish });
+            }
+
+            m_client.sendMessage(reply);
         }
     }
 }
