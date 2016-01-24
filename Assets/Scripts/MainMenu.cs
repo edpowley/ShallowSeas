@@ -17,8 +17,42 @@ public class MainMenu : MonoBehaviour
 
     public void Start()
     {
+        processCommandLineArguments();
+
         ServerIpInput.text = m_serverHost;
         ServerPortInput.text = m_serverPort.ToString();
+    }
+
+    private void processCommandLineArguments()
+    {
+        bool autoStart = false;
+
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            string nextArg = (i < args.Length - 1) ? args[i + 1] : "";
+            switch (args[i])
+            {
+                case "-name":
+                    PlayerNameInput.text = nextArg;
+                    break;
+
+                case "-host":
+                    m_serverHost = nextArg;
+                    break;
+
+                case "-port":
+                    int.TryParse(nextArg, out m_serverPort);
+                    break;
+
+                case "-join":
+                    autoStart = true;
+                    break;
+            }
+        }
+
+        if (autoStart)
+            OnJoinClicked();
     }
 
     public void OnDestroy()
