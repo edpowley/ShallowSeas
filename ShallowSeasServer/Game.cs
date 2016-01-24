@@ -63,15 +63,22 @@ namespace ShallowSeasServer
             return result;
         }
 
-        private void handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest msg)
+        private void handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest joinMsg)
         {
-            Player player = new Player(this, client, msg.PlayerName);
+            Player player = new Player(this, client, joinMsg.PlayerName);
             Log.log(Log.Category.GameStatus, "Adding player named {0} with id {1}", player.Name, player.m_id);
             m_players.Add(player);
 
             updatePlayerColours();
 
-            player.m_client.sendMessage(new WelcomePlayer() { PlayerId = player.m_id, Players = getPlayerInfoList() });
+            CompoundMessage welcomeMsg = new CompoundMessage();
+            welcomeMsg.Messages.Add(new WelcomePlayer() { PlayerId = player.m_id, Players = getPlayerInfoList() });
+            foreach (Player otherPlayer in m_players)
+            {
+                welcomeMsg.Messages.AddRange(otherPlayer.getStatusSyncMessages());
+            }
+            player.m_client.sendMessage(welcomeMsg);
+
             broadcastMessageToAllPlayersExcept(player, new PlayerJoined() { Player = player.getInfo() });
 
             m_pendingClients.Remove(client);

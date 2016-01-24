@@ -15,6 +15,14 @@ namespace ShallowNet
     public abstract class ServerToClientMessage : Message { }
     public abstract class ClientToServerMessage : Message { }
 
+    public class CompoundMessage : Message
+    {
+        public CompoundMessage() { Messages = new List<Message>(); }
+        public CompoundMessage(IEnumerable<Message> messages) { Messages = messages.ToList(); }
+
+        public List<Message> Messages { get; set; }
+    }
+
     public class Ping : Message
     {
         public float Timestamp { get; set; }

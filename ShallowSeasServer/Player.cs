@@ -18,6 +18,11 @@ namespace ShallowSeasServer
 
         public bool m_waitingForSceneLoad = false;
 
+        private List<SNVector2> m_currentCourse = null;
+        private float m_courseStartTime;
+
+        private List<int> m_currentCatch = new List<int> { 0, 0, 0 };
+
         private string m_castGear = null;
         private SNVector2 m_castPos;
         private float m_castStartTime;
@@ -45,7 +50,38 @@ namespace ShallowSeasServer
 
         public PlayerInfo getInfo()
         {
-            return new PlayerInfo { Id = m_id, Name = Name, ColourH = m_colourH, ColourS = m_colourS, ColourV = m_colourV };
+            return new PlayerInfo { Id = m_id, Name = Name, ColourH = m_colourH, ColourS = m_colourS, ColourV = m_colourV, };
+        }
+
+        /** Get the sequence of messages to send to a client to update the status of this player */
+        public IEnumerable<Message> getStatusSyncMessages()
+        {
+            if (m_castGear != null)
+            {
+                yield return new SetPlayerCastingGear()
+                {
+                    PlayerId = m_id,
+                    Position = m_castPos,
+                    GearName = m_castGear,
+                    StartTime = m_castStartTime,
+                    EndTime = m_castEndTime
+                };
+            }
+            else if (m_currentCourse != null)
+            {
+                yield return new SetCourse()
+                {
+                    PlayerId = m_id,
+                    Course = m_currentCourse,
+                    StartTime = m_courseStartTime
+                };
+            }
+
+            yield return new NotifyCatch()
+            {
+                PlayerId = m_id,
+                FishCaught = m_currentCatch
+            };
         }
 
         internal void update()
@@ -77,6 +113,7 @@ namespace ShallowSeasServer
 
                 for (int i = 0; i < 3; i++)
                 {
+                    m_currentCatch[i] += msg.FishCaught[i];
                     Log.log(Log.Category.GameEvent, "Player {0} caught {1} fish of type {2}", m_id, msg.FishCaught[i], i);
                 }
 
@@ -95,10 +132,13 @@ namespace ShallowSeasServer
                     string.Join("; ", (from p in msg.Course select p.ToString()).ToArray())
                 );
 
+                m_currentCourse = msg.Course;
+                m_courseStartTime = m_game.CurrentTimestamp;
+
                 SetCourse broadcastMsg = new SetCourse();
                 broadcastMsg.PlayerId = m_id;
-                broadcastMsg.Course = msg.Course;
-                broadcastMsg.StartTime = m_game.CurrentTimestamp;
+                broadcastMsg.Course = m_currentCourse;
+                broadcastMsg.StartTime = m_courseStartTime;
 
                 m_game.broadcastMessageToAllPlayers(broadcastMsg);
             }

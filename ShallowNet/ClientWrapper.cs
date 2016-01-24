@@ -97,7 +97,7 @@ namespace ShallowNet
         {
             lock (m_messagesReceived)
             {
-                for (int i=0;i<m_messagesReceived.Count;i++)
+                for (int i = 0; i < m_messagesReceived.Count; i++)
                 {
                     Message msg = m_messagesReceived[i];
 
@@ -123,6 +123,21 @@ namespace ShallowNet
                         DebugLog.WriteLine("WARNING: No handler found for message {0}", msg);
                         // Keep it in the queue
                     }
+                }
+            }
+        }
+
+        private IEnumerable<Message> unpackCompoundMessage(CompoundMessage compoundMsg)
+        {
+            foreach (Message msg in compoundMsg.Messages)
+            {
+                if (msg is CompoundMessage)
+                {
+                    foreach (Message m in unpackCompoundMessage((CompoundMessage)msg)) yield return m;
+                }
+                else
+                {
+                    yield return msg;
                 }
             }
         }
@@ -180,7 +195,10 @@ namespace ShallowNet
 
                         lock (m_messagesReceived)
                         {
-                            m_messagesReceived.Add(msg);
+                            if (msg is CompoundMessage)
+                                m_messagesReceived.AddRange(unpackCompoundMessage((CompoundMessage)msg));
+                            else
+                                m_messagesReceived.Add(msg);
                         }
                     }
                 }
