@@ -51,6 +51,7 @@ namespace ShallowNet
     public class PlayerJoined : ServerToClientMessage
     {
         public PlayerInfo Player { get; set; }
+        public SNVector2 InitialPos { get; set; }
     }
 
     public class PlayerLeft : ServerToClientMessage

@@ -30,11 +30,13 @@ namespace ShallowSeasServer
         private float m_castMaxCatch;
         private List<float> m_castCatchMultipliers;
 
-        public Player(Game game, ClientWrapper client, string name)
+        public Player(Game game, ClientWrapper client, string name, SNVector2 initialPos)
         {
             m_game = game;
             m_id = Guid.NewGuid().ToString();
             m_client = client;
+            m_currentCourse = new List<SNVector2> { initialPos };
+            m_courseStartTime = game.CurrentTimestamp;
             Name = name;
 
             m_client.addMessageHandler<Ping>(this, handlePing);

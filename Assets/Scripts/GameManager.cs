@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
 
         foreach (PlayerInfo player in MyNetworkManager.Instance.m_players)
         {
-            createBoat(player);
+            createBoat(player, new SNVector2(0, 0));
         }
 
         var client = MyNetworkManager.Instance.m_client;
@@ -111,10 +111,10 @@ public class GameManager : MonoBehaviour
         Debug.LogFormat("m_timestampOffsetTarget = {0}", m_timestampOffsetTarget);
     }
 
-    private void createBoat(PlayerInfo player)
+    private void createBoat(PlayerInfo player, SNVector2 pos)
     {
-        //SNVector2 startPos =  msg.StartPositions[i];
-        Vector3 startPos3 = new Vector3(128, 0, 128);
+        Vector3 startPos3;
+        startPos3 = new Vector3(pos.x, 0, pos.y);
 
         Boat boat = Util.InstantiatePrefab(m_boatPrefab, startPos3, Quaternion.identity);
         boat.PlayerId = player.Id;
@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
 
     private void handlePlayerJoined(ClientWrapper client, PlayerJoined msg)
     {
-        createBoat(msg.Player);
+        createBoat(msg.Player, msg.InitialPos);
     }
 
     private void handlePlayerLeft(ClientWrapper client, PlayerLeft msg)

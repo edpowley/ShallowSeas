@@ -202,6 +202,8 @@ namespace ShallowNet
                         }
                     }
                 }
+
+                Thread.Sleep(0);
             }
 
             Connected = false;

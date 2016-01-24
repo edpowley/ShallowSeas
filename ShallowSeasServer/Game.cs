@@ -63,10 +63,25 @@ namespace ShallowSeasServer
             return result;
         }
 
+        private int m_nextInitialPositionIndex = 0;
+        static SNVector2 c_initialPosCentre = new SNVector2(132.5f, 127.5f);
+
+        private SNVector2 getNextInitialPosition()
+        {
+            float angle = m_nextInitialPositionIndex * (float)Math.PI / 4.0f;
+            float radius = 1.0f + m_nextInitialPositionIndex / 8.0f;
+            m_nextInitialPositionIndex++;
+            return new SNVector2(
+                c_initialPosCentre.x + radius * (float)Math.Cos(angle),
+                c_initialPosCentre.y + radius * (float)Math.Sin(angle)
+            );
+        }
+
         private void handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest joinMsg)
         {
-            Player player = new Player(this, client, joinMsg.PlayerName);
-            Log.log(Log.Category.GameStatus, "Adding player named {0} with id {1}", player.Name, player.m_id);
+            SNVector2 pos = getNextInitialPosition();
+            Player player = new Player(this, client, joinMsg.PlayerName, pos);
+            Log.log(Log.Category.GameStatus, "Adding player named {0} with id {1} at {2}", player.Name, player.m_id, pos);
             m_players.Add(player);
 
             updatePlayerColours();
@@ -79,7 +94,7 @@ namespace ShallowSeasServer
             }
             player.m_client.sendMessage(welcomeMsg);
 
-            broadcastMessageToAllPlayersExcept(player, new PlayerJoined() { Player = player.getInfo() });
+            broadcastMessageToAllPlayersExcept(player, new PlayerJoined() { Player = player.getInfo(), InitialPos = pos });
 
             m_pendingClients.Remove(client);
         }
