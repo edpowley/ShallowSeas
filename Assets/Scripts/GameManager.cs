@@ -183,11 +183,8 @@ public class GameManager : MonoBehaviour
 
     private void handleInformFishDensity(ClientWrapper client, InformFishDensity msg)
     {
-        foreach (var item in msg.Density)
-        {
-            Debug.LogFormat("Setting density at {0},{1} to {2}", item.x, item.y, item.fish);
-            m_fishDensity[item.x, item.y] = item.fish;
-        }
+        Debug.LogFormat("Setting density at {0},{1} to {2}", msg.X, msg.Y, msg.Density);
+        m_fishDensity[msg.X, msg.Y] = msg.Density;
     }
 
     private void initIsWater()

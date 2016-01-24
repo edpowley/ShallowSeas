@@ -35,14 +35,6 @@ public class Boat : MonoBehaviour
         var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
         m_nameLabel.text = playerInfo.Name;
         m_nameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
-
-        if (isLocalPlayer)
-        {
-            RequestFishDensity msg = new RequestFishDensity();
-            IntVector2 currentCell = CurrentCell;
-            msg.Squares = new List<SNVector2> { new SNVector2(currentCell.X, currentCell.Y) };
-            MyNetworkManager.Instance.m_client.sendMessage(msg);
-        }
     }
 
     internal void setColour(Color colour)
@@ -195,7 +187,15 @@ public class Boat : MonoBehaviour
 
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, m_rotationSpeed * Time.deltaTime);
 
-        if (!isLocalPlayer)
+        if (isLocalPlayer)
+        {
+            if (GameManager.Instance.getFishDensity(CurrentCell) == null)
+            {
+                RequestFishDensity msg = new RequestFishDensity() { X = CurrentCell.X, Y = CurrentCell.Y };
+                MyNetworkManager.Instance.m_client.sendMessage(msg);
+            }
+        }
+        else // not local player
         {
             bool visible = GameManager.Instance.m_fogCircle.cellIsVisible(this.CurrentCell);
             setVisible(visible);

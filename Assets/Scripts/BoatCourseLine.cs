@@ -66,12 +66,12 @@ public class BoatCourseLine : MonoBehaviour
                     msg.Course = new List<SNVector2>(from p in m_points select new SNVector2(p.x, p.z));
                     MyNetworkManager.Instance.m_client.sendMessage(msg);
 
-                    HashSet<IntVector2> squaresOnCourse = new HashSet<IntVector2>(getSquaresAlongCourse(m_points));
+                    /*HashSet<IntVector2> squaresOnCourse = new HashSet<IntVector2>(getSquaresAlongCourse(m_points));
                     RequestFishDensity densityMsg = new RequestFishDensity()
                     {
                         Squares = new List<SNVector2>(from p in squaresOnCourse select new SNVector2(p.X, p.Y))
                     };
-                    MyNetworkManager.Instance.m_client.sendMessage(densityMsg);
+                    MyNetworkManager.Instance.m_client.sendMessage(densityMsg);*/
                 }
 
                 /*if (Player.m_castGear == GearType.None)

@@ -113,18 +113,15 @@ namespace ShallowNet
 
     public class RequestFishDensity : ClientToServerMessage
     {
-        public List<SNVector2> Squares { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 
     public class InformFishDensity : ServerToClientMessage
     {
-        public struct Item
-        {
-            public int x { get; set; }
-            public int y { get; set; }
-            public List<float> fish { get; set; }
-        }
+        public int X { get; set; }
+        public int Y { get; set; }
 
-        public List<Item> Density { get; set; }
+        public List<float> Density { get; set; }
     }
 }

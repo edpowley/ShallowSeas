@@ -177,16 +177,12 @@ namespace ShallowSeasServer
 
         private void handleRequestFishDensity(ClientWrapper client, RequestFishDensity msg)
         {
-            InformFishDensity reply = new InformFishDensity();
-            reply.Density = new List<InformFishDensity.Item>();
-
-            foreach (SNVector2 pos in msg.Squares)
+            InformFishDensity reply = new InformFishDensity()
             {
-                int x = (int)pos.x;
-                int y = (int)pos.y;
-                var fish = m_game.getFishDensity(x,y);
-                reply.Density.Add(new InformFishDensity.Item() { x = x, y = y, fish = fish });
-            }
+                X = msg.X,
+                Y = msg.Y,
+                Density = m_game.getFishDensity(msg.X, msg.Y)
+            };
 
             m_client.sendMessage(reply);
         }

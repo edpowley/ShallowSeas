@@ -114,13 +114,13 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1321678863}
+  m_Father: {fileID: 1541866147}
   m_RootOrder: 0
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 4, y: -4}
+  m_SizeDelta: {x: 400, y: 100}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &124898186
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1053,7 +1053,7 @@ RectTransform:
   m_Children:
   - {fileID: 250852839}
   m_Father: {fileID: 1541866147}
-  m_RootOrder: 3
+  m_RootOrder: 5
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -1809,7 +1809,7 @@ RectTransform:
   - {fileID: 1746567003}
   - {fileID: 1771722742}
   m_Father: {fileID: 1321678863}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -2064,6 +2064,7 @@ GameObject:
   m_Component:
   - 224: {fileID: 1321678863}
   - 114: {fileID: 1321678864}
+  - 114: {fileID: 1321678865}
   m_Layer: 5
   m_Name: Button group
   m_TagString: Untagged
@@ -2081,16 +2082,14 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 124898185}
   - {fileID: 1371379783}
   - {fileID: 1057276222}
-  - {fileID: 1606961638}
   m_Father: {fileID: 1541866147}
-  m_RootOrder: 0
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -10}
-  m_SizeDelta: {x: -20, y: 100}
+  m_RootOrder: 2
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -4}
+  m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1321678864
 MonoBehaviour:
@@ -2112,6 +2111,19 @@ MonoBehaviour:
   m_Spacing: 10
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
+--- !u!114 &1321678865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1321678862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1741964061, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 2
+  m_VerticalFit: 0
 --- !u!1 &1324583511
 GameObject:
   m_ObjectHideFlags: 0
@@ -2213,7 +2225,7 @@ RectTransform:
   - {fileID: 991498541}
   - {fileID: 909878709}
   m_Father: {fileID: 1321678863}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -2591,7 +2603,7 @@ RectTransform:
   m_Children:
   - {fileID: 1381733588}
   m_Father: {fileID: 1541866147}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -2713,6 +2725,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
+  - {fileID: 124898185}
+  - {fileID: 1606961638}
   - {fileID: 1321678863}
   - {fileID: 1509724800}
   - {fileID: 2037431217}
@@ -2753,13 +2767,13 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1321678863}
-  m_RootOrder: 3
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 1}
+  m_Father: {fileID: 1541866147}
+  m_RootOrder: 1
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -4, y: -4}
+  m_SizeDelta: {x: 400, y: 100}
+  m_Pivot: {x: 1, y: 1}
 --- !u!225 &1606961639
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -3188,7 +3202,7 @@ RectTransform:
   - {fileID: 1128400953}
   - {fileID: 706770181}
   m_Father: {fileID: 1541866147}
-  m_RootOrder: 2
+  m_RootOrder: 4
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -10, y: 0}
@@ -3426,7 +3440,6 @@ MonoBehaviour:
   DrawingLine: {fileID: 240473623}
   m_textTopLeft: {fileID: 124898186}
   m_textTopRight: {fileID: 1606961640}
-  m_textWaitingForGameStart: {fileID: 0}
   m_notification: {fileID: 1381733589}
   m_fogCircle: {fileID: 795950263}
   m_timestampOffset: 0
