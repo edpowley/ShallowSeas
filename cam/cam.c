@@ -11,12 +11,13 @@
 * Species 0 a small fish that reaches maturity quickly: a low-value forage fish.				*
 * Species 1 a fish that grows to a larger size and takes longer to mature: a high-value fish when mature.	*
 *				 										*
-* Coexistence of the species becomes a potential issue because species interact. Have put in an interation	*
+* Coexistence of the species becomes a potential issue because species interact. Have put in an interaction	*
 * matrix for weighting	the effects of the intra- and inter-specific predation. This has the form (for		* 
 * two species):													*
 *   alpha  =	1   a			a = 0: species are independent						*
 *		a   1			a = 1: species do not discriminate in their feeding.			*
-* You tune the strength of interaction between species by altering the value of 'a' from 0 to 1.		*
+* You tune the strength of interaction between species by altering the value of 'a' from 0 to 1; 'a'=0.5 for	*
+* now.														*
 *														*
 * Time t goes in discrete steps.  Have been working towards a time step of 1 day, trying to get ecological	*
 * parameters acting slowly enough on this time scale (fishers' dynamics operate much faster than the ecology).	*
@@ -64,15 +65,20 @@
 * LESLIE2 has density-dependent feedback, and tries to set parameters nominally as 1 iteration = 1 day.  There	*
 * is now no correspondence between time and life stage, so there are non-zero terms all along the diagonal to	*
 * deal with updating of densities within life stages.  This is rough and ready at the moment.			*
-*    A0	   =	q00(N)  0.1		q00(N) = 0.999 - (1.0 - exp(-0.01*community.N0[1][x][y]))		*
-*		0.001   q10(N)		q01(N) = 0.999 - (1.0 - exp(-0.01*community.N0[1][x][y]))		*
+*    A0	   =	q00(N)  0.1		q00(N) = 0.999 - (1.0 - exp(-0.01*N0[1][x][y]))				*
+*		0.001   q10(N)		q01(N) = 0.999 - (1.0 - exp(-0.01*N0[1][x][y]))				*
 														*
-*    A1	   =	q10(N)  0      0.1	q10(N) = 0.999 - (1.0 - exp(-0.01*community.N1[2][x][y]))		*
-*		0.001   q11(N) 0	q11(N) = 0.999 - (1.0 - exp(-0.01*community.N1[2][x][y]))		*
+*    A1	   =	q10(N)  0      0.1	q10(N) = 0.999 - (1.0 - exp(-0.01*N1[2][x][y]))				*
+*		0.001   q11(N) 0	q11(N) = 0.999 - (1.0 - exp(-0.01*N1[2][x][y]))				*
 *		0       0.05   0.9988										*
-* Again, feedbacks here are a minimal concession to reality.  In this case, bigger fish eat smaller fish so the	*
-* proportion surviving in the current stage is reduced the more fish there are in the next stage.		*
-* This model uses the interaction matrix alpha.									*
+* Here N0[1][x][y] = alpha * N[1][[x][y], where N[j][x][y] is the species vector of densities at life stage j,	*
+* and Ni[j][x][y] is the species vector of densities at stage j on stage i, after weighting by alpha, the	*
+* interaction matrix.  Again, feedbacks here are a minimal concession to reality.  In this case, bigger fish	*
+* eat smaller fish so the proportion surviving in the current stage is reduced the more fish there are in the	*
+* next stage.													*
+*														*
+* To do: Another feedback in which fish grow faster if there are more smaller fish.  That's the	counterpart	*
+* to death from predation, and could go in on the subdiagonals.							*
 *														*
 *														*
 * MOVEMENTS													*
@@ -105,7 +111,7 @@
 *														*
 * (Note for RL: comes from spatiotemporal/2003.discrete/stochastic)						*
 *														*
-* Last update: 25.01.16.											*
+* Last update: 26.01.16.											*
 ****************************************************************************************************************/
 
 #include	<stdlib.h>
