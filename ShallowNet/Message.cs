@@ -10,6 +10,27 @@ namespace ShallowNet
         public Message()
         {
         }
+
+        public static IEnumerable<string> AllPropertyNames
+        {
+            get
+            {
+                HashSet<string> names = new HashSet<string>();
+
+                foreach (Type type in System.Reflection.Assembly.GetExecutingAssembly().GetTypes())
+                {
+                    if (type.IsSubclassOf(typeof(Message)))
+                    {
+                        foreach (var property in type.GetProperties())
+                        {
+                            names.Add(property.Name);
+                        }
+                    }
+                }
+
+                return names;
+            }
+        }
     }
 
     public abstract class ServerToClientMessage : Message { }

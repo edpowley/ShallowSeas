@@ -1,7 +1,9 @@
 ﻿using ShallowNet;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -40,6 +42,8 @@ namespace ShallowSeasServer
             {
                 player.m_client.sendMessage(msg);
             }
+
+            writeToLogFile(msg);
         }
 
         internal void broadcastMessageToAllPlayersExcept(Player except, Message msg)
@@ -49,6 +53,8 @@ namespace ShallowSeasServer
                 if (player != except)
                     player.m_client.sendMessage(msg);
             }
+
+            writeToLogFile(msg);
         }
 
         public List<PlayerInfo> getPlayerInfoList()
@@ -187,6 +193,8 @@ namespace ShallowSeasServer
 
         void startGame()
         {
+            initLogFile();
+
             loadFishDensityMap();
 
             m_startTime = DateTime.Now;
@@ -226,6 +234,79 @@ namespace ShallowSeasServer
         public List<float> getFishDensity(int x, int y)
         {
             return m_fishDensity[x, y];
+        }
+
+        StreamWriter m_logWriter = null;
+        List<string> m_logPropertyNames = null;
+
+        private void initLogFile()
+        {
+            string filename;
+            do
+            {
+                filename = string.Format("log_{0:yyyy-MM-dd_HH-mm-ss}.txt", DateTime.Now);
+            }
+            while (File.Exists(filename));
+
+            m_logWriter = new StreamWriter(filename);
+
+            m_logPropertyNames = new List<string>(Message.AllPropertyNames);
+            m_logPropertyNames.Sort();
+            m_logWriter.Write("_real time_\t_event type_");
+            foreach (string propertyName in m_logPropertyNames)
+            {
+                m_logWriter.Write("\t{0}", propertyName);
+            }
+            m_logWriter.WriteLine();
+            m_logWriter.Flush();
+        }
+
+        private void writeToLogFile(Message msg)
+        {
+            if (msg is CompoundMessage)
+            {
+                foreach (Message childMsg in (msg as CompoundMessage).Messages)
+                {
+                    writeToLogFile(childMsg);
+                }
+            }
+            else
+            {
+                m_logWriter.Write("{0}\t{1}", DateTime.Now, msg.GetType().Name);
+                foreach (string propertyName in m_logPropertyNames)
+                {
+                    var property = msg.GetType().GetProperty(propertyName);
+                    if (property != null)
+                        m_logWriter.Write("\t{0}", property.GetValue(msg, null));
+                    else
+                        m_logWriter.Write("\t");
+                }
+                m_logWriter.WriteLine();
+                m_logWriter.Flush();
+            }
+        }
+
+        private string getWritableValue(object value)
+        {
+            if (value is IEnumerable)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("[");
+                bool first = true;
+                foreach (object element in (IEnumerable)value)
+                {
+                    if (!first)
+                        sb.Append(", ");
+                    first = false;
+                    sb.Append(getWritableValue(element));
+                }
+                sb.Append("]");
+                return sb.ToString();
+            }
+            else
+            {
+                return value.ToString();
+            }
         }
     }
 }
