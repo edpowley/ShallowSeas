@@ -8,8 +8,8 @@ using System.Threading;
 
 namespace ShallowNet
 {
-    public class ClientWrapper : IDisposable
-    {
+	public class ClientWrapper : IDisposable
+	{
 		private Thread m_thread;
 		private TcpClient m_client;
 		private NetworkStream m_stream;
@@ -97,32 +97,56 @@ namespace ShallowNet
 		{
 			lock (m_messagesReceived)
 			{
-				foreach (Message msg in m_messagesReceived)
+				for (int i = 0; i < m_messagesReceived.Count; i++)
 				{
+					Message msg = m_messagesReceived[i];
+
 					bool handled = false;
 					List<MessageHandler> handlers = new List<MessageHandler>(m_messageHandlers);
-					foreach(MessageHandler handler in handlers)
+					foreach (MessageHandler handler in handlers)
 					{
 						if (handler.m_type.IsInstanceOfType(msg))
 						{
+							DebugLog.WriteLine("Passing message {0} to {1}", msg, handler.m_owner);
 							handler.handleMessage(this, msg);
 							handled = true;
 						}
 					}
 
-					if (!handled)
+					if (handled)
+					{
+						m_messagesReceived.RemoveAt(i);
+						i--;
+					}
+					else
 					{
 						DebugLog.WriteLine("WARNING: No handler found for message {0}", msg);
+						// Keep it in the queue
 					}
 				}
+			}
+		}
 
-				m_messagesReceived.Clear();
+		private IEnumerable<Message> unpackCompoundMessage(CompoundMessage compoundMsg)
+		{
+			foreach (Message msg in compoundMsg.Messages)
+			{
+				if (msg is CompoundMessage)
+				{
+					foreach (Message m in unpackCompoundMessage((CompoundMessage)msg)) yield return m;
+				}
+				else
+				{
+					yield return msg;
+				}
 			}
 		}
 
 		private void threadFunc()
 		{
 			Connected = true;
+
+			JSONParameters jsonParams = new JSONParameters() { InlineCircularReferences = true };
 
 			while (m_client.Connected && !m_disconnecting)
 			{
@@ -132,7 +156,7 @@ namespace ShallowNet
 					while (m_messagesToSend.Count > 0)
 					{
 						Message msg = m_messagesToSend.Peek();
-						string str = JSON.ToJSON(msg);
+						string str = JSON.ToJSON(msg, jsonParams);
 						DebugLog.WriteLine("Sending: {0}", str);
 
 						byte[] data = Encoding.UTF8.GetBytes(str);
@@ -188,6 +212,8 @@ namespace ShallowNet
 						}
 					}
 				}
+
+				Thread.Sleep(0);
 			}
 
 			Connected = false;

@@ -23,10 +23,6 @@ public class BoatCourseLine : MonoBehaviour
 
     private IEnumerator handleMouse()
     {
-        // Wait for game to start properly
-        while (GameManager.Instance.IsWaitingForStart)
-            yield return null;
-
         while (true)
         {
             if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
@@ -41,14 +37,14 @@ public class BoatCourseLine : MonoBehaviour
 
                 clearPoints();
                 addPoint(startPos);
-                
+
                 while (Input.GetMouseButton(0))
                 {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
-                    
+
                     yIntercept.y = 0;
-                    
+
                     if (Vector3.Distance(yIntercept, m_points.Last()) > 0.5f)
                     {
                         Vector3 pathStart = m_points.Last();
@@ -69,6 +65,13 @@ public class BoatCourseLine : MonoBehaviour
                     RequestCourse msg = new RequestCourse();
                     msg.Course = new List<SNVector2>(from p in m_points select new SNVector2(p.x, p.z));
                     MyNetworkManager.Instance.m_client.sendMessage(msg);
+
+                    /*HashSet<IntVector2> squaresOnCourse = new HashSet<IntVector2>(getSquaresAlongCourse(m_points));
+                    RequestFishDensity densityMsg = new RequestFishDensity()
+                    {
+                        Squares = new List<SNVector2>(from p in squaresOnCourse select new SNVector2(p.X, p.Y))
+                    };
+                    MyNetworkManager.Instance.m_client.sendMessage(densityMsg);*/
                 }
 
                 /*if (Player.m_castGear == GearType.None)
@@ -78,16 +81,29 @@ public class BoatCourseLine : MonoBehaviour
 
                 clearPoints();
             }
-            
+
             yield return null;
+        }
+    }
+
+    private static IEnumerable<IntVector2> getSquaresAlongCourse(List<Vector3> points)
+    {
+        if (points.Count > 0)
+        {
+            yield return new IntVector2((int)points[0].x, (int)points[0].z);
+            for (int i = 1; i < points.Count; i++)
+            {
+                foreach (IntVector2 square in Util.SupercoverLine(points[i - 1].x, points[i - 1].z, points[i].x, points[i].z))
+                    yield return square;
+            }
         }
     }
 
     private void setLineSegmentTransformation(GameObject line, Vector3 a, Vector3 b)
     {
         line.transform.localPosition = a;
-        line.transform.localScale = new Vector3((b-a).magnitude, 1, 1);
-        line.transform.localRotation = Quaternion.FromToRotation(Vector3.right, b-a);
+        line.transform.localScale = new Vector3((b - a).magnitude, 1, 1);
+        line.transform.localRotation = Quaternion.FromToRotation(Vector3.right, b - a);
     }
 
     internal void addPoint(Vector3 p)
@@ -99,7 +115,7 @@ public class BoatCourseLine : MonoBehaviour
         {
             GameObject newLine = Util.InstantiatePrefab(m_linePrefab);
             newLine.transform.SetParent(this.transform, worldPositionStays: false);
-            setLineSegmentTransformation(newLine, m_points [m_points.Count - 1], p);
+            setLineSegmentTransformation(newLine, m_points[m_points.Count - 1], p);
             newLine.name = string.Format("m_lines[{0}]", m_lines.Count);
             m_lines.Add(newLine);
         }
@@ -137,13 +153,13 @@ public class BoatCourseLine : MonoBehaviour
         int intOffset = Mathf.CeilToInt(offset);
         float fracOffset = offset - Mathf.Floor(offset);
 
-        for (int i=0; i<m_lines.Count; i++)
+        for (int i = 0; i < m_lines.Count; i++)
             m_lines[i].SetActive(i >= intOffset);
 
         if (fracOffset != 0 && intOffset > 0 && intOffset < m_points.Count)
         {
-            Vector3 p = m_points [intOffset - 1];
-            Vector3 q = m_points [intOffset];
+            Vector3 p = m_points[intOffset - 1];
+            Vector3 q = m_points[intOffset];
             Vector3 s = Vector3.Lerp(p, q, fracOffset);
 
             if (m_firstLine == null)

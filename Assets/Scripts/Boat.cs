@@ -7,15 +7,16 @@ using ShallowNet;
 
 public class Boat : MonoBehaviour
 {
-    public float MovementSpeed = 10;
-    public float RotationSpeed = 90;
-    public MeshRenderer NetRenderer;
+    public float m_movementSpeed = 2.5f;
+    public float m_rotationSpeed = 720;
 
     public string PlayerId { get; set; }
 
     internal List<int> m_catch = new List<int>() { 0, 0, 0 };
 
-    public UnityEngine.UI.Text NameLabel;
+    public UnityEngine.UI.Text m_nameLabel;
+    public UnityEngine.UI.Text m_tooltipLabel;
+    public CanvasGroup m_tooltipGroup;
 
     public IntVector2 CurrentCell
     {
@@ -26,14 +27,14 @@ public class Boat : MonoBehaviour
         }
     }
 
-    private bool isLocalPlayer { get { return PlayerId == MyNetworkManager.Instance.LocalPlayerId; } }
+    internal bool isLocalPlayer { get { return PlayerId == MyNetworkManager.Instance.LocalPlayerId; } }
 
     // Use this for initialization
     void Start()
     {
         var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
-        NameLabel.text = playerInfo.Name;
-        NameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
+        m_nameLabel.text = playerInfo.Name;
+        m_nameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
     }
 
     internal void setColour(Color colour)
@@ -44,7 +45,7 @@ public class Boat : MonoBehaviour
                 material.color = colour;
         }
 
-        NameLabel.color = colour;
+        m_nameLabel.color = colour;
     }
 
     private bool m_isVisible = true;
@@ -57,8 +58,8 @@ public class Boat : MonoBehaviour
             {
                 renderer.enabled = value;
             }
-            
-            NameLabel.enabled = value;
+
+            m_nameLabel.enabled = value;
         }
 
         m_isVisible = value;
@@ -69,7 +70,7 @@ public class Boat : MonoBehaviour
     }
 
     #region Course
-    
+
     internal List<Vector3> m_course = new List<Vector3>();
     internal List<float> m_courseSegmentCumulativeLengths = new List<float>();
     internal float m_courseStartTime, m_courseEndTime;
@@ -79,26 +80,26 @@ public class Boat : MonoBehaviour
         m_course.Clear();
         m_course.AddRange(from p in msg.Course select new Vector3(p.x, 0, p.y));
         m_courseStartTime = msg.StartTime;
-        
+
         m_courseSegmentCumulativeLengths.Clear();
         float len = 0;
         m_courseSegmentCumulativeLengths.Add(0);
-        for (int i=1; i<m_course.Count; i++)
+        for (int i = 1; i < m_course.Count; i++)
         {
-            len += Vector3.Distance(m_course[i], m_course[i-1]);
+            len += Vector3.Distance(m_course[i], m_course[i - 1]);
             m_courseSegmentCumulativeLengths.Add(len);
         }
-        
-        m_courseEndTime = msg.StartTime + len / MovementSpeed;
-        
+
+        m_courseEndTime = msg.StartTime + len / m_movementSpeed;
+
         transform.position = m_course[0];
-        
+
         if (isLocalPlayer)
         {
             GameManager.Instance.CourseLine.setCourse(m_course);
         }
     }
-    
+
     #endregion
 
     #region Casting
@@ -121,6 +122,22 @@ public class Boat : MonoBehaviour
 
     #endregion
 
+    private string getTooltipText()
+    {
+        var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
+        string tooltipText = string.Format("{0}", playerInfo.Name);
+
+        tooltipText += "\nCurrent catch: ";
+        tooltipText += string.Join(", ", (from n in m_catch select n.ToString()).ToArray());
+
+        if (m_castGear != GearType.None)
+        {
+            tooltipText += string.Format("\nCurrently casting {0}", GearInfo.getInfo(m_castGear).m_gearName);
+        }
+
+        return tooltipText;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -134,26 +151,28 @@ public class Boat : MonoBehaviour
 
         if (m_course.Count > 0)
         {
-            float lengthAlongCourse = (GameManager.Instance.CurrentTime - m_courseStartTime) * MovementSpeed;
+            float lengthAlongCourse = (GameManager.Instance.CurrentTime - m_courseStartTime) * m_movementSpeed;
 
             if (lengthAlongCourse <= 0)
             {
-                transform.position = m_course [0];
-            } else if (lengthAlongCourse >= m_courseSegmentCumulativeLengths.Last())
+                transform.position = m_course[0];
+            }
+            else if (lengthAlongCourse >= m_courseSegmentCumulativeLengths.Last())
             {
                 transform.position = m_course.Last();
-            } else
+            }
+            else
             {
-                for (int i=1; i<m_course.Count; i++)
+                for (int i = 1; i < m_course.Count; i++)
                 {
-                    if (lengthAlongCourse < m_courseSegmentCumulativeLengths [i])
+                    if (lengthAlongCourse < m_courseSegmentCumulativeLengths[i])
                     {
                         // Between segments i-1 and i
-                        float a = m_courseSegmentCumulativeLengths [i - 1];
-                        float b = m_courseSegmentCumulativeLengths [i];
+                        float a = m_courseSegmentCumulativeLengths[i - 1];
+                        float b = m_courseSegmentCumulativeLengths[i];
                         float p = (lengthAlongCourse - a) / (b - a);
-                        transform.position = Vector3.Lerp(m_course [i - 1], m_course [i], p);
-                        targetRotation = Quaternion.FromToRotation(Vector3.right, m_course [i] - m_course [i - 1]);
+                        transform.position = Vector3.Lerp(m_course[i - 1], m_course[i], p);
+                        targetRotation = Quaternion.FromToRotation(Vector3.right, m_course[i] - m_course[i - 1]);
 
                         if (isLocalPlayer)
                         {
@@ -166,11 +185,37 @@ public class Boat : MonoBehaviour
             }
         }
 
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, m_rotationSpeed * Time.deltaTime);
 
-        if (!isLocalPlayer)
+        if (isLocalPlayer)
         {
-            setVisible(GameManager.Instance.m_fogCircle.cellIsVisible(this.CurrentCell));
+            if (GameManager.Instance.getFishDensity(CurrentCell) == null)
+            {
+                RequestFishDensity msg = new RequestFishDensity() { X = CurrentCell.X, Y = CurrentCell.Y };
+                MyNetworkManager.Instance.m_client.sendMessage(msg);
+            }
+        }
+        else // not local player
+        {
+            bool visible = GameManager.Instance.m_fogCircle.cellIsVisible(this.CurrentCell);
+            setVisible(visible);
+
+            if (visible)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
+                yIntercept.y = 0;
+
+                if (Vector3.Distance(yIntercept, transform.position) <= 1)
+                {
+                    m_tooltipGroup.alpha = 1;
+                    m_tooltipLabel.text = getTooltipText();
+                }
+                else
+                {
+                    m_tooltipGroup.alpha = 0;
+                }
+            }
         }
     }
 }

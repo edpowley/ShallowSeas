@@ -11,18 +11,48 @@ public class MainMenu : MonoBehaviour
 {
     public InputField PlayerNameInput, ServerIpInput, ServerPortInput;
     public Button JoinButton;
-    public MainMenuPlayerListEntry PlayerListEntryPrefab;
-    public RectTransform PlayerListParent;
 
     public string m_serverHost;
     public int m_serverPort;
 
-    private List<MainMenuPlayerListEntry> m_playerListEntries = new List<MainMenuPlayerListEntry>();
-
     public void Start()
     {
+        processCommandLineArguments();
+
         ServerIpInput.text = m_serverHost;
         ServerPortInput.text = m_serverPort.ToString();
+    }
+
+    private void processCommandLineArguments()
+    {
+        bool autoStart = false;
+
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            string nextArg = (i < args.Length - 1) ? args[i + 1] : "";
+            switch (args[i])
+            {
+                case "-name":
+                    PlayerNameInput.text = nextArg;
+                    break;
+
+                case "-host":
+                    m_serverHost = nextArg;
+                    break;
+
+                case "-port":
+                    int.TryParse(nextArg, out m_serverPort);
+                    break;
+
+                case "-join":
+                    autoStart = true;
+                    break;
+            }
+        }
+
+        if (autoStart)
+            OnJoinClicked();
     }
 
     public void OnDestroy()
@@ -40,56 +70,11 @@ public class MainMenu : MonoBehaviour
         JoinButton.interactable = !isConnected;
     }
 
-    private void handlePlayerList(ClientWrapper client, SetPlayerList msg)
-    {
-        foreach (var entry in m_playerListEntries)
-        {
-            DestroyObject(entry.gameObject);
-        }
-        
-        m_playerListEntries.Clear();
-        
-        foreach(PlayerInfo info in msg.Players)
-        {
-            var entry = Util.InstantiatePrefab(PlayerListEntryPrefab);
-            entry.transform.SetParent(PlayerListParent, false);
-            entry.setPlayerInfo(info);
-            m_playerListEntries.Add(entry);
-        }
-    }
-    
-    private void handlePlayerInfo(ClientWrapper client, SetPlayerInfo msg)
-    {
-        var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == msg.Player.Id);
-        if (entry != null)
-        {
-            entry.setPlayerInfo(msg.Player);
-        }
-        else
-        {
-            Debug.LogFormat("No entry for id {0}", msg.Player.Id);
-        }
-    }
-    
-    public void OnPlayerNameChanged(string value)
-    {
-        if (MyNetworkManager.Instance.IsConnected)
-        {
-            MyNetworkManager.Instance.LocalPlayer.Name = value;
-
-            MyNetworkManager.Instance.m_client.sendMessage(new SetPlayerName() { NewName = value });
-
-            var entry = m_playerListEntries.SingleOrDefault(e => e.PlayerId == MyNetworkManager.Instance.LocalPlayerId);
-            if (entry != null)
-                entry.PlayerName.text = value;
-        }
-    }
-    
     public void OnServerIpChanged(string value)
     {
         m_serverHost = value;
     }
-    
+
     public void OnServerPortChanged(string value)
     {
         m_serverPort = int.Parse(value);
@@ -97,11 +82,6 @@ public class MainMenu : MonoBehaviour
 
     public void OnJoinClicked()
     {
-        MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort);
-
-        MyNetworkManager.Instance.m_client.addMessageHandler<SetPlayerList>(this, handlePlayerList);
-        MyNetworkManager.Instance.m_client.addMessageHandler<SetPlayerInfo>(this, handlePlayerInfo);
-
-        MyNetworkManager.Instance.m_client.sendMessage(new PlayerJoinRequest() { PlayerName = PlayerNameInput.text });
+        MyNetworkManager.Instance.JoinServer(m_serverHost, m_serverPort, PlayerNameInput.text);
     }
 }

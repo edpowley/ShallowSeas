@@ -5,6 +5,7 @@
 [Bb]in/
 
 log_*.html
+log_*.txt
 
 .vs/
 

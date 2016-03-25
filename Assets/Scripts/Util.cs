@@ -8,18 +8,18 @@ public static class Util
     {
         return InstantiatePrefab<T>(prefab, prefab.transform.position, prefab.transform.rotation);
     }
-    
+
     static public GameObject InstantiatePrefab(GameObject prefab)
     {
         return InstantiatePrefab(prefab, prefab.transform.position, prefab.transform.rotation);
     }
-    
+
     static public T InstantiatePrefab<T>(T prefab, Vector3 position, Quaternion rotation) where T : Component
     {
         GameObject gob = InstantiatePrefab(prefab.gameObject, position, rotation);
         return gob.GetComponent<T>();
     }
-    
+
     static public GameObject InstantiatePrefab(GameObject prefab, Vector3 position, Quaternion rotation)
     {
         return (GameObject)UnityEngine.Object.Instantiate(prefab, position, rotation);
@@ -46,12 +46,12 @@ public static class Util
             int targetY = Mathf.FloorToInt(y2);
             int stepY = (targetY > y) ? +1 : -1;
 
-            yield return new IntVector2(x,y);
+            yield return new IntVector2(x, y);
 
             while (y != targetY)
             {
                 y += stepY;
-                yield return new IntVector2(x,y);
+                yield return new IntVector2(x, y);
             }
         }
         else if (Mathf.FloorToInt(y1) == Mathf.FloorToInt(y2))
@@ -61,13 +61,13 @@ public static class Util
             int y = Mathf.FloorToInt(y1);
             int targetX = Mathf.FloorToInt(x2);
             int stepX = (targetX > x) ? +1 : -1;
-            
-            yield return new IntVector2(x,y);
-            
+
+            yield return new IntVector2(x, y);
+
             while (x != targetX)
             {
                 x += stepX;
-                yield return new IntVector2(x,y);
+                yield return new IntVector2(x, y);
             }
         }
         else
@@ -96,7 +96,7 @@ public static class Util
             int targetX = Mathf.FloorToInt(x2);
             int targetY = Mathf.FloorToInt(y2);
 
-            yield return new IntVector2(x,y);
+            yield return new IntVector2(x, y);
 
             while (x != targetX || y != targetY)
             {
@@ -111,7 +111,7 @@ public static class Util
                     y += stepY;
                 }
 
-                yield return new IntVector2(x,y);
+                yield return new IntVector2(x, y);
 
                 if ((targetX - x) * stepX < 0 || (targetY - y) * stepY < 0)
                 {
@@ -126,7 +126,7 @@ public static class Util
         // http://answers.unity3d.com/questions/701956/hsv-to-rgb-without-editorguiutilityhsvtorgb.html
 
         if (S == 0f)
-            return new Color(V,V,V);
+            return new Color(V, V, V);
         else if (V == 0f)
             return Color.black;
         else

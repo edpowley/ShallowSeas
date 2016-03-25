@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ShallowNet;
+using UnityEngine.SceneManagement;
 
 public class MyNetworkManager : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class MyNetworkManager : MonoBehaviour
     public void Awake()
     {
         //ShallowNet.DebugLog.s_printFunc = Debug.Log;
-        ShallowNet.DebugLog.s_printFunc = (msg => {});
+        ShallowNet.DebugLog.s_printFunc = (msg => { });
 
         Debug.LogFormat("{0} Awake", this.GetInstanceID());
         if (Instance != null)
@@ -53,72 +54,44 @@ public class MyNetworkManager : MonoBehaviour
             Instance = null;
     }
 
-    public void JoinServer(string hostName, int port)
+    public void JoinServer(string hostName, int port, string playerName)
     {
         if (m_client != null)
             m_client.Dispose();
 
         m_client = ClientWrapper.Connect(hostName, port);
-        m_client.addMessageHandler<SetPlayerList>(this, handleSetPlayerList);
-        m_client.addMessageHandler<SetPlayerInfo>(this, handleSetPlayerInfo);
+        m_client.addMessageHandler<ShallowNet.Ping>(this, handlePing);
         m_client.addMessageHandler<WelcomePlayer>(this, handleWelcomeMessage);
-        m_client.addMessageHandler<ReadyToStart>(this, handleReadyToStart);
+        m_client.addMessageHandler<PlayerJoined>(this, handlePlayerJoined);
+        m_client.addMessageHandler<PlayerLeft>(this, handlePlayerLeft);
+
+        m_client.sendMessage(new PlayerJoinRequest() { PlayerName = playerName });
     }
 
-    void handleSetPlayerList(ClientWrapper client, SetPlayerList msg)
+    void handlePing(ClientWrapper client, ShallowNet.Ping msg)
     {
-        m_players = msg.Players;
-    }
-    
-    void handleSetPlayerInfo(ClientWrapper client, SetPlayerInfo msg)
-    {
-        int index = m_players.FindIndex(p => p.Id == msg.Player.Id);
-        if (index != -1)
-        {
-            m_players [index] = msg.Player;
-        }
-        else
-        {
-            Debug.LogErrorFormat("Player id {0} not in players list", msg.Player.Id);
-        }
     }
 
     private void handleWelcomeMessage(ClientWrapper client, WelcomePlayer msg)
     {
         Debug.LogFormat("Joined as player id {0}", msg.PlayerId);
-        MyNetworkManager.Instance.LocalPlayerId = msg.PlayerId;
-    }
-    
-    private void handleReadyToStart(ClientWrapper client, ReadyToStart msg)
-    {
-        Application.LoadLevel((int)Level.MainGame);
+        LocalPlayerId = msg.PlayerId;
+        m_players = msg.Players;
+
+        SceneManager.LoadScene((int)Level.MainGame);
     }
 
-    public void ChangeLevel(Level level)
+    private void handlePlayerJoined(ClientWrapper client, PlayerJoined msg)
     {
-        //ServerChangeScene(level.ToString());
+        m_players.Add(msg.Player);
     }
 
-    /*public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
+    private void handlePlayerLeft(ClientWrapper client, PlayerLeft msg)
     {
-        Debug.Log("OnServerAddPlayer");
-        base.OnServerAddPlayer(conn, playerControllerId);
-        MyNetworkPlayer.updatePlayers();
+        int index = m_players.FindIndex(p => p.Id == msg.PlayerId);
+        if (index != -1)
+            m_players.RemoveAt(index);
     }
-
-    public override void OnServerRemovePlayer(NetworkConnection conn, PlayerController player)
-    {
-        Debug.Log("OnServerRemovePlayer");
-        base.OnServerRemovePlayer(conn, player);
-        MyNetworkPlayer.updatePlayers();
-    }
-
-    public override void OnServerDisconnect(NetworkConnection conn)
-    {
-        Debug.Log("OnServerDisconnect");
-        base.OnServerDisconnect(conn);
-        MyNetworkPlayer.updatePlayers();
-    }*/
 
     public void Update()
     {
