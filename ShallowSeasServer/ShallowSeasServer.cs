@@ -76,7 +76,8 @@ namespace ShallowSeasServer
 			Application.SetCompatibleTextRenderingDefault(false);
 
 			s_mainForm = new MainForm();
-			DebugLog.s_printFunc = (message => Log.log(Log.Category.Debug, message));
+			//DebugLog.s_printFunc = (message => Log.log(Log.Category.Debug, message));
+			DebugLog.s_printFunc = (_ => { });
 
 			int port = c_defaultPort;
 			s_listenThread = new Thread(new ThreadStart(() => listen(port)));

@@ -124,7 +124,7 @@ namespace ShallowSeasServer
 
 				if (!player.m_client.Connected)
 				{
-					Log.log(Log.Category.GameStatus, "Removing player {0}", player.m_id);
+					Log.log(Log.Category.GameStatus, "Removing player {0}", player.Name);
 					m_players.RemoveAt(playerIndex);
 					playerIndex--;
 

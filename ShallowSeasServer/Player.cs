@@ -70,7 +70,7 @@ namespace ShallowSeasServer
 
 				for (int i=0; i<3; i++)
 				{
-					Log.log(Log.Category.GameEvent, "Player {0} caught {1} fish of type {2}", m_id, msg.FishCaught[i], i);
+					Log.log(Log.Category.GameEvent, "Player {0} caught {1} fish of type {2}", Name, msg.FishCaught[i], i);
 				}
 
 				m_client.sendMessage(msg);
@@ -91,7 +91,7 @@ namespace ShallowSeasServer
 		{
 			if (m_castGear == null)
 			{
-				Log.log(Log.Category.GameEvent, "Player {0} set course {1}", m_id,
+				Log.log(Log.Category.GameEvent, "Player {0} set course {1}", Name,
 					string.Join("; ", (from p in msg.Course select p.ToString()).ToArray())
 				);
 
@@ -106,7 +106,7 @@ namespace ShallowSeasServer
 
 		private void handleCastGear(ClientWrapper client, RequestCastGear msg)
 		{
-			Log.log(Log.Category.GameEvent, "Player {0} cast gear {1} at {2}", m_id, msg.GearName, msg.Position);
+			Log.log(Log.Category.GameEvent, "Player {0} cast gear {1} at {2}", Name, msg.GearName, msg.Position);
 			m_castGear = msg.GearName;
 			m_castPos = msg.Position;
 			m_castStartTime = m_game.CurrentTimestamp;

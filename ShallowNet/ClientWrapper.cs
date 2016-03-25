@@ -166,12 +166,25 @@ namespace ShallowNet
 						DebugLog.WriteLine("Received: {0}", str);
 						m_readBuffer.Clear();
 
-						Message msg = JSON.ToObject<Message>(str);
-						DebugLog.WriteLine("Received message {0}", msg);
-
-						lock (m_messagesReceived)
+						Message msg = null;
+						try
 						{
-							m_messagesReceived.Add(msg);
+							msg = JSON.ToObject<Message>(str);
+						}
+						catch (Exception)
+						{
+							System.Diagnostics.Debug.WriteLine("Malformed JSON message");
+							// TODO do something about this
+						}
+
+						if (msg != null)
+						{
+							DebugLog.WriteLine("Received message {0}", msg);
+
+							lock (m_messagesReceived)
+							{
+								m_messagesReceived.Add(msg);
+							}
 						}
 					}
 				}

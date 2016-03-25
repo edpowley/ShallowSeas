@@ -76,26 +76,29 @@ namespace ShallowSeasServer
 
 		static internal void log(Category category, string message)
 		{
-			Color color;
-			if (!s_categoryColours.TryGetValue(category, out color))
-				color = Color.DarkGray;
-
-			if (category != Category.Debug)
+			lock(s_logWriter)
 			{
-				ShallowSeasServer.s_mainForm.logWriteLine(color, message);
-			}
+				Color color;
+				if (!s_categoryColours.TryGetValue(category, out color))
+					color = Color.DarkGray;
+
+				if (category != Category.Debug)
+				{
+					ShallowSeasServer.s_mainForm.logWriteLine(color, message);
+				}
 
 
-			if (s_logWriter != null)
-			{
-				string encodedMsg = message
-					.Replace("&", "&amp;")
-					.Replace("<", "&lt;")
-					.Replace(">", "&gt;")
-					.Replace("\r\n", "\n")
-					.Replace("\n", "<br />");
+				if (s_logWriter != null)
+				{
+					string encodedMsg = message
+						.Replace("&", "&amp;")
+						.Replace("<", "&lt;")
+						.Replace(">", "&gt;")
+						.Replace("\r\n", "\n")
+						.Replace("\n", "<br />");
 
-				s_logWriter.WriteLine("<div class=\"message {0}\"><span class=\"timestamp\">{1}</span> {2}</div>", category, DateTime.Now, encodedMsg);
+					s_logWriter.WriteLine("<div class=\"message {0}\"><span class=\"timestamp\">{1}</span> {2}</div>", category, DateTime.Now, encodedMsg);
+				}
 			}
 		}
 
