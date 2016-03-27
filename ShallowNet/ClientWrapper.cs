@@ -207,7 +207,14 @@ namespace ShallowNet
 
 							lock (m_messagesReceived)
 							{
-								m_messagesReceived.Add(msg);
+								if (msg is CompoundMessage)
+								{
+									m_messagesReceived.AddRange(unpackCompoundMessage((CompoundMessage)msg));
+								}
+								else
+								{
+									m_messagesReceived.Add(msg);
+								}
 							}
 						}
 					}
