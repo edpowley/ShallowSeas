@@ -220,7 +220,7 @@ namespace ShallowNet
 					}
 				}
 
-				Thread.Sleep(0);
+				Thread.Sleep(1000 / 60);
 			}
 
 			Connected = false;

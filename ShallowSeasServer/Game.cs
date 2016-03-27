@@ -175,7 +175,7 @@ namespace ShallowSeasServer
                     player.update();
                 }
 
-                Thread.Sleep(0);
+				Thread.Sleep(1000 / 60);
             }
         }
 
