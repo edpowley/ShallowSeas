@@ -16,8 +16,6 @@ namespace ShallowSeasServer
         public string Name { get; set; }
         public float m_colourH, m_colourS, m_colourV;
 
-        public bool m_waitingForSceneLoad = false;
-
         private List<SNVector2> m_currentCourse = null;
         private float m_courseStartTime;
 

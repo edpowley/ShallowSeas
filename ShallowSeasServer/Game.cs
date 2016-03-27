@@ -179,18 +179,6 @@ namespace ShallowSeasServer
             }
         }
 
-        void handleSceneLoaded(ClientWrapper client, SceneLoaded msg)
-        {
-            Player player = m_players.Single(p => p.m_client == client);
-            player.m_waitingForSceneLoad = false;
-
-            if (m_players.All(p => p.m_waitingForSceneLoad == false))
-            {
-                Log.log(Log.Category.GameStatus, "All players are in game");
-                startGame();
-            }
-        }
-
         void startGame()
         {
             initLogFile();

@@ -80,10 +80,6 @@ namespace ShallowNet
         public string PlayerId { get; set; }
     }
 
-    public class SceneLoaded : ClientToServerMessage
-    {
-    }
-
     public class RequestCourse : ClientToServerMessage
     {
         public List<SNVector2> Course { get; set; }

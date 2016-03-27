@@ -93,7 +93,6 @@ public class GameManager : MonoBehaviour
         client.addMessageHandler<InformFishDensity>(this, handleInformFishDensity);
         client.addMessageHandler<PlayerJoined>(this, handlePlayerJoined);
         client.addMessageHandler<PlayerLeft>(this, handlePlayerLeft);
-        client.sendMessage(new SceneLoaded());
     }
 
     public void OnDestroy()
