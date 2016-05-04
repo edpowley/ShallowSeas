@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using ShallowNet;
 
 public class DebugFishDensityDisplay : MonoBehaviour
 {
@@ -16,21 +17,29 @@ public class DebugFishDensityDisplay : MonoBehaviour
         m_isShown = false;
     }
 
-    private void showOrHide(bool show)
-    {
-        m_isShown = show;
-        m_renderer.enabled = m_isShown;
-        //m_waterRenderer.enabled = !m_isShown;
+	private void showOrHide(bool show)
+	{
+		m_isShown = show;
+		m_renderer.enabled = m_isShown;
+		//m_waterRenderer.enabled = !m_isShown;
+		transform.position = new Vector3(GameManager.Instance.MapWidth * 0.5f, transform.position.y, GameManager.Instance.MapHeight * 0.5f);
+		transform.localScale = 0.1f * new Vector3(GameManager.Instance.MapWidth, GameManager.Instance.MapWidth, GameManager.Instance.MapHeight);
 
-        if (m_isShown && m_texture == null)
-        {
-            m_texture = new Texture2D(GameManager.Instance.MapWidth, GameManager.Instance.MapHeight, TextureFormat.ARGB32, /*mipmap*/ false);
-            m_texture.filterMode = FilterMode.Point;
+		if (m_isShown && m_texture == null)
+		{
+			m_texture = new Texture2D(GameManager.Instance.MapWidth, GameManager.Instance.MapHeight, TextureFormat.ARGB32, /*mipmap*/ false);
+			m_texture.filterMode = FilterMode.Point;
 
-            m_renderer.material.mainTexture = m_texture;
-            m_renderer.material.renderQueue = 3100;
-        }
-    }
+			m_renderer.material.mainTexture = m_texture;
+			m_renderer.material.renderQueue = 3100;
+		}
+
+		if (m_isShown)
+		{
+			RequestFishDensity msg = new RequestFishDensity() { X = 0, Y = 0, Width = GameManager.Instance.MapWidth, Height = GameManager.Instance.MapHeight };
+			MyNetworkManager.Instance.m_client.sendMessage(msg);
+		}
+	}
 
     void Update()
     {

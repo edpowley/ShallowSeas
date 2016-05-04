@@ -191,7 +191,7 @@ public class Boat : MonoBehaviour
         {
             if (GameManager.Instance.getFishDensity(CurrentCell) == null)
             {
-                RequestFishDensity msg = new RequestFishDensity() { X = CurrentCell.X, Y = CurrentCell.Y };
+                RequestFishDensity msg = new RequestFishDensity() { X = CurrentCell.X, Y = CurrentCell.Y, Width = 1, Height = 1 };
                 MyNetworkManager.Instance.m_client.sendMessage(msg);
             }
         }

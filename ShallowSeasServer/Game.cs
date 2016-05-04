@@ -78,7 +78,7 @@ namespace ShallowSeasServer
         private SNVector2 getNextInitialPosition()
         {
             float angle = m_nextInitialPositionIndex * (float)Math.PI / 4.0f;
-            float radius = 1.0f + m_nextInitialPositionIndex / 8.0f;
+			float radius = Math.Min(m_nextInitialPositionIndex / 16.0f, 1.0f);
             m_nextInitialPositionIndex++;
             return new SNVector2(
                 m_startCell.x + radius * (float)Math.Cos(angle),

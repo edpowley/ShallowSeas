@@ -69,7 +69,7 @@ namespace ShallowNet
         public List<PlayerInfo> Players { get; set; }
 		public int MapWidth { get; set; }
 		public int MapHeight { get; set; }
-		public string MapWater { get; set; }
+		public string MapWater { get; set; } // Base64 encoded bools
     }
 
     public class PlayerJoined : ServerToClientMessage
@@ -134,15 +134,19 @@ namespace ShallowNet
 
     public class RequestFishDensity : ClientToServerMessage
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-    }
+		public int X { get; set; }
+		public int Y { get; set; }
+		public int Width { get; set; }
+		public int Height { get; set; }
+	}
 
-    public class InformFishDensity : ServerToClientMessage
+	public class InformFishDensity : ServerToClientMessage
     {
         public int X { get; set; }
         public int Y { get; set; }
+		public int Width { get; set; }
+		public int Height { get; set; }
 
-        public List<float> Density { get; set; }
+		public string Density { get; set; } // Base64 encoded bytes
     }
 }

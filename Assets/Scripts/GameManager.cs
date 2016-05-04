@@ -182,8 +182,27 @@ public class GameManager : MonoBehaviour
 
     private void handleInformFishDensity(ClientWrapper client, InformFishDensity msg)
     {
-        Debug.LogFormat("Setting density at {0},{1} to {2}", msg.X, msg.Y, msg.Density);
-        m_fishDensity[msg.X, msg.Y] = msg.Density;
+		byte[] bytes = Convert.FromBase64String(msg.Density);
+
+		for (int dx = 0; dx < msg.Width; dx++)
+		{
+			if (msg.X + dx < 0 || msg.X + dx >= MapWidth)
+				continue;
+
+			for (int dy = 0; dy < msg.Height; dy++)
+			{
+				if (msg.Y + dy < 0 || msg.Y + dy >= MapHeight)
+					continue;
+
+				List<float> density = new List<float>(Enumerable.Repeat(0.0f, c_numFishTypes));
+				m_fishDensity[msg.X + dx, msg.Y + dy] = density;
+				for (int i = 0; i < c_numFishTypes; i++)
+				{
+					int byteIndex = (dy * msg.Width + dx) * c_numFishTypes + i;
+					density[i] = bytes[byteIndex] / 255.0f;
+				}
+			}
+		}
     }
 
 	private bool[,] getMapWaterFromBase64(WelcomePlayer msg)
