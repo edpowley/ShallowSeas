@@ -11,7 +11,9 @@ public class MyNetworkManager : MonoBehaviour
 
     internal ClientWrapper m_client = null;
 
-    internal string LocalPlayerId { get; private set; }
+	internal WelcomePlayer m_welcomeMsg = null;
+
+	internal string LocalPlayerId { get; private set; }
     internal List<PlayerInfo> m_players = new List<PlayerInfo>();
 
     internal PlayerInfo LocalPlayer { get { return m_players.Single(p => p.Id == LocalPlayerId); } }
@@ -77,6 +79,7 @@ public class MyNetworkManager : MonoBehaviour
         Debug.LogFormat("Joined as player id {0}", msg.PlayerId);
         LocalPlayerId = msg.PlayerId;
         m_players = msg.Players;
+		m_welcomeMsg = msg;
 
         SceneManager.LoadScene((int)Level.MainGame);
     }

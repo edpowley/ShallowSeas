@@ -24,7 +24,7 @@ public class DebugFishDensityDisplay : MonoBehaviour
 
         if (m_isShown && m_texture == null)
         {
-            m_texture = new Texture2D(GameManager.c_gridWidth, GameManager.c_gridHeight, TextureFormat.ARGB32, /*mipmap*/ false);
+            m_texture = new Texture2D(GameManager.Instance.MapWidth, GameManager.Instance.MapHeight, TextureFormat.ARGB32, /*mipmap*/ false);
             m_texture.filterMode = FilterMode.Point;
 
             m_renderer.material.mainTexture = m_texture;
@@ -45,12 +45,12 @@ public class DebugFishDensityDisplay : MonoBehaviour
 
     private void updateTexture()
     {
-        Color32[] colours = new Color32[GameManager.c_gridWidth * GameManager.c_gridHeight];
+        Color32[] colours = new Color32[GameManager.Instance.MapWidth * GameManager.Instance.MapHeight];
         Color32 transparent = new Color32(0, 0, 0, 0);
 
-        for (int x = 0; x < GameManager.c_gridWidth; x++)
+        for (int x = 0; x < GameManager.Instance.MapWidth; x++)
         {
-            for (int y = 0; y < GameManager.c_gridHeight; y++)
+            for (int y = 0; y < GameManager.Instance.MapHeight; y++)
             {
                 List<float> density = GameManager.Instance.getFishDensity(x, y);
                 Color32 colour;
@@ -66,7 +66,7 @@ public class DebugFishDensityDisplay : MonoBehaviour
                     colour = transparent;
                 }
 
-                colours[x + y * GameManager.c_gridWidth] = colour;
+                colours[x + y * GameManager.Instance.MapWidth] = colour;
             }
         }
 

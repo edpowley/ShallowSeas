@@ -67,6 +67,9 @@ namespace ShallowNet
     {
         public string PlayerId { get; set; }
         public List<PlayerInfo> Players { get; set; }
+		public int MapWidth { get; set; }
+		public int MapHeight { get; set; }
+		public string MapWater { get; set; }
     }
 
     public class PlayerJoined : ServerToClientMessage

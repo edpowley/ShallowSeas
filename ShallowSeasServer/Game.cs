@@ -19,6 +19,10 @@ namespace ShallowSeasServer
         private List<Player> m_players = new List<Player>();
         public DateTime m_lastPingTime = DateTime.FromFileTime(0);
 
+		private int m_mapWidth, m_mapHeight;
+		private bool[,] m_isWater;
+		private SNVector2 m_startCell;
+
         private List<float>[,] m_fishDensity;
 
         private bool m_quit = false;
@@ -70,7 +74,6 @@ namespace ShallowSeasServer
         }
 
         private int m_nextInitialPositionIndex = 0;
-        static SNVector2 c_initialPosCentre = new SNVector2(132.5f, 127.5f);
 
         private SNVector2 getNextInitialPosition()
         {
@@ -78,8 +81,8 @@ namespace ShallowSeasServer
             float radius = 1.0f + m_nextInitialPositionIndex / 8.0f;
             m_nextInitialPositionIndex++;
             return new SNVector2(
-                c_initialPosCentre.x + radius * (float)Math.Cos(angle),
-                c_initialPosCentre.y + radius * (float)Math.Sin(angle)
+                m_startCell.x + radius * (float)Math.Cos(angle),
+				m_startCell.y + radius * (float)Math.Sin(angle)
             );
         }
 
@@ -93,7 +96,7 @@ namespace ShallowSeasServer
             updatePlayerColours();
 
             CompoundMessage welcomeMsg = new CompoundMessage();
-            welcomeMsg.Messages.Add(new WelcomePlayer() { PlayerId = player.m_id, Players = getPlayerInfoList() });
+			welcomeMsg.Messages.Add(new WelcomePlayer() { PlayerId = player.m_id, Players = getPlayerInfoList(), MapWidth = m_mapWidth, MapHeight = m_mapHeight, MapWater = getMapWaterAsBase64() });
             foreach (Player otherPlayer in m_players)
             {
                 welcomeMsg.Messages.AddRange(otherPlayer.getStatusSyncMessages());
@@ -182,27 +185,52 @@ namespace ShallowSeasServer
         void startGame()
         {
             initLogFile();
-
+			loadMap();
             loadFishDensityMap();
-
             m_startTime = DateTime.Now;
         }
 
-        IEnumerable<SNVector2> getStartPositions(SNVector2 centre, float radius, int numPlayers)
-        {
-            if (numPlayers == 0)
-                yield break;
-            else if (numPlayers == 1)
-                yield return centre;
-            else
-            {
-                for (int i = 0; i < numPlayers; i++)
-                {
-                    float angle = (float)i / numPlayers * 2.0f * (float)Math.PI;
-                    yield return centre + radius * new SNVector2((float)Math.Cos(angle), (float)Math.Sin(angle));
-                }
-            }
-        }
+		void loadMap()
+		{
+			Bitmap bmp = new Bitmap("water.png");
+			m_mapWidth = bmp.Width;
+			m_mapHeight = bmp.Height;
+			m_isWater = new bool[m_mapWidth, m_mapHeight];
+
+			for (int x = 0; x < m_mapWidth; x++)
+			{
+				for (int y = 0; y < m_mapHeight; y++)
+				{
+					Color pixel = bmp.GetPixel(x, m_mapHeight - 1 - y);
+					m_isWater[x, y] = (pixel.B > 128);
+					if (pixel.R < 128 && pixel.G > 128 && pixel.B < 128) // green
+					{
+						m_isWater[x, y] = true;
+						m_startCell = new SNVector2(x + 0.5f, y + 0.5f);
+					}
+				}
+			}
+		}
+
+		string getMapWaterAsBase64()
+		{
+			byte[] bytes = new byte[m_mapWidth * m_mapHeight / 8 + 1];
+			for (int x = 0; x < m_mapWidth; x++)
+			{
+				for (int y = 0; y < m_mapHeight; y++)
+				{
+					if (m_isWater[x, y])
+					{
+						int bitIndex = y * m_mapWidth + x;
+						int byteIndex = bitIndex / 8;
+						bitIndex = bitIndex % 8;
+						byte mask = (byte)(1 << bitIndex);
+						bytes[byteIndex] |= mask;
+					}
+				}
+			}
+			return Convert.ToBase64String(bytes);
+		}
 
         void loadFishDensityMap()
         {

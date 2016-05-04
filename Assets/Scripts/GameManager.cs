@@ -11,12 +11,12 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    internal const int c_gridWidth = 256;
-    internal const int c_gridHeight = 256;
     internal const int c_numFishTypes = 3;
 
-    private bool[,] m_isWater = new bool[c_gridWidth, c_gridHeight];
-    private List<float>[,] m_fishDensity = new List<float>[c_gridWidth, c_gridHeight];
+	internal int MapWidth { get; private set; }
+	internal int MapHeight { get; private set; }
+	private bool[,] m_isWater;
+    private List<float>[,] m_fishDensity;
 
     public string[] FishNames = new string[] { "red fish", "green fish", "blue fish" };
 
@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
 
     internal bool isWater(int x, int y)
     {
-        if (x < 0 || x >= c_gridWidth || y < 0 || y >= c_gridHeight)
+        if (x < 0 || x >= MapWidth || y < 0 || y >= MapHeight)
             return false;
         else
             return m_isWater[x, y];
@@ -65,8 +65,8 @@ public class GameManager : MonoBehaviour
 
         // If the network manager isn't running, go back to the main menu
         // (shouldn't happen in game, but is useful for testing in the Unity editor)
-        //  if (MyNetworkManager.Instance == null)
-        //      StartCoroutine(returnToMainMenuAfterDelay(0.1f));
+        if (MyNetworkManager.Instance == null)
+            StartCoroutine(returnToMainMenuAfterDelay(0.1f));
     }
 
     private IEnumerator returnToMainMenuAfterDelay(float seconds)
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
-        initIsWater();
+        initMap();
 
         foreach (PlayerInfo player in MyNetworkManager.Instance.m_players)
         {
@@ -186,62 +186,50 @@ public class GameManager : MonoBehaviour
         m_fishDensity[msg.X, msg.Y] = msg.Density;
     }
 
-    private void initIsWater()
+	private bool[,] getMapWaterFromBase64(WelcomePlayer msg)
+	{
+		byte[] bytes = Convert.FromBase64String(msg.MapWater);
+		bool[,] result = new bool[msg.MapWidth, msg.MapHeight];
+
+		for (int x = 0; x < msg.MapWidth; x++)
+		{
+			for (int y = 0; y < msg.MapHeight; y++)
+			{
+				int bitIndex = y * msg.MapWidth + x;
+				int byteIndex = bitIndex / 8;
+				bitIndex = bitIndex % 8;
+				byte mask = (byte)(1 << bitIndex);
+				result[x, y] = ((bytes[byteIndex] & mask) == mask);
+			}
+		}
+
+		return result;
+	}
+
+    private void initMap()
     {
         Terrain terrain = Terrain.activeTerrain;
+		WelcomePlayer welcome = MyNetworkManager.Instance.m_welcomeMsg;
 
-        for (int x = 0; x < c_gridWidth; x++)
-        {
-            for (int y = 0; y < c_gridHeight; y++)
-            {
-                bool isWater = true;
+		MapWidth = welcome.MapWidth;
+		MapHeight = welcome.MapHeight;
+		m_isWater = getMapWaterFromBase64(welcome);
+		m_fishDensity = new List<float>[MapWidth, MapHeight];
 
-                for (float dx = 0.0f; dx <= 1.0f; dx += 0.5f)
-                    for (float dy = 0.0f; dy <= 1.0f; dy += 0.5f)
-                        isWater = isWater && (terrain.SampleHeight(new Vector3(x + dx, 0, y + dy)) < 16.0f);
+		terrain.terrainData.size = new Vector3(welcome.MapWidth, terrain.terrainData.size.y, welcome.MapHeight);
 
-                m_isWater[x, y] = isWater;
-            }
-        }
+		float[,] heightMap = new float[terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight];
+		for(int hx=0;hx< terrain.terrainData.heightmapWidth;hx++)
+		{
+			int wx = (int)((double)hx / terrain.terrainData.heightmapWidth *welcome.MapWidth);
+			for(int hy=0;hy< terrain.terrainData.heightmapHeight;hy++)
+			{
+				int wy = (int)((double)hy / terrain.terrainData.heightmapHeight * welcome.MapHeight);
+				heightMap[hy, hx] = 0.5f + (m_isWater[wx, wy] ? -1.0f : +1.0f) * 0.02f + UnityEngine.Random.Range(-1.0f, +1.0f) * 0.001f;
+			}
+		}
 
-        bool[,] reachable = getReachability(c_gridWidth / 2, c_gridHeight / 2);
-
-        for (int x = 0; x < c_gridWidth; x++)
-        {
-            for (int y = 0; y < c_gridHeight; y++)
-            {
-                m_isWater[x, y] = m_isWater[x, y] && reachable[x, y];
-            }
-        }
-    }
-
-    private bool[,] getReachability(int startX, int startY)
-    {
-        bool[,] result = new bool[c_gridWidth, c_gridHeight];
-        Stack<Vector2> stack = new Stack<Vector2>();
-        stack.Push(new Vector2(startX, startY));
-
-        while (stack.Count > 0)
-        {
-            Vector2 p = stack.Pop();
-            int x = (int)p.x;
-            int y = (int)p.y;
-            result[x, y] = true;
-
-            if (x > 0 && m_isWater[x - 1, y] && !result[x - 1, y])
-                stack.Push(new Vector2(x - 1, y));
-
-            if (y > 0 && m_isWater[x, y - 1] && !result[x, y - 1])
-                stack.Push(new Vector2(x, y - 1));
-
-            if (x < c_gridWidth - 1 && m_isWater[x + 1, y] && !result[x + 1, y])
-                stack.Push(new Vector2(x + 1, y));
-
-            if (y < c_gridHeight - 1 && m_isWater[x, y + 1] && !result[x, y + 1])
-                stack.Push(new Vector2(x, y + 1));
-        }
-
-        return result;
+		terrain.terrainData.SetHeights(0, 0, heightMap);
     }
 
     internal List<float> getFishDensity(int x, int y)

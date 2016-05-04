@@ -33,9 +33,6 @@ public class CameraZoom : MonoBehaviour
     /// </summary>
     public Vector3 Offset = new Vector3(0, 2, -4);
 
-    public float MidZoomY = 100;
-    public Vector2 MaxZoomHalfArea = 0.5f * new Vector2(GameManager.c_gridWidth, GameManager.c_gridHeight);
-
     void Start()
     {
         m_camera = GetComponent<Camera>();
@@ -78,10 +75,13 @@ public class CameraZoom : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.LocalPlayerBoat != null)
             targetPos = GameManager.Instance.LocalPlayerBoat.transform.position;
         else
-            targetPos = new Vector3(GameManager.c_gridWidth / 2, 0, GameManager.c_gridHeight / 2);
+            targetPos = new Vector3(GameManager.Instance.MapWidth / 2, 0, GameManager.Instance.MapHeight / 2);
 
-        // Update camera position and rotation
-        Vector3 lowZoomPos = new Vector3(targetPos.x, Mathf.Clamp01(Zoom) * MidZoomY, targetPos.z) + Offset;
+		float maxZoomY = 0.5f * GameManager.Instance.MapHeight / Mathf.Tan(0.5f * m_camera.fieldOfView * Mathf.Deg2Rad);
+		float midZoomY = 0.5f * maxZoomY;
+
+		// Update camera position and rotation
+		Vector3 lowZoomPos = new Vector3(targetPos.x, Mathf.Clamp01(Zoom) * midZoomY, targetPos.z) + Offset;
 
         if (Zoom <= 1.0f)
         {
@@ -90,8 +90,7 @@ public class CameraZoom : MonoBehaviour
         }
         else
         {
-            float maxZoomY = MaxZoomHalfArea.y / Mathf.Tan(0.5f * m_camera.fieldOfView * Mathf.Deg2Rad);
-            Vector3 maxZoomPos = new Vector3(GameManager.c_gridWidth * 0.5f, maxZoomY, GameManager.c_gridHeight * 0.5f);
+            Vector3 maxZoomPos = new Vector3(GameManager.Instance.MapWidth * 0.5f, maxZoomY, GameManager.Instance.MapHeight * 0.5f);
 
             transform.position = Vector3.Lerp(lowZoomPos, maxZoomPos, Zoom - 1);
 
