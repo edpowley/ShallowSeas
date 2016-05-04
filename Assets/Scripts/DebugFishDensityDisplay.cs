@@ -15,6 +15,8 @@ public class DebugFishDensityDisplay : MonoBehaviour
     {
         m_renderer = GetComponent<Renderer>();
         m_isShown = false;
+
+		StartCoroutine(refresh());
     }
 
 	private void showOrHide(bool show)
@@ -22,22 +24,30 @@ public class DebugFishDensityDisplay : MonoBehaviour
 		m_isShown = show;
 		m_renderer.enabled = m_isShown;
 		//m_waterRenderer.enabled = !m_isShown;
-		transform.position = new Vector3(GameManager.Instance.MapWidth * 0.5f, transform.position.y, GameManager.Instance.MapHeight * 0.5f);
+		transform.position = new Vector3(GameManager.Instance.MapWidth * 0.5f + 0.125f, transform.position.y, GameManager.Instance.MapHeight * 0.5f + 0.125f);
 		transform.localScale = 0.1f * new Vector3(GameManager.Instance.MapWidth, GameManager.Instance.MapWidth, GameManager.Instance.MapHeight);
 
 		if (m_isShown && m_texture == null)
 		{
-			m_texture = new Texture2D(GameManager.Instance.MapWidth, GameManager.Instance.MapHeight, TextureFormat.ARGB32, /*mipmap*/ false);
+			m_texture = new Texture2D(GameManager.Instance.MapWidth * 4, GameManager.Instance.MapHeight * 4, TextureFormat.ARGB32, /*mipmap*/ false);
 			m_texture.filterMode = FilterMode.Point;
 
 			m_renderer.material.mainTexture = m_texture;
 			m_renderer.material.renderQueue = 3100;
 		}
+	}
 
-		if (m_isShown)
+	private IEnumerator refresh()
+	{
+		while (true)
 		{
-			RequestFishDensity msg = new RequestFishDensity() { X = 0, Y = 0, Width = GameManager.Instance.MapWidth, Height = GameManager.Instance.MapHeight };
-			MyNetworkManager.Instance.m_client.sendMessage(msg);
+			yield return new WaitForSeconds(0.5f);
+
+			if (m_isShown)
+			{
+				RequestFishDensity msg = new RequestFishDensity() { X = 0, Y = 0, Width = GameManager.Instance.MapWidth, Height = GameManager.Instance.MapHeight };
+				MyNetworkManager.Instance.m_client.sendMessage(msg);
+			}
 		}
 	}
 
@@ -54,7 +64,7 @@ public class DebugFishDensityDisplay : MonoBehaviour
 
     private void updateTexture()
     {
-        Color32[] colours = new Color32[GameManager.Instance.MapWidth * GameManager.Instance.MapHeight];
+        Color32[] colours = new Color32[GameManager.Instance.MapWidth * GameManager.Instance.MapHeight * 4 * 4];
         Color32 transparent = new Color32(0, 0, 0, 0);
 
         for (int x = 0; x < GameManager.Instance.MapWidth; x++)
@@ -62,20 +72,20 @@ public class DebugFishDensityDisplay : MonoBehaviour
             for (int y = 0; y < GameManager.Instance.MapHeight; y++)
             {
                 List<float> density = GameManager.Instance.getFishDensity(x, y);
-                Color32 colour;
-                if (density != null)
-                {
-                    colour.r = (byte)(Mathf.Clamp01(density[0]) * 255);
-                    colour.g = (byte)(Mathf.Clamp01(density[1]) * 255);
-                    colour.b = (byte)(Mathf.Clamp01(density[2]) * 255);
-                    colour.a = 255;
-                }
-                else
-                {
-                    colour = transparent;
-                }
-
-                colours[x + y * GameManager.Instance.MapWidth] = colour;
+				if (density != null)
+				{
+					for (int i = 0; i < density.Count; i++)
+					{
+						int px = x * 4 + (i % 3);
+						int py = y * 4 + (i / 3);
+						Color32 colour;
+						colour.r = (byte)(Mathf.Clamp01(density[i]) * 1000);
+						colour.g = colour.r;
+						colour.b = colour.r;
+						colour.a = 255;
+						colours[py * GameManager.Instance.MapWidth * 4 + px] = colour;
+					}
+				}
             }
         }
 

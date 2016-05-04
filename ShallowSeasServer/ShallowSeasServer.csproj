@@ -43,6 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EcologicalModel.cs" />
+    <Compile Include="EcologicalModel_Move.cs" />
+    <Compile Include="EcologicalModel_Leslie.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

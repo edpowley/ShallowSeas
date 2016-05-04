@@ -23,7 +23,7 @@ namespace ShallowSeasServer
 		private bool[,] m_isWater;
 		private SNVector2 m_startCell;
 
-        private List<float>[,] m_fishDensity;
+		private EcologicalModel m_ecologicalModel;
 
         private bool m_quit = false;
         public void quit() { m_quit = true; }
@@ -161,6 +161,8 @@ namespace ShallowSeasServer
         {
             startGame();
 
+			float lastModelUpdate = 0;
+
             m_quit = false;
             while (!m_quit)
             {
@@ -178,6 +180,12 @@ namespace ShallowSeasServer
                     player.update();
                 }
 
+				if (CurrentTimestamp - lastModelUpdate > 1)
+				{
+					m_ecologicalModel.iterate();
+					lastModelUpdate = CurrentTimestamp;
+				}
+
 				Thread.Sleep(1000 / 60);
             }
         }
@@ -186,7 +194,7 @@ namespace ShallowSeasServer
         {
             initLogFile();
 			loadMap();
-            loadFishDensityMap();
+			m_ecologicalModel = new EcologicalModel();
             m_startTime = DateTime.Now;
         }
 
@@ -232,24 +240,19 @@ namespace ShallowSeasServer
 			return Convert.ToBase64String(bytes);
 		}
 
-        void loadFishDensityMap()
-        {
-            Bitmap bmp = new Bitmap("FishDensity.png");
-
-            m_fishDensity = new List<float>[bmp.Width, bmp.Height];
-            for (int x = 0; x < bmp.Width; x++)
-            {
-                for (int y = 0; y < bmp.Height; y++)
-                {
-                    Color pixel = bmp.GetPixel(x, bmp.Height - 1 - y);
-                    m_fishDensity[x, y] = new List<float>() { pixel.R / 255.0f, pixel.G / 255.0f, pixel.B / 255.0f };
-                }
-            }
-        }
-
         public List<float> getFishDensity(int x, int y)
         {
-            return m_fishDensity[x, y];
+			if (x >= 0 && x < m_mapWidth && y >= 0 && y < m_mapHeight)
+			{
+				List<float> result = new List<float>();
+				for (int i = 0; i < 3; i++)
+					result.Add((float)m_ecologicalModel.getDensity(0, i, x, y) / 100.0f);
+				return result;
+			}
+			else
+			{
+				return new List<float> { 0, 0, 0 };
+			}
         }
 
         StreamWriter m_logWriter = null;
