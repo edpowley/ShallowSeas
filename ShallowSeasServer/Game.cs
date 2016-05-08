@@ -15,6 +15,8 @@ namespace ShallowSeasServer
     {
         internal Random m_rnd = new Random();
 
+		internal GameSettings m_settings;
+
         private List<ClientWrapper> m_pendingClients = new List<ClientWrapper>();
         private List<Player> m_players = new List<Player>();
         public DateTime m_lastPingTime = DateTime.FromFileTime(0);
@@ -96,7 +98,14 @@ namespace ShallowSeasServer
             updatePlayerColours();
 
             CompoundMessage welcomeMsg = new CompoundMessage();
-			welcomeMsg.Messages.Add(new WelcomePlayer() { PlayerId = player.m_id, Players = getPlayerInfoList(), MapWidth = m_mapWidth, MapHeight = m_mapHeight, MapWater = getMapWaterAsBase64() });
+			welcomeMsg.Messages.Add(new WelcomePlayer() {
+				PlayerId = player.m_id,
+				Players = getPlayerInfoList(),
+				Settings = m_settings,
+				MapWidth = m_mapWidth,
+				MapHeight = m_mapHeight,
+				MapWater = getMapWaterAsBase64()
+			});
             foreach (Player otherPlayer in m_players)
             {
                 welcomeMsg.Messages.AddRange(otherPlayer.getStatusSyncMessages());
@@ -192,6 +201,9 @@ namespace ShallowSeasServer
 
         void startGame()
         {
+			string settingsText = System.IO.File.ReadAllText("GameSettings.json");
+			m_settings = fastJSON.JSON.ToObject<GameSettings>(settingsText);
+
             initLogFile();
 			loadMap();
 			m_ecologicalModel = new EcologicalModel();
@@ -240,20 +252,18 @@ namespace ShallowSeasServer
 			return Convert.ToBase64String(bytes);
 		}
 
-        public List<float> getFishDensity(int x, int y)
-        {
-			if (x >= 0 && x < m_mapWidth && y >= 0 && y < m_mapHeight)
+		public Dictionary<FishType, float> getFishDensity(int x, int y)
+		{
+			Dictionary<FishType, float> result = new Dictionary<FishType, float>();
+			foreach (FishType ft in FishType.All)
 			{
-				List<float> result = new List<float>();
-				for (int i = 0; i < 3; i++)
-					result.Add((float)m_ecologicalModel.getDensity(0, i, x, y) / 100.0f);
-				return result;
+				if (x >= 0 && x < m_mapWidth && y >= 0 && y < m_mapHeight)
+					result.Add(ft, (float)m_ecologicalModel.getDensity(ft.species, ft.stage, x, y) / 100.0f);
+				else
+					result.Add(ft, 0.0f);
 			}
-			else
-			{
-				return new List<float> { 0, 0, 0 };
-			}
-        }
+			return result;
+		}
 
         StreamWriter m_logWriter = null;
         List<string> m_logPropertyNames = null;

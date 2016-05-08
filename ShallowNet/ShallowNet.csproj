@@ -48,6 +48,9 @@
     <Compile Include="fastJSON\JsonSerializer.cs" />
     <Compile Include="fastJSON\Reflection.cs" />
     <Compile Include="fastJSON\SafeDictionary.cs" />
+    <Compile Include="FishType.cs" />
+    <Compile Include="GameConstants.cs" />
+    <Compile Include="GameSettings.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SNVector2.cs" />

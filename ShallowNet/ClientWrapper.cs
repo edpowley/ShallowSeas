@@ -195,9 +195,9 @@ namespace ShallowNet
 						{
 							msg = JSON.ToObject<Message>(str);
 						}
-						catch (Exception)
+						catch (Exception err)
 						{
-							System.Diagnostics.Debug.WriteLine("Malformed JSON message");
+							DebugLog.WriteLine("Malformed JSON message: {0}", err.Message);
 							// TODO do something about this
 						}
 

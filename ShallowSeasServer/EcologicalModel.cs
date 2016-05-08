@@ -127,9 +127,8 @@ namespace ShallowSeasServer
 		* Global constants                                                              *
 		********************************************************************************/
 
-		private const int nspp = 2;         /*number of species: indexed 0,1                */
-		private const int nstage = 3;       /*maximum number of life stages: indexed 0,1,2  */
-		private const double tmax = 1000.0; /*time at which to end simulation               */
+		private const int nspp = ShallowNet.GameConstants.c_numFishSpecies;         /*number of species: indexed 0,1                */
+		private const int nstage = ShallowNet.GameConstants.c_numFishStages;        /*maximum number of life stages: indexed 0,1,2  */
 		private const double dt = 1.0;      /*time step                                     */
 		private const int xmax = 32;        /*number of cells along x coordinate            */
 		private const int ymax = 32;        /*number of cells along y coordinate            */

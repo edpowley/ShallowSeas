@@ -8,9 +8,9 @@ public class GearSelector : MonoBehaviour
 {
     private Dropdown m_dropdown;
 
-    private List<GearType> m_gearTypes;
+    private List<string> m_gearTypes;
 
-    internal GearType SelectedGearType
+    internal string SelectedGearType
     {
         get { return m_gearTypes[m_dropdown.value]; }
         set { m_dropdown.value = m_gearTypes.IndexOf(value); }
@@ -20,18 +20,16 @@ public class GearSelector : MonoBehaviour
     {
         m_dropdown = GetComponent<Dropdown>();
 
-        m_gearTypes = new List<GearType>(System.Enum.GetValues(typeof(GearType)).Cast<GearType>());
-        m_gearTypes.Remove(GearType.None);
+        m_gearTypes = new List<string>(from gear in GameManager.Instance.m_settings.gear select gear.name);
 
         m_dropdown.ClearOptions();
-        List<string> gearNames = new List<string>(from gear in m_gearTypes select GearInfo.getInfo(gear).m_gearName);
-        m_dropdown.AddOptions(gearNames);
+        m_dropdown.AddOptions(m_gearTypes);
         m_dropdown.value = 0;
     }
 
     public void Update()
     {
         if (GameManager.Instance.LocalPlayerBoat != null)
-            m_dropdown.interactable = (GameManager.Instance.LocalPlayerBoat.m_castGear == GearType.None);
+            m_dropdown.interactable = (GameManager.Instance.LocalPlayerBoat.m_castGear == null);
     }
 }

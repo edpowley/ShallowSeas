@@ -67,6 +67,7 @@ namespace ShallowNet
     {
         public string PlayerId { get; set; }
         public List<PlayerInfo> Players { get; set; }
+		public GameSettings Settings { get; set; }
 		public int MapWidth { get; set; }
 		public int MapHeight { get; set; }
 		public string MapWater { get; set; } // Base64 encoded bools
@@ -99,9 +100,6 @@ namespace ShallowNet
     {
         public SNVector2 Position { get; set; }
         public string GearName { get; set; }
-        public float CastDuration { get; set; }
-        public List<float> CatchMultipliers { get; set; }
-        public int MaxCatch { get; set; }
     }
 
     public class SetPlayerCastingGear : ServerToClientMessage
@@ -116,7 +114,7 @@ namespace ShallowNet
     public class NotifyCatch : ServerToClientMessage
     {
         public string PlayerId { get; set; }
-        public List<int> FishCaught { get; set; }
+        public Dictionary<FishType, float> FishCaught { get; set; }
     }
 
     public class RequestAnnounce : ClientToServerMessage

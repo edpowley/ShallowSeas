@@ -12,7 +12,7 @@ public class Boat : MonoBehaviour
 
     public string PlayerId { get; set; }
 
-    internal List<int> m_catch = new List<int>() { 0, 0, 0 };
+	internal Dictionary<FishType, float> m_catch;
 
     public UnityEngine.UI.Text m_nameLabel;
     public UnityEngine.UI.Text m_tooltipLabel;
@@ -32,6 +32,10 @@ public class Boat : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+		m_catch = new Dictionary<FishType, float>();
+		foreach (FishType ft in FishType.All)
+			m_catch.Add(ft, 0);
+
         var playerInfo = MyNetworkManager.Instance.getPlayerInfo(PlayerId);
         m_nameLabel.text = playerInfo.Name;
         m_nameLabel.color = Util.HSVToRGB(playerInfo.ColourH, playerInfo.ColourS, playerInfo.ColourV);
@@ -104,7 +108,7 @@ public class Boat : MonoBehaviour
 
     #region Casting
 
-    internal GearType m_castGear = GearType.None;
+    internal string m_castGear = null;
     internal float m_castStartTime, m_castEndTime;
 
     internal void setCasting(SetPlayerCastingGear msg)
@@ -115,7 +119,7 @@ public class Boat : MonoBehaviour
 
         transform.position = new Vector3(msg.Position.x, 0, msg.Position.y);
 
-        m_castGear = (GearType)System.Enum.Parse(typeof(GearType), msg.GearName);
+        m_castGear = msg.GearName;
         m_castStartTime = msg.StartTime;
         m_castEndTime = msg.EndTime;
     }
@@ -130,9 +134,9 @@ public class Boat : MonoBehaviour
         tooltipText += "\nCurrent catch: ";
         tooltipText += string.Join(", ", (from n in m_catch select n.ToString()).ToArray());
 
-        if (m_castGear != GearType.None)
+        if (m_castGear != null)
         {
-            tooltipText += string.Format("\nCurrently casting {0}", GearInfo.getInfo(m_castGear).m_gearName);
+            tooltipText += string.Format("\nCurrently casting {0}", m_castGear);
         }
 
         return tooltipText;
@@ -141,9 +145,9 @@ public class Boat : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_castGear != GearType.None && GameManager.Instance.CurrentTime > m_castEndTime)
+        if (m_castGear != null && GameManager.Instance.CurrentTime > m_castEndTime)
         {
-            m_castGear = GearType.None;
+            m_castGear = null;
             m_castStartTime = m_castEndTime = 0;
         }
 

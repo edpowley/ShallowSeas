@@ -71,19 +71,21 @@ public class DebugFishDensityDisplay : MonoBehaviour
         {
             for (int y = 0; y < GameManager.Instance.MapHeight; y++)
             {
-                List<float> density = GameManager.Instance.getFishDensity(x, y);
+                var density = GameManager.Instance.getFishDensity(x, y);
 				if (density != null)
 				{
-					for (int i = 0; i < density.Count; i++)
+					int i = 0;
+					foreach(FishType ft in FishType.All)
 					{
 						int px = x * 4 + (i % 3);
 						int py = y * 4 + (i / 3);
 						Color32 colour;
-						colour.r = (byte)(Mathf.Clamp01(density[i]) * 1000);
+						colour.r = (byte)(Mathf.Clamp01(density[ft]) * 1000);
 						colour.g = colour.r;
 						colour.b = colour.r;
 						colour.a = 255;
 						colours[py * GameManager.Instance.MapWidth * 4 + px] = colour;
+						i++;
 					}
 				}
             }

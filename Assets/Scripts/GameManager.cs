@@ -11,12 +11,12 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    internal const int c_numFishTypes = 3;
+	internal GameSettings m_settings;
 
 	internal int MapWidth { get; private set; }
 	internal int MapHeight { get; private set; }
 	private bool[,] m_isWater;
-    private List<float>[,] m_fishDensity;
+    private Dictionary<FishType, float>[,] m_fishDensity;
 
     public string[] FishNames = new string[] { "red fish", "green fish", "blue fish" };
 
@@ -77,6 +77,8 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
+		m_settings = MyNetworkManager.Instance.m_welcomeMsg.Settings;
+
         initMap();
 
         foreach (PlayerInfo player in MyNetworkManager.Instance.m_players)
@@ -153,24 +155,49 @@ public class GameManager : MonoBehaviour
     {
         Boat boat = m_playerBoats[msg.PlayerId];
 
-        for (int i = 0; i < msg.FishCaught.Count; i++)
+        foreach(var kv in msg.FishCaught)
         {
-            boat.m_catch[i] += msg.FishCaught[i];
+			boat.m_catch[kv.Key] += kv.Value;
         }
 
-        if (boat.isLocalPlayer)
-        {
-            RequestAnnounce announceMsg = new RequestAnnounce();
-            announceMsg.Message = string.Format("{0} caught {1} red fish, {2} green fish and {3} blue fish using {4}",
-                MyNetworkManager.Instance.getPlayerInfo(boat.PlayerId).Name,
-                msg.FishCaught[0], msg.FishCaught[1], msg.FishCaught[2],
-                boat.m_castGear);
-            announceMsg.Position = new SNVector2(boat.transform.position.x, boat.transform.position.z);
+		if (boat.isLocalPlayer)
+		{
+			List<string> parts = new List<string>();
+			foreach (FishType ft in FishType.All)
+			{
+				float fish = msg.FishCaught[ft];
+				if (fish > 0)
+				{
+					parts.Add(string.Format("{0} {1}", fish, ft));
+				}
+			}
 
-            GameManager.Instance.m_notification.PutMessage(
-                () => { MyNetworkManager.Instance.m_client.sendMessage(announceMsg); },
-                "You caught {0} red fish, {1} green fish and {2} blue fish", msg.FishCaught[0], msg.FishCaught[1], msg.FishCaught[2]);
-        }
+			string whatCaught = "";
+			for (int i = 0; i < parts.Count; i++)
+			{
+				if (i > 0)
+				{
+					if (i == parts.Count - 1)
+						whatCaught += " and ";
+					else
+						whatCaught += ", ";
+				}
+				whatCaught += parts[i];
+			}
+			if (whatCaught == "")
+				whatCaught = "nothing";
+
+			RequestAnnounce announceMsg = new RequestAnnounce();
+			announceMsg.Message = string.Format("{0} caught {1} using {2}",
+				MyNetworkManager.Instance.getPlayerInfo(boat.PlayerId).Name,
+				whatCaught,
+				boat.m_castGear);
+			announceMsg.Position = new SNVector2(boat.transform.position.x, boat.transform.position.z);
+
+			GameManager.Instance.m_notification.PutMessage(
+				() => { MyNetworkManager.Instance.m_client.sendMessage(announceMsg); },
+				"You caught {0}", whatCaught);
+		}
     }
 
     private void handleAnnounce(ClientWrapper client, Announce msg)
@@ -194,12 +221,17 @@ public class GameManager : MonoBehaviour
 				if (msg.Y + dy < 0 || msg.Y + dy >= MapHeight)
 					continue;
 
-				List<float> density = new List<float>(Enumerable.Repeat(0.0f, c_numFishTypes));
-				m_fishDensity[msg.X + dx, msg.Y + dy] = density;
-				for (int i = 0; i < c_numFishTypes; i++)
+				Dictionary<FishType, float> density = new Dictionary<FishType, float>();
+				foreach(FishType ft in FishType.All)
 				{
-					int byteIndex = (dy * msg.Width + dx) * c_numFishTypes + i;
-					density[i] = bytes[byteIndex] / 255.0f;
+					density.Add(ft, 0);
+				}
+				m_fishDensity[msg.X + dx, msg.Y + dy] = density;
+				int byteIndex = (dy * msg.Width + dx) * GameConstants.c_numFishSpecies * GameConstants.c_numFishStages;
+				foreach (FishType ft in FishType.All)
+				{
+					density[ft] = bytes[byteIndex] / 255.0f;
+					byteIndex++;
 				}
 			}
 		}
@@ -233,7 +265,7 @@ public class GameManager : MonoBehaviour
 		MapWidth = welcome.MapWidth;
 		MapHeight = welcome.MapHeight;
 		m_isWater = getMapWaterFromBase64(welcome);
-		m_fishDensity = new List<float>[MapWidth, MapHeight];
+		m_fishDensity = new Dictionary<FishType, float>[MapWidth, MapHeight];
 
 		terrain.terrainData.size = new Vector3(welcome.MapWidth, terrain.terrainData.size.y, welcome.MapHeight);
 
@@ -251,12 +283,12 @@ public class GameManager : MonoBehaviour
 		terrain.terrainData.SetHeights(0, 0, heightMap);
     }
 
-    internal List<float> getFishDensity(int x, int y)
+    internal Dictionary<FishType, float> getFishDensity(int x, int y)
     {
         return m_fishDensity[x, y];
     }
 
-    internal List<float> getFishDensity(IntVector2 cell)
+    internal Dictionary<FishType, float> getFishDensity(IntVector2 cell)
     {
         return m_fishDensity[cell.X, cell.Y];
     }

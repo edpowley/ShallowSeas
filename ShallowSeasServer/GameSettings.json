@@ -1,0 +1,30 @@
+{
+	"gear" : [
+		{
+			"name": "Big Net",
+			"castTime": 15,
+			"maxCatch": 25,
+			"catchMultiplier": {
+				"juvenile herring": 0,
+				"intermediate herring": 1,
+				"adult herring": 1,
+				"juvenile cod": 0,
+				"intermediate cod": 1,
+				"adult cod": 1
+			}
+		},
+		{
+			"name": "Small Net",
+			"castTime": 7.5,
+			"maxCatch": 10,
+			"catchMultiplier": {
+				"juvenile herring": 1,
+				"intermediate herring": 1,
+				"adult herring": 0,
+				"juvenile cod": 1,
+				"intermediate cod": 1,
+				"adult cod": 0
+			}
+		}
+	]
+}

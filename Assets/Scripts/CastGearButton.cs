@@ -16,16 +16,12 @@ public class CastGearButton : MonoBehaviour
     public void OnButtonClick()
     {
         GearSelector gearSelector = FindObjectOfType<GearSelector>();
-        GearType gearType = gearSelector.SelectedGearType;
-        GearInfo gear = GearInfo.getInfo(gearType);
+        string gearType = gearSelector.SelectedGearType;
 
         var msg = new ShallowNet.RequestCastGear();
         var boatPos = GameManager.Instance.LocalPlayerBoat.transform.position;
         msg.Position = new ShallowNet.SNVector2(boatPos.x, boatPos.z);
         msg.GearName = gearType.ToString();
-        msg.CastDuration = gear.m_castDuration;
-        msg.CatchMultipliers = gear.m_catchMultiplier;
-        msg.MaxCatch = gear.m_maxCatch;
 
         MyNetworkManager.Instance.m_client.sendMessage(msg);
     }
@@ -34,9 +30,9 @@ public class CastGearButton : MonoBehaviour
     {
         if (GameManager.Instance.LocalPlayerBoat != null)
         {
-            m_button.interactable = (GameManager.Instance.LocalPlayerBoat.m_castGear == GearType.None);
+            m_button.interactable = (GameManager.Instance.LocalPlayerBoat.m_castGear == null);
 
-            if (GameManager.Instance.LocalPlayerBoat.m_castGear != GearType.None)
+            if (GameManager.Instance.LocalPlayerBoat.m_castGear != null)
             {
                 float start = GameManager.Instance.LocalPlayerBoat.m_castStartTime;
                 float end = GameManager.Instance.LocalPlayerBoat.m_castEndTime;
