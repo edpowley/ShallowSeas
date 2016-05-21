@@ -19,7 +19,7 @@ namespace ShallowSeasServer
         static bool s_stopListening = false;
 
         internal static MainForm s_mainForm { get; private set; }
-        static Game s_game = new Game();
+        internal static Game s_game = new Game();
 
         static void listen(int port)
         {
@@ -55,6 +55,10 @@ namespace ShallowSeasServer
                 case "exit":
                     s_mainForm.Close();
                     break;
+
+				case "resetecology":
+					s_game.resetEcology();
+					break;
 
                 default:
                     Log.log(Log.Category.Error, "Unknown command '{0}'", command);

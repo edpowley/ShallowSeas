@@ -21,7 +21,8 @@ namespace ShallowSeasServer
         private List<Player> m_players = new List<Player>();
         public DateTime m_lastPingTime = DateTime.FromFileTime(0);
 
-		private int m_mapWidth, m_mapHeight;
+		internal int m_mapWidth { get; private set; }
+		internal int m_mapHeight { get; private set; }
 		private bool[,] m_isWater;
 		private SNVector2 m_startCell;
 
@@ -206,9 +207,14 @@ namespace ShallowSeasServer
 
             initLogFile();
 			loadMap();
-			m_ecologicalModel = new EcologicalModel();
+			m_ecologicalModel = new EcologicalModel(m_mapWidth, m_mapHeight, m_isWater);
             m_startTime = DateTime.Now;
         }
+
+		internal void resetEcology()
+		{
+			m_ecologicalModel = new EcologicalModel(m_mapWidth, m_mapHeight, m_isWater);
+		}
 
 		void loadMap()
 		{

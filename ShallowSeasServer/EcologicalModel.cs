@@ -127,11 +127,11 @@ namespace ShallowSeasServer
 		* Global constants                                                              *
 		********************************************************************************/
 
-		private const int nspp = ShallowNet.GameConstants.c_numFishSpecies;         /*number of species: indexed 0,1                */
-		private const int nstage = ShallowNet.GameConstants.c_numFishStages;        /*maximum number of life stages: indexed 0,1,2  */
+		internal const int nspp = ShallowNet.GameConstants.c_numFishSpecies;         /*number of species: indexed 0,1                */
+		internal const int nstage = ShallowNet.GameConstants.c_numFishStages;        /*maximum number of life stages: indexed 0,1,2  */
 		private const double dt = 1.0;      /*time step                                     */
-		private const int xmax = 32;        /*number of cells along x coordinate            */
-		private const int ymax = 32;        /*number of cells along y coordinate            */
+		internal readonly int xmax;	      /*number of cells along x coordinate            */
+		internal readonly int ymax;        /*number of cells along y coordinate            */
 		private const int nbrmax = 4;       /*number of neighbour cells                     */
 
 
@@ -151,11 +151,17 @@ namespace ShallowSeasServer
 		********************************************************************************/
 		class species_properties
 		{
-			internal double[,,] N = new double[nstage, xmax, ymax];          /*    species densities by life stage and grid cell     */
-			internal double[,,] newN = new double[nstage, xmax, ymax];       /*new species densities by life stage and grid cell     */
+			internal double[,,] N;          /*    species densities by life stage and grid cell     */
+			internal double[,,] newN;       /*new species densities by life stage and grid cell     */
 			internal double[] sumN = new double[nstage];                   /*    species densities by life stage summed over grid  */
 			internal double[,] leslie = new double[nstage, nstage];         /*matrix for dynamics -- Leslie-matrix-like             */
 			internal double[] move = new double[2];                        /*vector for movement between 2 cells                   */
+
+			internal species_properties(int xmax, int ymax)
+			{
+				N = new double[nstage, xmax, ymax];
+				newN = new double[nstage, xmax, ymax];
+			}
 		};
 
 		species_properties[] species = new species_properties[nspp];
@@ -163,11 +169,17 @@ namespace ShallowSeasServer
 		class community_properties
 		{
 			internal double[,] alpha = new double[nspp, nspp];              /*  interaction matrix of species                       */
-			internal double[,,] N = new double[nstage, xmax, ymax];          /*  community densities by life stage and grid cell     */
+			internal double[,,] N;          /*  community densities by life stage and grid cell     */
+
+			internal community_properties(int xmax, int ymax)
+			{
+				N = new double[nstage, xmax, ymax];
+			}
 		};
 
-		community_properties community = new community_properties();
+		community_properties community;
 
+		bool[,] m_isWater;
 
 		public double getDensity(int spec, int stage, int x, int y)
 		{
@@ -209,28 +221,42 @@ namespace ShallowSeasServer
 			for (x = 0; x < xmax; ++x)
 				for (y = 0; y < ymax; ++y)
 				{
-					/***species densities by cell and life stage***/
-					for (sp = 0; sp < nspp; ++sp)
-						switch (sp)
-						{
-							case 0: /*species 0*/
-								species[sp].N[0, x, y] = 50.0 * drand48();
-								species[sp].N[1, x, y] = 10.0 * drand48();
-								species[sp].N[2, x, y] = 0.0 * drand48();
-								break;
-
-							case 1:/*species 1*/
-								species[sp].N[0, x, y] = 20.0 * drand48();
-								species[sp].N[1, x, y] = 5.0 * drand48();
-								species[sp].N[2, x, y] = 1.0 * drand48();
-								break;
-						}
-
-					/***community densities by cell and life stage (summing over species)***/
-					for (i = 0; i < nstage; ++i)
+					if (m_isWater[x, y])
 					{
-						community.N[i, x, y] = 0.0;
-						for (sp = 0; sp < nspp; ++sp) community.N[i, x, y] += species[sp].N[i, x, y];
+						/***species densities by cell and life stage***/
+						for (sp = 0; sp < nspp; ++sp)
+							switch (sp)
+							{
+								case 0: /*species 0*/
+									species[sp].N[0, x, y] = 50.0 * drand48();
+									species[sp].N[1, x, y] = 10.0 * drand48();
+									species[sp].N[2, x, y] = 0.0 * drand48();
+									break;
+
+								case 1:/*species 1*/
+									species[sp].N[0, x, y] = 20.0 * drand48();
+									species[sp].N[1, x, y] = 5.0 * drand48();
+									species[sp].N[2, x, y] = 1.0 * drand48();
+									break;
+							}
+
+						/***community densities by cell and life stage (summing over species)***/
+						for (i = 0; i < nstage; ++i)
+						{
+							community.N[i, x, y] = 0.0;
+							for (sp = 0; sp < nspp; ++sp) community.N[i, x, y] += species[sp].N[i, x, y];
+						}
+					}
+					else
+					{
+						for (i = 0; i < nstage; i++)
+						{
+							for (sp = 0; sp < nspp; sp++)
+							{
+								species[sp].N[i, x, y] = 0;
+							}
+							community.N[i, x, y] = 0;
+						}
 					}
 				}
 		}
@@ -316,29 +342,34 @@ namespace ShallowSeasServer
 
 			for (x = 0; x < xmax; ++x)
 				for (y = 0; y < ymax; ++y)
-					for (i = 0; i < nstage; ++i)
-						for (nbr = 0; nbr < nbrmax; ++nbr)
-						{
-							/***coordinates of neighbour cell***/
-							neighbour_coords(x, y, nbr, out xnbr, out ynbr);
-
-							/***matrices for movement between cell x,y and cell xnbr, ynbr***/
-							switch (method_move)
+					if (m_isWater[x, y])
+						for (i = 0; i < nstage; ++i)
+							for (nbr = 0; nbr < nbrmax; ++nbr)
 							{
-								case 0: /*movement matrices: simplest stochastic matrix*/
+								/***coordinates of neighbour cell***/
+								neighbour_coords(x, y, nbr, out xnbr, out ynbr);
 
-									move0(t, i, x, y, xnbr, ynbr);
-									break;
+								if (m_isWater[xnbr, ynbr])
+								{
+
+									/***matrices for movement between cell x,y and cell xnbr, ynbr***/
+									switch (method_move)
+									{
+										case 0: /*movement matrices: simplest stochastic matrix*/
+
+											move0(t, i, x, y, xnbr, ynbr);
+											break;
+									}
+
+									/***loss to target cell from movement OUT to nbr cell***/
+									for (sp = 0; sp < nspp; ++sp)
+										species[sp].newN[i, x, y] -= species[sp].move[1] * species[sp].N[i, x, y];
+
+									/***gain to target cell from movement IN from nbr cell***/
+									for (sp = 0; sp < nspp; ++sp)
+										species[sp].newN[i, x, y] += species[sp].move[1] * species[sp].N[i, xnbr, ynbr];
+								}
 							}
-
-							/***loss to target cell from movement OUT to nbr cell***/
-							for (sp = 0; sp < nspp; ++sp)
-								species[sp].newN[i, x, y] -= species[sp].move[1] * species[sp].N[i, x, y];
-
-							/***gain to target cell from movement IN from nbr cell***/
-							for (sp = 0; sp < nspp; ++sp)
-								species[sp].newN[i, x, y] += species[sp].move[1] * species[sp].N[i, xnbr, ynbr];
-						}
 
 			/***update grid***/
 			for (x = 0; x < xmax; ++x)
@@ -402,10 +433,15 @@ namespace ShallowSeasServer
 			*/
 		}
 
-		public EcologicalModel()
+		public EcologicalModel(int mapWidth, int mapHeight, bool[,] isWater)
 		{
+			xmax = mapWidth;
+			ymax = mapHeight;
+			m_isWater = isWater;
+
 			for (int i = 0; i < nspp; i++)
-				species[i] = new species_properties();
+				species[i] = new species_properties(xmax, ymax);
+			community = new community_properties(xmax, ymax);
 
 			initialize_interactions();
 			initialize_spatial_densities();
