@@ -189,22 +189,19 @@ namespace ShallowSeasServer
 				Height = msg.Height
 			};
 
-			byte[] bytes = new byte[msg.Width * msg.Height * 6];
-			for (int dx = 0; dx < msg.Width; dx++)
+			reply.Density = new Base64Array_float();
+
+			for (int dy = 0; dy < msg.Height; dy++)
 			{
-				for (int dy = 0; dy < msg.Height; dy++)
+				for (int dx = 0; dx < msg.Width; dx++)
 				{
 					var density = m_game.getFishDensity(msg.X + dx, msg.Y + dy);
-					int byteIndex = (dy * msg.Width + dx) * GameConstants.c_numFishSpecies * GameConstants.c_numFishStages;
-					foreach(FishType ft in FishType.All)
+					foreach (FishType ft in FishType.All)
 					{
-						bytes[byteIndex] = (byte)(255 * Math.Max(0, Math.Min(density[ft], 1)));
-						byteIndex++;
+						reply.Density.Add(density[ft]);
 					}
 				}
 			}
-
-			reply.Density = Convert.ToBase64String(bytes);
 
 			m_client.sendMessage(reply);
 		}
