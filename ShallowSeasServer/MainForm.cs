@@ -14,6 +14,9 @@ namespace ShallowSeasServer
 	{
 		private Dictionary<FishType, PictureBox> m_fishMapPictureBoxes = new Dictionary<FishType, PictureBox>();
 
+		private const int c_numColours = 64;
+		private Color[] m_fishMapColours;
+
 		public MainForm()
 		{
 			InitializeComponent();
@@ -95,10 +98,44 @@ namespace ShallowSeasServer
 				m_fishMapPictureBoxes.Add(ft, picture);
 			}
 
+			initFishMapColours();
+
 			Timer timer = new Timer();
-			timer.Interval = 500;
+			timer.Interval = 1000;
 			timer.Tick += Timer_Tick;
 			timer.Start();
+		}
+
+		private void initFishMapColours()
+		{
+			m_fishMapColours = new Color[c_numColours];
+			for (int i = 0; i < c_numColours; i++)
+			{
+				double fraction = (double)i / (double)c_numColours;
+
+				// Colour formula from cam.vogl.c function fraction2rgb
+				double hue = 1.0 - fraction;
+				if (hue < 0.0) hue = 0.0;
+				if (hue > 1.0) hue = 1.0;
+				int huesector = (int)Math.Floor(hue * 5.0);
+				double huetune = hue * 5.0 - huesector;
+				double mix_up = huetune;
+				double mix_do = 1.0 - huetune;
+				mix_up = Math.Pow(mix_up, 1.0 / 2.5);
+				mix_do = Math.Pow(mix_do, 1.0 / 2.5);
+				double r, g, b;
+				switch (huesector)
+				{
+					case 0: r = 1.0; g = mix_up; b = 0.0; break; /* red    to yellow */
+					case 1: r = mix_do; g = 1.0; b = 0.0; break; /* yellow to green  */
+					case 2: r = 0.0; g = 1.0; b = mix_up; break; /* green  to cyan   */
+					case 3: r = 0.0; g = mix_do; b = 1.0; break; /* cyan   to blue   */
+					case 4: r = 0.0; g = 0.0; b = mix_do; break; /* blue   to black  */
+					default: r = 0.0; g = 0.0; b = 0.0; break;
+				}
+
+				m_fishMapColours[i] = Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
+			}
 		}
 
 		private void Timer_Tick(object sender, EventArgs e)
@@ -123,13 +160,19 @@ namespace ShallowSeasServer
 					{
 						for (int y = 0; y < game.m_mapHeight; y++)
 						{
-							float density = game.getFishDensity(x, y)[ft];
-							int rgb = Math.Max(0, Math.Min((int)(density * 100), 255));
-							Color color = Color.FromArgb(rgb, rgb, rgb);
+							float density = game.getFishDensity(x, y)[ft] * 100;
+							int colourIndex = (int)density;
+							Color colour;
+							if (colourIndex < 0)
+								colour = m_fishMapColours[0];
+							else if (colourIndex >= m_fishMapColours.Length)
+								colour = m_fishMapColours[m_fishMapColours.Length - 1];
+							else
+								colour = m_fishMapColours[colourIndex];
 
 							for (int px = x * pixelSize; px < (x + 1) * pixelSize; px++)
 								for (int py = y * pixelSize; py < (y + 1) * pixelSize; py++)
-									bitmap.SetPixel(px, (game.m_mapHeight * pixelSize) - 1 - py, color);
+									bitmap.SetPixel(px, (game.m_mapHeight * pixelSize) - 1 - py, colour);
 						}
 					}
 
