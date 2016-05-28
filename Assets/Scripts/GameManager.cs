@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
 
     public BoatCourseLine CourseLine, DrawingLine;
 
-    public Text m_textTopLeft, m_textTopRight;
+    public Text m_textTopLeft;
     public NotificationText m_notification;
 
     public FogCircle m_fogCircle;
@@ -305,9 +305,5 @@ public class GameManager : MonoBehaviour
             densityString = string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray());
 
         m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}", currentCell, densityString);
-
-        m_textTopRight.text = string.Format("Catch: {0}",
-                                    string.Join(", ", (from n in LocalPlayerBoat.m_catch select n.ToString()).ToArray())
-                                    );
     }
 }

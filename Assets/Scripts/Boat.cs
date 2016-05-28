@@ -13,6 +13,7 @@ public class Boat : MonoBehaviour
     public string PlayerId { get; set; }
 
 	internal Dictionary<FishType, int> m_catch;
+	public int m_maxCatch = 100;
 
     public UnityEngine.UI.Text m_nameLabel;
     public UnityEngine.UI.Text m_tooltipLabel;
