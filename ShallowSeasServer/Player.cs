@@ -19,7 +19,7 @@ namespace ShallowSeasServer
 		private List<SNVector2> m_currentCourse = null;
 		private float m_courseStartTime;
 
-		private Dictionary<FishType, float> m_currentCatch;
+		private Dictionary<FishType, int> m_currentCatch;
 
 		private string m_castGear = null;
 		private SNVector2 m_castPos;
@@ -35,9 +35,9 @@ namespace ShallowSeasServer
 			m_courseStartTime = game.CurrentTimestamp;
 			Name = name;
 
-			m_currentCatch = new Dictionary<FishType, float>();
+			m_currentCatch = new Dictionary<FishType, int>();
 			foreach (FishType ft in FishType.All)
-				m_currentCatch.Add(ft, 0.0f);
+				m_currentCatch.Add(ft, 0);
 
 			m_client.addMessageHandler<Ping>(this, handlePing);
 			m_client.addMessageHandler<RequestCourse>(this, handleRequestCourse);
@@ -94,27 +94,26 @@ namespace ShallowSeasServer
 
 				NotifyCatch msg = new NotifyCatch();
 				msg.PlayerId = m_id;
-				msg.FishCaught = new Dictionary<FishType, float>();
+				msg.FishCaught = new Dictionary<FishType, int>();
 
-				float totalFish = 0;
+				int totalFish = 0;
 				var density = m_game.getFishDensity((int)m_castPos.x, (int)m_castPos.y);
+				float totalDensity = density.Values.Sum();
 				foreach(FishType ft in FishType.All)
 				{
-					float numFish = (float)(m_game.m_rnd.NextDouble() * density[ft] * (m_castEndTime - m_castStartTime) * gearInfo.getCatchMultiplier(ft));
+					int numFish = (int)Math.Round(density[ft] / totalDensity * gearInfo.maxCatch);
 					msg.FishCaught.Add(ft, numFish);
 					totalFish += numFish;
 				}
 
-				if (totalFish > gearInfo.maxCatch)
+				while (totalFish > gearInfo.maxCatch)
 				{
-					float scale = gearInfo.maxCatch / totalFish;
-
-					foreach(FishType ft in FishType.All)
+					FishType ft = FishType.All[m_game.m_rnd.Next(FishType.All.Count)];
+					if (msg.FishCaught[ft] > 0)
 					{
-						msg.FishCaught[ft] *= scale;
+						msg.FishCaught[ft]--;
+						totalFish--;
 					}
-
-					totalFish = gearInfo.maxCatch;
 				}
 
 				foreach (FishType ft in FishType.All)

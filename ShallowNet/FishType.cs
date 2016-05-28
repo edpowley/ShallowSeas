@@ -19,7 +19,7 @@ namespace ShallowNet
 
 		private static List<FishType> s_all = null;
 
-		public static IEnumerable<FishType> All
+		public static List<FishType> All
 		{
 			get
 			{

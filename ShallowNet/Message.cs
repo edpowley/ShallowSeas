@@ -114,7 +114,7 @@ namespace ShallowNet
     public class NotifyCatch : ServerToClientMessage
     {
         public string PlayerId { get; set; }
-        public Dictionary<FishType, float> FishCaught { get; set; }
+        public Dictionary<FishType, int> FishCaught { get; set; }
     }
 
     public class RequestAnnounce : ClientToServerMessage

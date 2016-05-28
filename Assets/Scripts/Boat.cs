@@ -12,7 +12,7 @@ public class Boat : MonoBehaviour
 
     public string PlayerId { get; set; }
 
-	internal Dictionary<FishType, float> m_catch;
+	internal Dictionary<FishType, int> m_catch;
 
     public UnityEngine.UI.Text m_nameLabel;
     public UnityEngine.UI.Text m_tooltipLabel;
@@ -32,7 +32,7 @@ public class Boat : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-		m_catch = new Dictionary<FishType, float>();
+		m_catch = new Dictionary<FishType, int>();
 		foreach (FishType ft in FishType.All)
 			m_catch.Add(ft, 0);
 
