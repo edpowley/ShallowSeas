@@ -302,8 +302,8 @@ public class GameManager : MonoBehaviour
         var currentCellFishDensity = m_fishDensity[currentCell.X, currentCell.Y];
         string densityString = "???";
         if (currentCellFishDensity != null)
-            densityString = string.Join(", ", (from d in currentCellFishDensity select string.Format("{0:0.00}", d)).ToArray());
+            densityString = string.Join("\n", (from ft in FishType.All select string.Format("Density of {0}: {1}", ft, currentCellFishDensity[ft])).ToArray());
 
-        m_textTopLeft.text = string.Format("Boat in square {0}\nFish density {1}", currentCell, densityString);
+        m_textTopLeft.text = string.Format("Boat in square {0}\n{1}", currentCell, densityString);
     }
 }

@@ -119,7 +119,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 4, y: -4}
-  m_SizeDelta: {x: 400, y: 100}
+  m_SizeDelta: {x: 400, y: 400}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &124898186
 MonoBehaviour:
@@ -150,7 +150,7 @@ MonoBehaviour:
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
+    m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 'Hello
@@ -232,7 +232,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 220
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.y
@@ -414,7 +414,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 160
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.y
@@ -715,7 +715,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 140
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.y
@@ -859,7 +859,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 200
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.y
@@ -1470,7 +1470,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 240
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.y
@@ -1598,7 +1598,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &747164490
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1814,7 +1814,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 180
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 22486362, guid: 5a18cae5460efa8489a9ba4b848a690b, type: 2}
       propertyPath: m_AnchoredPosition.y
