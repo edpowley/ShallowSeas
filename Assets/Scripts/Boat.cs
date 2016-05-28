@@ -15,6 +15,9 @@ public class Boat : MonoBehaviour
 	internal Dictionary<FishType, int> m_catch;
 	public int m_maxCatch = 100;
 
+	public float m_initialFuel = 100;
+	internal float m_remainingFuel = 500;
+
     public UnityEngine.UI.Text m_nameLabel;
     public UnityEngine.UI.Text m_tooltipLabel;
     public CanvasGroup m_tooltipGroup;
@@ -33,6 +36,7 @@ public class Boat : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+		m_remainingFuel = m_initialFuel;
 		m_catch = new Dictionary<FishType, int>();
 		foreach (FishType ft in FishType.All)
 			m_catch.Add(ft, 0);
@@ -183,6 +187,8 @@ public class Boat : MonoBehaviour
                         {
                             GameManager.Instance.CourseLine.setOffset(i - 1 + p);
                         }
+
+						m_remainingFuel -= m_movementSpeed * Time.deltaTime;
 
                         break;
                     }
