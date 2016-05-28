@@ -264,7 +264,7 @@ namespace ShallowSeasServer
 			foreach (FishType ft in FishType.All)
 			{
 				if (x >= 0 && x < m_mapWidth && y >= 0 && y < m_mapHeight)
-					result.Add(ft, (float)m_ecologicalModel.getDensity(ft.species, ft.stage, x, y) / 100.0f);
+					result.Add(ft, (float)m_ecologicalModel.getDensity(ft.species, ft.stage, x, y));
 				else
 					result.Add(ft, 0.0f);
 			}

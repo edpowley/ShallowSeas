@@ -230,7 +230,7 @@ public class GameManager : MonoBehaviour
 				int byteIndex = (dy * msg.Width + dx) * GameConstants.c_numFishSpecies * GameConstants.c_numFishStages;
 				foreach (FishType ft in FishType.All)
 				{
-					density[ft] = bytes[byteIndex] / 255.0f;
+					density[ft] = bytes[byteIndex];
 					byteIndex++;
 				}
 			}

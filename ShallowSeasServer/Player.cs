@@ -198,7 +198,7 @@ namespace ShallowSeasServer
 					int byteIndex = (dy * msg.Width + dx) * GameConstants.c_numFishSpecies * GameConstants.c_numFishStages;
 					foreach(FishType ft in FishType.All)
 					{
-						bytes[byteIndex] = (byte)(255 * Math.Max(0, Math.Min(density[ft], 1)));
+						bytes[byteIndex] = (byte)(Math.Max(0, Math.Min(density[ft], 255)));
 						byteIndex++;
 					}
 				}

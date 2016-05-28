@@ -160,7 +160,7 @@ namespace ShallowSeasServer
 					{
 						for (int y = 0; y < game.m_mapHeight; y++)
 						{
-							float density = game.getFishDensity(x, y)[ft] * 100;
+							float density = game.getFishDensity(x, y)[ft];
 							int colourIndex = (int)density;
 							Color colour;
 							if (colourIndex < 0)

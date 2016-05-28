@@ -11,10 +11,47 @@ public class DebugFishDensityDisplay : MonoBehaviour
 
     private Texture2D m_texture = null;
 
-    void Start()
+	private const int c_numColours = 64;
+	private Color32[] m_fishMapColours;
+
+	private void initFishMapColours()
+	{
+		m_fishMapColours = new Color32[c_numColours];
+		for (int i = 0; i < c_numColours; i++)
+		{
+			double fraction = (double)i / (double)c_numColours;
+
+			// Colour formula from cam.vogl.c function fraction2rgb
+			double hue = 1.0 - fraction;
+			if (hue < 0.0) hue = 0.0;
+			if (hue > 1.0) hue = 1.0;
+			int huesector = (int)System.Math.Floor(hue * 5.0);
+			double huetune = hue * 5.0 - huesector;
+			double mix_up = huetune;
+			double mix_do = 1.0 - huetune;
+			mix_up = System.Math.Pow(mix_up, 1.0 / 2.5);
+			mix_do = System.Math.Pow(mix_do, 1.0 / 2.5);
+			double r, g, b;
+			switch (huesector)
+			{
+				case 0: r = 1.0; g = mix_up; b = 0.0; break; /* red    to yellow */
+				case 1: r = mix_do; g = 1.0; b = 0.0; break; /* yellow to green  */
+				case 2: r = 0.0; g = 1.0; b = mix_up; break; /* green  to cyan   */
+				case 3: r = 0.0; g = mix_do; b = 1.0; break; /* cyan   to blue   */
+				case 4: r = 0.0; g = 0.0; b = mix_do; break; /* blue   to black  */
+				default: r = 0.0; g = 0.0; b = 0.0; break;
+			}
+
+			m_fishMapColours[i] = new Color32((byte)(r * 255), (byte)(g * 255), (byte)(b * 255), 255);
+		}
+	}
+
+	void Start()
     {
         m_renderer = GetComponent<Renderer>();
         m_isShown = false;
+
+		initFishMapColours();
 
 		StartCoroutine(refresh());
     }
@@ -80,10 +117,13 @@ public class DebugFishDensityDisplay : MonoBehaviour
 						int px = x * 4 + (i % 3);
 						int py = y * 4 + (i / 3);
 						Color32 colour;
-						colour.r = (byte)(Mathf.Clamp01(density[ft]) * 1000);
-						colour.g = colour.r;
-						colour.b = colour.r;
-						colour.a = 255;
+						int colourIndex = (int)density[ft];
+						if (colourIndex < 0)
+							colour = m_fishMapColours[0];
+						else if (colourIndex >= c_numColours)
+							colour = m_fishMapColours[c_numColours - 1];
+						else
+							colour = m_fishMapColours[colourIndex];
 						colours[py * GameManager.Instance.MapWidth * 4 + px] = colour;
 						i++;
 					}
