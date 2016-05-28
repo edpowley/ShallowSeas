@@ -209,16 +209,29 @@ public class GameManager : MonoBehaviour
 
     private void handleInformFishDensity(ClientWrapper client, InformFishDensity msg)
     {
-		int index = 0;
-		for (int dy = 0; dy < msg.Height; dy++)
+		byte[] bytes = Convert.FromBase64String(msg.Density);
+
+		for (int dx = 0; dx < msg.Width; dx++)
 		{
-			for (int dx = 0; dx < msg.Width; dx++)
-		{
+			if (msg.X + dx < 0 || msg.X + dx >= MapWidth)
+				continue;
+
+			for (int dy = 0; dy < msg.Height; dy++)
+			{
+				if (msg.Y + dy < 0 || msg.Y + dy >= MapHeight)
+					continue;
+
 				Dictionary<FishType, float> density = new Dictionary<FishType, float>();
 				foreach(FishType ft in FishType.All)
 				{
-					density.Add(ft, msg.Density[index]);
-					index++;
+					density.Add(ft, 0);
+				}
+				m_fishDensity[msg.X + dx, msg.Y + dy] = density;
+				int byteIndex = (dy * msg.Width + dx) * GameConstants.c_numFishSpecies * GameConstants.c_numFishStages;
+				foreach (FishType ft in FishType.All)
+				{
+					density[ft] = bytes[byteIndex] / 255.0f;
+					byteIndex++;
 				}
 			}
 		}

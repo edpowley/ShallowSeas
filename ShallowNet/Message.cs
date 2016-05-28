@@ -145,6 +145,6 @@ namespace ShallowNet
 		public int Width { get; set; }
 		public int Height { get; set; }
 
-		public Base64Array_float Density { get; set; }
+		public string Density { get; set; } // Base64 encoded bytes
     }
 }

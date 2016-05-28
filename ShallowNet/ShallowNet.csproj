@@ -38,7 +38,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Base64Array.cs" />
     <Compile Include="ClientWrapper.cs" />
     <Compile Include="DebugLog.cs" />
     <Compile Include="fastJSON\dynamic.cs" />
