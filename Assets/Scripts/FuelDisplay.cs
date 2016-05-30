@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Linq;
 
 public class FuelDisplay : MonoBehaviour {
 
@@ -16,23 +17,35 @@ public class FuelDisplay : MonoBehaviour {
 	void Update ()
 	{
 		var boat = GameManager.Instance.LocalPlayerBoat;
-		if (boat!=null)
+		if (boat != null)
 		{
-			float scale = m_width / (float)boat.m_initialFuel;
-			m_mainBar.minWidth = boat.m_remainingFuel * scale;
+			float distanceLeft;
 
-			if (boat.m_course.Count > 0 && boat.m_courseEndTime > GameManager.Instance.CurrentTime)
+			var drawingCourse = GameManager.Instance.DrawingLine.Course;
+			if (drawingCourse.Any())
 			{
-				float distanceLeft = (boat.m_courseEndTime - GameManager.Instance.CurrentTime) * boat.m_movementSpeed;
-				Debug.LogFormat("distanceLeft = {0}", distanceLeft);
-				m_usingBar.minWidth = distanceLeft * scale;
-				m_mainBar.minWidth -= m_usingBar.minWidth;
+				distanceLeft = 0;
+				var lastPoint = drawingCourse.First();
+				foreach (var point in drawingCourse.Skip(1))
+				{
+					distanceLeft += (point - lastPoint).magnitude;
+					lastPoint = point;
+				}
+			}
+			else if (boat.m_course.Count > 0 && boat.m_courseEndTime > GameManager.Instance.CurrentTime)
+			{
+				distanceLeft = (boat.m_courseEndTime - GameManager.Instance.CurrentTime) * boat.m_movementSpeed;
 			}
 			else
 			{
-				Debug.LogFormat("no path");
-				m_usingBar.minWidth = 0;
+				distanceLeft = 0;
 			}
+
+			distanceLeft = Mathf.Min(distanceLeft, boat.m_remainingFuel);
+
+			float scale = m_width / (float)boat.m_initialFuel;
+			m_mainBar.minWidth = (boat.m_remainingFuel - distanceLeft) * scale;
+			m_usingBar.minWidth = distanceLeft * scale;
 		}
 	}
 }

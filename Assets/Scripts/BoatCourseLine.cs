@@ -15,6 +15,12 @@ public class BoatCourseLine : MonoBehaviour
     private List<Vector3> m_points = new List<Vector3>();
     private float m_offset = 0;
 
+	internal IEnumerable<Vector3> Course
+	{
+		get { return m_points; }
+		set { clearPoints(); addPoints(value); }
+	}
+
     void Start()
     {
         if (m_handlesMouse)
@@ -30,6 +36,7 @@ public class BoatCourseLine : MonoBehaviour
                 Vector3 startPos = GameManager.Instance.LocalPlayerBoat.transform.position;
 
                 {
+					// Clear the current course
                     RequestCourse msg = new RequestCourse();
                     msg.Course = new List<SNVector2> { new SNVector2(startPos.x, startPos.z) };
                     MyNetworkManager.Instance.m_client.sendMessage(msg);
@@ -177,11 +184,5 @@ public class BoatCourseLine : MonoBehaviour
             if (m_firstLine != null)
                 m_firstLine.SetActive(false);
         }
-    }
-
-    internal void setCourse(IEnumerable<Vector3> points)
-    {
-        clearPoints();
-        addPoints(points);
     }
 }

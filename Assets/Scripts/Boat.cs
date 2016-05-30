@@ -105,7 +105,7 @@ public class Boat : MonoBehaviour
 
         if (isLocalPlayer)
         {
-            GameManager.Instance.CourseLine.setCourse(m_course);
+            GameManager.Instance.CourseLine.Course = m_course;
         }
     }
 
@@ -120,7 +120,7 @@ public class Boat : MonoBehaviour
     {
         m_course.Clear();
         if (isLocalPlayer)
-            GameManager.Instance.CourseLine.setCourse(m_course);
+            GameManager.Instance.CourseLine.Course = m_course;
 
         transform.position = new Vector3(msg.Position.x, 0, msg.Position.y);
 
