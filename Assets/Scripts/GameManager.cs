@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
 
     internal float CurrentTime { get { return Time.timeSinceLevelLoad + m_timestampOffset; } }
 
+	internal float m_roundEndTime = 60 * 5;
+
     public TextLabel m_chatPopupPrefab;
 
     internal bool isWater(int x, int y)
