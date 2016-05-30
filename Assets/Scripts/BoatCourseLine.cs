@@ -44,8 +44,9 @@ public class BoatCourseLine : MonoBehaviour
 
                 clearPoints();
                 addPoint(startPos);
+				float fuel = GameManager.Instance.LocalPlayerBoat.m_remainingFuel;
 
-                while (Input.GetMouseButton(0))
+				while (Input.GetMouseButton(0))
                 {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     Vector3 yIntercept = ray.GetPoint(-ray.origin.y / ray.direction.y);
@@ -60,8 +61,24 @@ public class BoatCourseLine : MonoBehaviour
                         {
                             Pathfinder.PullString(path);
 
-                            // First element of path is the start position
-                            addPoints(path.Skip(1));
+							// First element of path is the start position
+							for (int i = 1; i < path.Count && fuel > 0; i++)
+							{
+								var point = path[i];
+								var lastPoint = path[i - 1];
+								float distance = (point - lastPoint).magnitude;
+
+								// Stop short if the boat will run out of fuel on this leg
+								if (distance > fuel)
+								{
+									float proportion = fuel / distance;
+									point = Vector3.Lerp(lastPoint, point, proportion);
+									distance = fuel;
+								}
+
+								fuel -= distance;
+								addPoint(point);
+							}
                         }
                     }
 
