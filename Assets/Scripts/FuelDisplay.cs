@@ -3,18 +3,19 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Linq;
 
-public class FuelDisplay : MonoBehaviour {
+public class FuelDisplay : MonoBehaviour
+{
 
 	public LayoutElement m_mainBar, m_usingBar;
 	public float m_width;
 
 	// Use this for initialization
-	void Start ()
+	void Start()
 	{
 	}
-	
+
 	// Update is called once per frame
-	void Update ()
+	void Update()
 	{
 		var boat = GameManager.Instance.LocalPlayerBoat;
 		if (boat != null)
