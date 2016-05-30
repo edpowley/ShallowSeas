@@ -1,4 +1,7 @@
 {
+	"roundLength" : 300,
+	"modelUpdateFreq" : 60,
+	"maxFuel" : 100,
 	"gear" : [
 		{
 			"name": "Big Net",
@@ -26,5 +29,47 @@
 				"adult cod": 0
 			}
 		}
+	],
+	"buyItems" : [
+		{
+			"name": "Designer trainers",
+			"category": "Self",
+			"price": 50
+		},
+		{
+			"name": "iPhone",
+			"category": "Self",
+			"price": 250
+		},
+		{
+			"name": "House roof",
+			"category": "Self",
+			"price": 1000
+		},
+		{
+			"name": "Motorbike",
+			"category": "Self",
+			"price": 10000
+		},
+		{
+			"name": "Street lights",
+			"category": "Group",
+			"price": 500
+		},		
+		{
+			"name": "Computer",
+			"category": "Group",
+			"price": 1000
+		},		
+		{
+			"name": "School bus",
+			"category": "Group",
+			"price": 20000
+		},		
+		{
+			"name": "Church",
+			"category": "Group",
+			"price": 500000
+		},		
 	]
 }

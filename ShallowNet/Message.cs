@@ -68,12 +68,22 @@ namespace ShallowNet
         public string PlayerId { get; set; }
         public List<PlayerInfo> Players { get; set; }
 		public GameSettings Settings { get; set; }
+    }
+
+	public class StartRound : ServerToClientMessage
+	{
 		public int MapWidth { get; set; }
 		public int MapHeight { get; set; }
 		public string MapWater { get; set; } // Base64 encoded bools
-    }
+	}
 
-    public class PlayerJoined : ServerToClientMessage
+	public class StartShop : ServerToClientMessage
+	{
+		public Dictionary<string, int> GroupSpend { get; set; }
+		public Dictionary<string, int> PlayerSpend { get; set; }
+	}
+
+	public class PlayerJoined : ServerToClientMessage
     {
         public PlayerInfo Player { get; set; }
         public SNVector2 InitialPos { get; set; }

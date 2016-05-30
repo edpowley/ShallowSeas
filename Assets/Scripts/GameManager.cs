@@ -33,6 +33,9 @@ public class GameManager : MonoBehaviour
 
     public FogCircle m_fogCircle;
 
+	public Canvas m_hudCanvas;
+	public Camera m_mainCamera;
+
     public float m_timestampOffset = 0;
     private float m_timestampOffsetTarget = 0;
 
@@ -239,7 +242,7 @@ public class GameManager : MonoBehaviour
 		}
     }
 
-	private bool[,] getMapWaterFromBase64(WelcomePlayer msg)
+	private bool[,] getMapWaterFromBase64(StartRound msg)
 	{
 		byte[] bytes = Convert.FromBase64String(msg.MapWater);
 		bool[,] result = new bool[msg.MapWidth, msg.MapHeight];
@@ -262,22 +265,22 @@ public class GameManager : MonoBehaviour
     private void initMap()
     {
         Terrain terrain = Terrain.activeTerrain;
-		WelcomePlayer welcome = MyNetworkManager.Instance.m_welcomeMsg;
+		var startMsg = MyNetworkManager.Instance.m_startRoundMsg;
 
-		MapWidth = welcome.MapWidth;
-		MapHeight = welcome.MapHeight;
-		m_isWater = getMapWaterFromBase64(welcome);
+		MapWidth = startMsg.MapWidth;
+		MapHeight = startMsg.MapHeight;
+		m_isWater = getMapWaterFromBase64(startMsg);
 		m_fishDensity = new Dictionary<FishType, float>[MapWidth, MapHeight];
 
-		terrain.terrainData.size = new Vector3(welcome.MapWidth, terrain.terrainData.size.y, welcome.MapHeight);
+		terrain.terrainData.size = new Vector3(startMsg.MapWidth, terrain.terrainData.size.y, startMsg.MapHeight);
 
 		float[,] heightMap = new float[terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight];
 		for(int hx=0;hx< terrain.terrainData.heightmapWidth;hx++)
 		{
-			int wx = (int)((double)hx / terrain.terrainData.heightmapWidth *welcome.MapWidth);
+			int wx = (int)((double)hx / terrain.terrainData.heightmapWidth *startMsg.MapWidth);
 			for(int hy=0;hy< terrain.terrainData.heightmapHeight;hy++)
 			{
-				int wy = (int)((double)hy / terrain.terrainData.heightmapHeight * welcome.MapHeight);
+				int wy = (int)((double)hy / terrain.terrainData.heightmapHeight * startMsg.MapHeight);
 				heightMap[hy, hx] = 0.5f + (m_isWater[wx, wy] ? -1.0f : +1.0f) * 0.02f + UnityEngine.Random.Range(-1.0f, +1.0f) * 0.001f;
 			}
 		}

@@ -4,13 +4,8 @@ using UnityEngine.UI;
 
 public class TextLabel : MonoBehaviour
 {
-    public string CanvasName = "Canvas";
-    public string SceneCameraName = "Main Camera";
     public RectTransform GuiObject;
     public bool m_stayOnScreen = false;
-
-    private Camera m_sceneCamera;
-    private Canvas m_canvas;
 
     public CanvasGroup m_canvasGroup;
     public Text m_text;
@@ -20,10 +15,7 @@ public class TextLabel : MonoBehaviour
 
     void Start()
     {
-        m_sceneCamera = GameObject.Find(SceneCameraName).GetComponent<Camera>();
-        m_canvas = GameObject.Find(CanvasName).GetComponent<Canvas>();
-
-        GuiObject.SetParent(m_canvas.transform, worldPositionStays: false);
+        GuiObject.SetParent(GameManager.Instance.m_hudCanvas.transform, worldPositionStays: false);
     }
 
     internal void ShowMessage(string msg, float fadeTime)
@@ -51,16 +43,17 @@ public class TextLabel : MonoBehaviour
 
     void LateUpdate()
     {
-        Vector3 vpPoint = m_sceneCamera.WorldToViewportPoint(transform.position);
+        Vector3 vpPoint = GameManager.Instance.m_mainCamera.WorldToViewportPoint(transform.position);
 
-        Vector2 canvasSize = m_canvas.GetComponent<RectTransform>().sizeDelta;
+		var hudCanvasRect = GameManager.Instance.m_hudCanvas.GetComponent<RectTransform>();
+        Vector2 canvasSize = hudCanvasRect.sizeDelta;
         Vector2 canvasPoint = new Vector2((vpPoint.x - 0.5f) * canvasSize.x, (vpPoint.y - 0.5f) * canvasSize.y);
 
         GuiObject.anchoredPosition = canvasPoint;
 
         if (m_stayOnScreen)
         {
-            Rect canvasRect = m_canvas.GetComponent<RectTransform>().rect;
+            Rect canvasRect = hudCanvasRect.GetComponent<RectTransform>().rect;
             float offX = 0, offY = 0;
 
             if (GuiObject.offsetMin.x < canvasRect.xMin)

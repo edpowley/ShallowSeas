@@ -26,6 +26,10 @@ namespace ShallowSeasServer
 		private float m_castStartTime;
 		private float m_castEndTime;
 
+		internal int m_money;
+		internal float m_fuel;
+		internal Dictionary<string, int> m_spending;
+
 		public Player(Game game, ClientWrapper client, string name, SNVector2 initialPos)
 		{
 			m_game = game;
@@ -34,6 +38,14 @@ namespace ShallowSeasServer
 			m_currentCourse = new List<SNVector2> { initialPos };
 			m_courseStartTime = game.CurrentTimestamp;
 			Name = name;
+			m_fuel = m_game.m_settings.maxFuel;
+			m_money = 0;
+
+			m_spending = new Dictionary<string, int>();
+			foreach (var item in m_game.m_settings.buyItems)
+			{
+				m_spending.Add(item.name, item.name.Length);
+			}
 
 			m_currentCatch = new Dictionary<FishType, int>();
 			foreach (FishType ft in FishType.All)

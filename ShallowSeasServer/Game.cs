@@ -20,6 +20,7 @@ namespace ShallowSeasServer
         private List<ClientWrapper> m_pendingClients = new List<ClientWrapper>();
         private List<Player> m_players = new List<Player>();
         public DateTime m_lastPingTime = DateTime.FromFileTime(0);
+		public float m_lastModelUpdate = 0;
 
 		internal int m_mapWidth { get; private set; }
 		internal int m_mapHeight { get; private set; }
@@ -32,9 +33,29 @@ namespace ShallowSeasServer
         public void quit() { m_quit = true; }
 
         public float CurrentTimestamp { get; private set; }
-        private DateTime? m_startTime = null;
+        private DateTime m_roundStartTime;
 
-        public void addPendingClient(ClientWrapper client)
+		private Dictionary<string, int> m_groupSpend;
+
+		private enum GameState { Round, Shop }
+		private GameState m_currentState = GameState.Shop;
+
+		public Game()
+		{
+			string settingsText = System.IO.File.ReadAllText("GameSettings.json");
+			m_settings = fastJSON.JSON.ToObject<GameSettings>(settingsText);
+
+			m_groupSpend = new Dictionary<string, int>();
+			foreach(var item in m_settings.buyItems)
+				if (item.category == GameSettings.BuyCategory.Group)
+					m_groupSpend.Add(item.name, item.name.Length);
+
+			initLogFile();
+			loadMap();
+			resetEcology();
+		}
+
+		public void addPendingClient(ClientWrapper client)
         {
             lock (m_pendingClients)
             {
@@ -103,14 +124,33 @@ namespace ShallowSeasServer
 				PlayerId = player.m_id,
 				Players = getPlayerInfoList(),
 				Settings = m_settings,
-				MapWidth = m_mapWidth,
-				MapHeight = m_mapHeight,
-				MapWater = getMapWaterAsBase64()
 			});
+
+			switch (m_currentState)
+			{
+				case GameState.Round:
+					welcomeMsg.Messages.Add(new StartRound()
+					{
+						MapWidth = m_mapWidth,
+						MapHeight = m_mapHeight,
+						MapWater = getMapWaterAsBase64()
+					});
+					break;
+
+				case GameState.Shop:
+					welcomeMsg.Messages.Add(new StartShop()
+					{
+						GroupSpend = m_groupSpend,
+						PlayerSpend = player.m_spending
+					});
+					break;
+			}
+
             foreach (Player otherPlayer in m_players)
             {
                 welcomeMsg.Messages.AddRange(otherPlayer.getStatusSyncMessages());
             }
+
             player.m_client.sendMessage(welcomeMsg);
 
             broadcastMessageToAllPlayersExcept(player, new PlayerJoined() { Player = player.getInfo(), InitialPos = pos });
@@ -169,51 +209,37 @@ namespace ShallowSeasServer
 
         public void run()
         {
-            startGame();
-
-			float lastModelUpdate = 0;
+            startShop();
 
             m_quit = false;
-            while (!m_quit)
-            {
-                if (m_startTime != null)
-                    CurrentTimestamp = (float)(DateTime.Now - m_startTime.Value).TotalSeconds;
-                else
-                    CurrentTimestamp = -1;
+			while (!m_quit)
+			{
+				foreach (Player player in m_players)
+					player.m_client.pumpMessages();
 
-                handlePendingClients();
-                pingPlayers();
-
-                foreach (Player player in m_players)
-                {
-                    player.m_client.pumpMessages();
-                    player.update();
-                }
-
-				if (CurrentTimestamp - lastModelUpdate > 1)
+				switch (m_currentState)
 				{
-					m_ecologicalModel.iterate();
-					lastModelUpdate = CurrentTimestamp;
+					case GameState.Round:
+						tickRound();
+						break;
+
+					case GameState.Shop:
+						tickShop();
+						break;
 				}
 
+				handlePendingClients();
+				pingPlayers();
+
 				Thread.Sleep(1000 / 60);
-            }
-        }
-
-        void startGame()
-        {
-			string settingsText = System.IO.File.ReadAllText("GameSettings.json");
-			m_settings = fastJSON.JSON.ToObject<GameSettings>(settingsText);
-
-            initLogFile();
-			loadMap();
-			m_ecologicalModel = new EcologicalModel(m_mapWidth, m_mapHeight, m_isWater);
-            m_startTime = DateTime.Now;
+			}
         }
 
 		internal void resetEcology()
 		{
 			m_ecologicalModel = new EcologicalModel(m_mapWidth, m_mapHeight, m_isWater);
+			for (int i = 0; i < 10; i++)
+				m_ecologicalModel.iterate();
 		}
 
 		void loadMap()
@@ -271,7 +297,37 @@ namespace ShallowSeasServer
 			return result;
 		}
 
-        StreamWriter m_logWriter = null;
+		void startShop()
+		{
+			m_currentState = GameState.Shop;
+		}
+
+		void tickShop()
+		{
+			CurrentTimestamp = 0;
+		}
+
+		void startRound()
+		{
+			m_currentState = GameState.Round;
+			m_roundStartTime = DateTime.Now;
+		}
+
+		void tickRound()
+		{
+			CurrentTimestamp = (float)(DateTime.Now - m_roundStartTime).TotalSeconds;
+
+			foreach (Player player in m_players)
+				player.update();
+
+			if (CurrentTimestamp - m_lastModelUpdate > m_settings.modelUpdateFreq)
+			{
+				m_ecologicalModel.iterate();
+				m_lastModelUpdate = CurrentTimestamp;
+			}
+		}
+
+		StreamWriter m_logWriter = null;
         List<string> m_logPropertyNames = null;
 
         private void initLogFile()

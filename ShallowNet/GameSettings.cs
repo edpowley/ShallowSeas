@@ -20,6 +20,19 @@ namespace ShallowNet
 			}
 		}
 
+		public enum BuyCategory { Self, Group };
+
+		public class BuyInfo
+		{
+			public string name;
+			public BuyCategory category;
+			public int price;
+		}
+
+		public float roundLength;
+		public float modelUpdateFreq;
+		public float maxFuel;
 		public List<GearInfo> gear;
+		public List<BuyInfo> buyItems;
 	}
 }

@@ -12,6 +12,8 @@ public class MyNetworkManager : MonoBehaviour
     internal ClientWrapper m_client = null;
 
 	internal WelcomePlayer m_welcomeMsg = null;
+	internal StartRound m_startRoundMsg = null;
+	internal StartShop m_startShopMsg = null;
 
 	internal string LocalPlayerId { get; private set; }
     internal List<PlayerInfo> m_players = new List<PlayerInfo>();
@@ -64,7 +66,9 @@ public class MyNetworkManager : MonoBehaviour
         m_client = ClientWrapper.Connect(hostName, port);
         m_client.addMessageHandler<ShallowNet.Ping>(this, handlePing);
         m_client.addMessageHandler<WelcomePlayer>(this, handleWelcomeMessage);
-        m_client.addMessageHandler<PlayerJoined>(this, handlePlayerJoined);
+		m_client.addMessageHandler<StartRound>(this, handleStartRound);
+		m_client.addMessageHandler<StartShop>(this, handleStartShop);
+		m_client.addMessageHandler<PlayerJoined>(this, handlePlayerJoined);
         m_client.addMessageHandler<PlayerLeft>(this, handlePlayerLeft);
 
         m_client.sendMessage(new PlayerJoinRequest() { PlayerName = playerName });
@@ -80,11 +84,23 @@ public class MyNetworkManager : MonoBehaviour
         LocalPlayerId = msg.PlayerId;
         m_players = msg.Players;
 		m_welcomeMsg = msg;
-
-        SceneManager.LoadScene((int)Level.MainGame);
     }
 
-    private void handlePlayerJoined(ClientWrapper client, PlayerJoined msg)
+	private void handleStartRound(ClientWrapper client, StartRound msg)
+	{
+		m_startRoundMsg = msg;
+		m_startShopMsg = null;
+		SceneManager.LoadScene((int)Level.MainGame);
+	}
+
+	private void handleStartShop(ClientWrapper client, StartShop msg)
+	{
+		m_startRoundMsg = null;
+		m_startShopMsg = msg;
+		SceneManager.LoadScene((int)Level.ShopMenu);
+	}
+
+	private void handlePlayerJoined(ClientWrapper client, PlayerJoined msg)
     {
         m_players.Add(msg.Player);
     }
