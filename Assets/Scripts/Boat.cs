@@ -101,7 +101,8 @@ public class Boat : MonoBehaviour
 
         m_courseEndTime = msg.StartTime + len / m_movementSpeed;
 
-        transform.position = m_course[0];
+		if (m_course.Count > 0)
+			transform.position = m_course[0];
 
         if (isLocalPlayer)
         {

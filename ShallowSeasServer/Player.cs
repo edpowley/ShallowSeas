@@ -32,16 +32,16 @@ namespace ShallowSeasServer
 
 		internal bool m_isReady = false;
 
-		public Player(Game game, ClientWrapper client, string name, SNVector2 initialPos)
+		public Player(Game game, ClientWrapper client, string name)
 		{
 			m_game = game;
 			m_id = Guid.NewGuid().ToString();
 			m_client = client;
-			m_currentCourse = new List<SNVector2> { initialPos };
+			m_currentCourse = new List<SNVector2>();
 			m_courseStartTime = game.CurrentTimestamp;
 			Name = name;
 			m_fuel = m_game.m_settings.maxFuel;
-			m_money = 100;
+			m_money = 0;
 
 			m_spending = new Dictionary<string, int>();
 			foreach (var item in m_game.m_settings.buyItems)
@@ -60,6 +60,17 @@ namespace ShallowSeasServer
 			m_client.addMessageHandler<RequestFishDensity>(this, handleRequestFishDensity);
 			m_client.addMessageHandler<FinishedShopping>(this, handleFinishedShopping);
 			m_client.addMessageHandler<RequestBuy>(this, handleBuy);
+		}
+
+		internal void resetAtRoundStart(SNVector2 startPos)
+		{
+			m_currentCourse.Clear();
+			m_currentCourse.Add(startPos);
+			m_courseStartTime = 0;
+			m_fuel = m_game.m_settings.maxFuel;
+
+			foreach (FishType ft in FishType.All)
+				m_currentCatch[ft] = 0;
 		}
 
 		private void handlePing(ClientWrapper client, Ping msg)

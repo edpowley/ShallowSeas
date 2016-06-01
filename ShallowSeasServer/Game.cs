@@ -97,24 +97,10 @@ namespace ShallowSeasServer
             return result;
         }
 
-        private int m_nextInitialPositionIndex = 0;
-
-        private SNVector2 getNextInitialPosition()
-        {
-            float angle = m_nextInitialPositionIndex * (float)Math.PI / 4.0f;
-			float radius = Math.Min(m_nextInitialPositionIndex / 16.0f, 1.0f);
-            m_nextInitialPositionIndex++;
-            return new SNVector2(
-                m_startCell.x + radius * (float)Math.Cos(angle),
-				m_startCell.y + radius * (float)Math.Sin(angle)
-            );
-        }
-
         private void handlePlayerJoinRequest(ClientWrapper client, PlayerJoinRequest joinMsg)
         {
-            SNVector2 pos = getNextInitialPosition();
-            Player player = new Player(this, client, joinMsg.PlayerName, pos);
-            Log.log(Log.Category.GameStatus, "Adding player named {0} with id {1} at {2}", player.Name, player.m_id, pos);
+            Player player = new Player(this, client, joinMsg.PlayerName);
+            Log.log(Log.Category.GameStatus, "Adding player named {0} with id {1}", player.Name, player.m_id);
             m_players.Add(player);
 
             updatePlayerColours();
@@ -154,7 +140,7 @@ namespace ShallowSeasServer
 
             player.m_client.sendMessage(welcomeMsg);
 
-            broadcastMessageToAllPlayersExcept(player, new PlayerJoined() { Player = player.getInfo(), InitialPos = pos });
+            broadcastMessageToAllPlayersExcept(player, new PlayerJoined() { Player = player.getInfo() });
 
             m_pendingClients.Remove(client);
         }
@@ -332,11 +318,20 @@ namespace ShallowSeasServer
 			m_currentState = GameState.Round;
 			m_roundStartTime = DateTime.Now;
 
-			foreach (var player in m_players)
+			for (int i=0; i< m_players.Count; i++)
 			{
-				StartRound msg = new StartRound() { MapWidth = m_mapWidth, MapHeight = m_mapHeight, MapWater = getMapWaterAsBase64() };
-				player.m_client.sendMessage(msg);
+				double angle = 2.0 * Math.PI * i / m_players.Count;
+				var startPos = m_startCell + new SNVector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+				m_players[i].resetAtRoundStart(startPos);
 			}
+
+			CompoundMessage msg = new CompoundMessage();
+			msg.Messages.Add(new StartRound() { MapWidth = m_mapWidth, MapHeight = m_mapHeight, MapWater = getMapWaterAsBase64() });
+
+			foreach (var player in m_players)
+				msg.Messages.AddRange(player.getStatusSyncMessages());
+
+			broadcastMessageToAllPlayers(msg);
 		}
 
 		void tickRound()
