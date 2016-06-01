@@ -117,6 +117,7 @@ namespace ShallowSeasServer
 				case GameState.Round:
 					welcomeMsg.Messages.Add(new StartRound()
 					{
+						EndTime = m_settings.roundLength,
 						MapWidth = m_mapWidth,
 						MapHeight = m_mapHeight,
 						MapWater = getMapWaterAsBase64()
@@ -326,7 +327,7 @@ namespace ShallowSeasServer
 			}
 
 			CompoundMessage msg = new CompoundMessage();
-			msg.Messages.Add(new StartRound() { MapWidth = m_mapWidth, MapHeight = m_mapHeight, MapWater = getMapWaterAsBase64() });
+			msg.Messages.Add(new StartRound() { EndTime = m_settings.roundLength, MapWidth = m_mapWidth, MapHeight = m_mapHeight, MapWater = getMapWaterAsBase64() });
 
 			foreach (var player in m_players)
 				msg.Messages.AddRange(player.getStatusSyncMessages());
@@ -345,6 +346,11 @@ namespace ShallowSeasServer
 			{
 				m_ecologicalModel.iterate();
 				m_lastModelUpdate = CurrentTimestamp;
+			}
+
+			if (CurrentTimestamp >= m_settings.roundLength)
+			{
+				startShop();
 			}
 		}
 

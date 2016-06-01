@@ -15,7 +15,7 @@ public class RoundTimeDisplay : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		float timeLeft = GameManager.Instance.m_roundEndTime - GameManager.Instance.CurrentTime;
+		float timeLeft = MyNetworkManager.Instance.m_startRoundMsg.EndTime - GameManager.Instance.CurrentTime;
 		int secondsLeft = Mathf.CeilToInt(timeLeft);
 		if (secondsLeft < 0)
 			secondsLeft = 0;

@@ -72,6 +72,7 @@ namespace ShallowNet
 
 	public class StartRound : ServerToClientMessage
 	{
+		public float EndTime { get; set; }
 		public int MapWidth { get; set; }
 		public int MapHeight { get; set; }
 		public string MapWater { get; set; } // Base64 encoded bools

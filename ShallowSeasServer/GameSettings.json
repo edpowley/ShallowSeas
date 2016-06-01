@@ -1,5 +1,5 @@
 {
-	"roundLength" : 300,
+	"roundLength" : 180,
 	"modelUpdateFreq" : 60,
 	"maxFuel" : 100,
 	"gear" : [
