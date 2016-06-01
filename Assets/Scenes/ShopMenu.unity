@@ -2176,6 +2176,7 @@ MonoBehaviour:
   m_itemsContainer: {fileID: 325031898}
   m_moneyDisplay: {fileID: 177297022}
   m_doneButtonLabel: {fileID: 192879034}
+  m_statsDisplay: {fileID: 1211676767}
   m_canvasGroup: {fileID: 1590449193}
 --- !u!4 &1493930919
 Transform:

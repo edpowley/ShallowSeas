@@ -157,6 +157,7 @@ namespace ShallowNet
 		public int Money { get; set; }
 		public Dictionary<string, int> GroupSpend { get; set; }
 		public Dictionary<string, int> PlayerSpend { get; set; }
+		public string Stats { get; set; }
 	}
 
 	public class FinishedShopping : ClientToServerMessage

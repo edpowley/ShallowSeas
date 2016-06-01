@@ -73,6 +73,23 @@ namespace ShallowSeasServer
 				m_currentCatch[ft] = 0;
 		}
 
+		internal string sellCatch()
+		{
+			StringBuilder result = new StringBuilder();
+			int gross = 0;
+			foreach(FishType ft in FishType.All)
+			{
+				int count = m_currentCatch[ft];
+				int price = m_game.m_settings.fishSpecies[ft.species].prices[ft.stage];
+				if (count > 0)
+					result.AppendFormat("{0} {1} at ${2} each = ${3}\n", count, ft, price, count * price);
+				gross += count * price;
+			}
+			result.AppendFormat("Total: ${0}", gross);
+			m_money += gross;
+			return result.ToString();
+		}
+
 		private void handlePing(ClientWrapper client, Ping msg)
 		{
 		}

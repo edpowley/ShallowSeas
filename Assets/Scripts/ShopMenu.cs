@@ -9,8 +9,7 @@ public class ShopMenu : MonoBehaviour
 {
 	public ShopItemBuyer m_itemPrefab;
 	public RectTransform m_itemsContainer;
-	public Text m_moneyDisplay;
-	public Text m_doneButtonLabel;
+	public Text m_moneyDisplay, m_doneButtonLabel, m_statsDisplay;
 	public CanvasGroup m_canvasGroup;
 
 	internal GameSettings m_settings;
@@ -46,6 +45,8 @@ public class ShopMenu : MonoBehaviour
 		}
 
 		updateMoneyDisplay();
+
+		m_statsDisplay.text = MyNetworkManager.Instance.m_startShopMsg.Stats;
 
 		var client = MyNetworkManager.Instance.m_client;
 		client.addMessageHandler<InformBuy>(this, handleInformBuy);

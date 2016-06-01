@@ -1,5 +1,5 @@
 {
-	"roundLength" : 180,
+	"roundLength" : 30,
 	"modelUpdateFreq" : 60,
 	"maxFuel" : 100,
 	"gear" : [
@@ -71,5 +71,15 @@
 			"category": "Group",
 			"price": 500000
 		},		
+	],
+	"fishSpecies" : [
+		{
+			"name": "Herring",
+			"prices": [0, 2, 4]
+		},
+		{
+			"name": "Cod",
+			"prices": [1, 3, 5]
+		}
 	]
 }

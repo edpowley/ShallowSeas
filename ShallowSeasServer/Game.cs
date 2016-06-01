@@ -129,7 +129,8 @@ namespace ShallowSeasServer
 					{
 						Money = player.m_money,
 						GroupSpend = m_groupSpend,
-						PlayerSpend = player.m_spending
+						PlayerSpend = player.m_spending,
+						Stats = ""
 					});
 					break;
 			}
@@ -291,13 +292,15 @@ namespace ShallowSeasServer
 
 			foreach (var player in m_players)
 			{
+				string stats = player.sellCatch();
 				player.m_isReady = false;
 
 				StartShop msg = new StartShop()
 				{
 					Money = player.m_money,
 					GroupSpend = m_groupSpend,
-					PlayerSpend = player.m_spending
+					PlayerSpend = player.m_spending,
+					Stats = stats
 				};
 
 				player.m_client.sendMessage(msg);
