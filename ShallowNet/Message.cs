@@ -77,12 +77,6 @@ namespace ShallowNet
 		public string MapWater { get; set; } // Base64 encoded bools
 	}
 
-	public class StartShop : ServerToClientMessage
-	{
-		public Dictionary<string, int> GroupSpend { get; set; }
-		public Dictionary<string, int> PlayerSpend { get; set; }
-	}
-
 	public class PlayerJoined : ServerToClientMessage
     {
         public PlayerInfo Player { get; set; }
@@ -157,4 +151,30 @@ namespace ShallowNet
 
 		public string Density { get; set; } // Base64 encoded bytes
     }
+
+	public class StartShop : ServerToClientMessage
+	{
+		public int Money { get; set; }
+		public Dictionary<string, int> GroupSpend { get; set; }
+		public Dictionary<string, int> PlayerSpend { get; set; }
+	}
+
+	public class FinishedShopping : ClientToServerMessage
+	{
+	}
+
+	public class RequestBuy : ClientToServerMessage
+	{
+		public string PlayerId { get; set; }
+		public string Item { get; set; }
+		public int Amount { get; set; }
+	}
+
+	public class InformBuy : ServerToClientMessage
+	{
+		public string PlayerId { get; set; }
+		public string Item { get; set; }
+		public int ItemSpend { get; set; }
+		public int PlayerMoney { get; set; }
+	}
 }

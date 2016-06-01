@@ -30,6 +30,8 @@ namespace ShallowSeasServer
 		internal float m_fuel;
 		internal Dictionary<string, int> m_spending;
 
+		internal bool m_isReady = false;
+
 		public Player(Game game, ClientWrapper client, string name, SNVector2 initialPos)
 		{
 			m_game = game;
@@ -39,12 +41,12 @@ namespace ShallowSeasServer
 			m_courseStartTime = game.CurrentTimestamp;
 			Name = name;
 			m_fuel = m_game.m_settings.maxFuel;
-			m_money = 0;
+			m_money = 100;
 
 			m_spending = new Dictionary<string, int>();
 			foreach (var item in m_game.m_settings.buyItems)
 			{
-				m_spending.Add(item.name, item.name.Length);
+				m_spending.Add(item.name, 0);
 			}
 
 			m_currentCatch = new Dictionary<FishType, int>();
@@ -56,6 +58,8 @@ namespace ShallowSeasServer
 			m_client.addMessageHandler<RequestCastGear>(this, handleCastGear);
 			m_client.addMessageHandler<RequestAnnounce>(this, handleAnnounce);
 			m_client.addMessageHandler<RequestFishDensity>(this, handleRequestFishDensity);
+			m_client.addMessageHandler<FinishedShopping>(this, handleFinishedShopping);
+			m_client.addMessageHandler<RequestBuy>(this, handleBuy);
 		}
 
 		private void handlePing(ClientWrapper client, Ping msg)
@@ -218,6 +222,32 @@ namespace ShallowSeasServer
 			reply.Density = Convert.ToBase64String(bytes);
 
 			m_client.sendMessage(reply);
+		}
+
+		private void handleFinishedShopping(ClientWrapper client, FinishedShopping msg)
+		{
+			m_isReady = true;
+		}
+
+		private void handleBuy(ClientWrapper client, RequestBuy msg)
+		{
+			var item = m_game.m_settings.buyItems.Single(x => x.name == msg.Item);
+			m_money -= msg.Amount;
+			InformBuy reply = new InformBuy() { PlayerId = msg.PlayerId, Item = msg.Item, PlayerMoney = m_money };
+			switch (item.category)
+			{
+				case GameSettings.BuyCategory.Self:
+					m_spending[item.name] += msg.Amount;
+					reply.ItemSpend = m_spending[item.name];
+					m_client.sendMessage(reply);
+					break;
+
+				case GameSettings.BuyCategory.Group:
+					m_game.m_groupSpend[item.name] += msg.Amount;
+					reply.ItemSpend = m_game.m_groupSpend[item.name];
+					m_game.broadcastMessageToAllPlayers(reply);
+					break;
+			}
 		}
 	}
 }

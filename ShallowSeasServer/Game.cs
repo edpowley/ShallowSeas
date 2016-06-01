@@ -35,7 +35,7 @@ namespace ShallowSeasServer
         public float CurrentTimestamp { get; private set; }
         private DateTime m_roundStartTime;
 
-		private Dictionary<string, int> m_groupSpend;
+		internal Dictionary<string, int> m_groupSpend;
 
 		private enum GameState { Round, Shop }
 		private GameState m_currentState = GameState.Shop;
@@ -48,7 +48,7 @@ namespace ShallowSeasServer
 			m_groupSpend = new Dictionary<string, int>();
 			foreach(var item in m_settings.buyItems)
 				if (item.category == GameSettings.BuyCategory.Group)
-					m_groupSpend.Add(item.name, item.name.Length);
+					m_groupSpend.Add(item.name, 0);
 
 			initLogFile();
 			loadMap();
@@ -140,6 +140,7 @@ namespace ShallowSeasServer
 				case GameState.Shop:
 					welcomeMsg.Messages.Add(new StartShop()
 					{
+						Money = player.m_money,
 						GroupSpend = m_groupSpend,
 						PlayerSpend = player.m_spending
 					});
@@ -300,17 +301,42 @@ namespace ShallowSeasServer
 		void startShop()
 		{
 			m_currentState = GameState.Shop;
+
+			foreach (var player in m_players)
+			{
+				player.m_isReady = false;
+
+				StartShop msg = new StartShop()
+				{
+					Money = player.m_money,
+					GroupSpend = m_groupSpend,
+					PlayerSpend = player.m_spending
+				};
+
+				player.m_client.sendMessage(msg);
+			}
 		}
 
 		void tickShop()
 		{
 			CurrentTimestamp = 0;
+
+			if (m_players.Count > 0 && m_players.All(p => p.m_isReady))
+			{
+				startRound();
+			}
 		}
 
 		void startRound()
 		{
 			m_currentState = GameState.Round;
 			m_roundStartTime = DateTime.Now;
+
+			foreach (var player in m_players)
+			{
+				StartRound msg = new StartRound() { MapWidth = m_mapWidth, MapHeight = m_mapHeight, MapWater = getMapWaterAsBase64() };
+				player.m_client.sendMessage(msg);
+			}
 		}
 
 		void tickRound()

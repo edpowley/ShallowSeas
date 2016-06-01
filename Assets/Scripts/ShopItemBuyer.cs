@@ -5,13 +5,21 @@ using ShallowNet;
 
 public class ShopItemBuyer : MonoBehaviour
 {
+	private ShopMenu m_menu;
+
 	public Text m_nameText, m_amountText;
 	public Slider m_slider;
 	public Button m_buyButton;
 	public Image m_progressBar;
 
-	private GameSettings.BuyInfo m_itemInfo;
+	internal GameSettings.BuyInfo m_itemInfo;
 	private int m_currentSpend;
+
+	internal int CurrentSpend
+	{
+		get { return m_currentSpend; }
+		set { m_currentSpend = value;  updateValues(); }
+	}
 
 	// Use this for initialization
 	void Start()
@@ -19,8 +27,9 @@ public class ShopItemBuyer : MonoBehaviour
 
 	}
 
-	internal void init(GameSettings.BuyInfo itemInfo)
+	internal void init(ShopMenu menu, GameSettings.BuyInfo itemInfo)
 	{
+		m_menu = menu;
 		m_itemInfo = itemInfo;
 
 		m_currentSpend = 0;
@@ -37,10 +46,15 @@ public class ShopItemBuyer : MonoBehaviour
 
 		m_nameText.text = string.Format("[{0}] {1}", itemInfo.category, itemInfo.name);
 
-		m_progressBar.fillAmount = (float)m_currentSpend / itemInfo.price;
+		updateValues();
+	}
+
+	public void updateValues()
+	{
+		m_progressBar.fillAmount = (float)m_currentSpend / m_itemInfo.price;
 
 		m_slider.minValue = 0;
-		m_slider.maxValue = itemInfo.price - m_currentSpend;
+		m_slider.maxValue = Mathf.Min(m_itemInfo.price - m_currentSpend, m_menu.m_money);
 		m_slider.value = 0;
 
 		sliderValueChanged();
@@ -62,7 +76,17 @@ public class ShopItemBuyer : MonoBehaviour
 
 	public void buyClicked()
 	{
+		RequestBuy msg = new RequestBuy()
+		{
+			PlayerId = MyNetworkManager.Instance.LocalPlayerId,
+			Item = m_itemInfo.name,
+			Amount = (int)m_slider.value
+		};
 
+		// Disable canvas until server confirms purchase
+		m_menu.m_canvasGroup.interactable = false;
+
+		MyNetworkManager.Instance.m_client.sendMessage(msg);
 	}
 
 }
