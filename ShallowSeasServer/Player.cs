@@ -68,6 +68,7 @@ namespace ShallowSeasServer
 			m_currentCourse.Add(startPos);
 			m_courseStartTime = 0;
 			m_fuel = m_game.m_settings.maxFuel;
+			m_castGear = null;
 
 			foreach (FishType ft in FishType.All)
 				m_currentCatch[ft] = 0;
