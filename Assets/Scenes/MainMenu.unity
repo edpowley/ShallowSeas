@@ -730,7 +730,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Shallow Seas v0.3 ALPHA
+  m_Text: Shallow Seas v0.4 ALPHA
 --- !u!222 &840774868
 CanvasRenderer:
   m_ObjectHideFlags: 0
