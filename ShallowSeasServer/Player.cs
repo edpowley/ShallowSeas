@@ -151,7 +151,9 @@ namespace ShallowSeasServer
 					totalFish += numFish;
 				}
 
-				while (totalFish > gearInfo.maxCatch)
+				int previousCatch = m_currentCatch.Values.Sum();
+
+				while (totalFish > 0 && (totalFish > gearInfo.maxCatch || previousCatch + totalFish > m_game.m_settings.maxCatch))
 				{
 					FishType ft = FishType.All[m_game.m_rnd.Next(FishType.All.Count)];
 					if (msg.FishCaught[ft] > 0)

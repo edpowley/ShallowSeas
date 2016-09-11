@@ -2,6 +2,7 @@
 	"roundLength" : 180,
 	"modelUpdateFreq" : 60,
 	"maxFuel" : 100,
+	"maxCatch" : 100,
 	"gear" : [
 		{
 			"name": "Big Net",

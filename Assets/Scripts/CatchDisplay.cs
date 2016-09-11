@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class CatchDisplay : MonoBehaviour
 {
 	public List<LayoutElement> m_bars = new List<LayoutElement>();
+	public float m_width;
 
 	// Use this for initialization
 	void Start()
@@ -20,7 +21,7 @@ public class CatchDisplay : MonoBehaviour
 		var boat = GameManager.Instance.LocalPlayerBoat;
 		if (boat != null)
 		{
-			float scale = this.GetComponent<RectTransform>().rect.width / (float)boat.m_maxCatch;
+			float scale = m_width / (float)boat.m_maxCatch;
 			for (int i = 0; i < FishType.All.Count; i++)
 			{
 				FishType ft = FishType.All[i];
