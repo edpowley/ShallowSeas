@@ -718,7 +718,7 @@ namespace fastJSON
 #if !SILVERLIGHT
             return Enum.Parse(pt, v.ToString());
 #else
-            return Enum.Parse(pt, v, true);
+            return Enum.Parse(pt, v.ToString(), true);
 #endif
         }
 

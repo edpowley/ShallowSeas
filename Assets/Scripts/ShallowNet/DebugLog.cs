@@ -7,6 +7,8 @@ namespace ShallowNet
 {
     public class DebugLog
     {
+		public const bool c_verbose = false;
+
         public static Action<string> s_printFunc = null;
 
         internal static void WriteLine(string str)

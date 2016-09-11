@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace ShallowNet
@@ -189,6 +190,11 @@ namespace ShallowNet
 						string str = Encoding.UTF8.GetString(m_readBuffer.ToArray());
 						DebugLog.WriteLine("Received: {0}", str);
 						m_readBuffer.Clear();
+
+						// Hack assembly names
+						Regex re = new Regex(@"([A-Za-z0-9._]*), [-A-Za-z0-9._]*, Version=[0-9.]*, Culture=neutral, PublicKeyToken=null");
+						str = re.Replace(str, "$1, " + typeof(ShallowNet.Message).Assembly.FullName);
+						DebugLog.WriteLine("Hacked  : {0}", str);
 
 						Message msg = null;
 						try

@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ShallowSeasServer</RootNamespace>
     <AssemblyName>ShallowSeasServer</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -21,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -43,6 +46,51 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Assets\Scripts\ShallowNet\ClientWrapper.cs">
+      <Link>ShallowNet\ClientWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\DebugLog.cs">
+      <Link>ShallowNet\DebugLog.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\dynamic.cs">
+      <Link>ShallowNet\fastJSON\dynamic.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\Formatter.cs">
+      <Link>ShallowNet\fastJSON\Formatter.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\Getters.cs">
+      <Link>ShallowNet\fastJSON\Getters.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\JSON.cs">
+      <Link>ShallowNet\fastJSON\JSON.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\JsonParser.cs">
+      <Link>ShallowNet\fastJSON\JsonParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\JsonSerializer.cs">
+      <Link>ShallowNet\fastJSON\JsonSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\Reflection.cs">
+      <Link>ShallowNet\fastJSON\Reflection.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\fastJSON\SafeDictionary.cs">
+      <Link>ShallowNet\fastJSON\SafeDictionary.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\FishType.cs">
+      <Link>ShallowNet\FishType.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\GameConstants.cs">
+      <Link>ShallowNet\GameConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\GameSettings.cs">
+      <Link>ShallowNet\GameSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\Message.cs">
+      <Link>ShallowNet\Message.cs</Link>
+    </Compile>
+    <Compile Include="..\Assets\Scripts\ShallowNet\SNVector2.cs">
+      <Link>ShallowNet\SNVector2.cs</Link>
+    </Compile>
     <Compile Include="EcologicalModel.cs" />
     <Compile Include="EcologicalModel_Move.cs" />
     <Compile Include="EcologicalModel_Leslie.cs" />
@@ -70,6 +118,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -79,12 +128,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ShallowNet\ShallowNet.csproj">
-      <Project>{a6a093d7-1711-4e00-b997-27bba8a656a7}</Project>
-      <Name>ShallowNet</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
