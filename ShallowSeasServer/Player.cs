@@ -144,9 +144,10 @@ namespace ShallowSeasServer
 				int totalFish = 0;
 				var density = m_game.getFishDensity((int)m_castPos.x, (int)m_castPos.y);
 				float totalDensity = density.Values.Sum();
+				float catchSize = Math.Min(totalDensity, gearInfo.maxCatch);
 				foreach(FishType ft in FishType.All)
 				{
-					int numFish = (int)Math.Round(density[ft] / totalDensity * gearInfo.maxCatch);
+					int numFish = (int)Math.Round(density[ft] / totalDensity * catchSize);
 					msg.FishCaught.Add(ft, numFish);
 					totalFish += numFish;
 				}
@@ -163,6 +164,8 @@ namespace ShallowSeasServer
 					}
 				}
 
+				m_game.removeFish((int)m_castPos.x, (int)m_castPos.y, msg.FishCaught);
+				
 				foreach (FishType ft in FishType.All)
 				{
 					m_currentCatch[ft] += msg.FishCaught[ft];

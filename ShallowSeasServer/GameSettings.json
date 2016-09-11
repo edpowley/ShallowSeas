@@ -3,6 +3,7 @@
 	"modelUpdateFreq" : 60,
 	"maxFuel" : 100,
 	"maxCatch" : 100,
+	"depletionFactor" : 0.3,
 	"gear" : [
 		{
 			"name": "Big Net",

@@ -22,6 +22,8 @@ public class Boat : MonoBehaviour
     public UnityEngine.UI.Text m_tooltipLabel;
     public CanvasGroup m_tooltipGroup;
 
+	private float m_lastDensityUpdateTime = float.NegativeInfinity;
+
     public IntVector2 CurrentCell
     {
         get
@@ -201,10 +203,11 @@ public class Boat : MonoBehaviour
 
         if (isLocalPlayer)
         {
-            if (GameManager.Instance.getFishDensity(CurrentCell) == null)
+            if (GameManager.Instance.getFishDensity(CurrentCell) == null || GameManager.Instance.CurrentTime - m_lastDensityUpdateTime < 1)
             {
                 RequestFishDensity msg = new RequestFishDensity() { X = CurrentCell.X, Y = CurrentCell.Y, Width = 1, Height = 1 };
                 MyNetworkManager.Instance.m_client.sendMessage(msg);
+				m_lastDensityUpdateTime = GameManager.Instance.CurrentTime;
             }
         }
         else // not local player

@@ -228,15 +228,15 @@ namespace ShallowSeasServer
 							switch (sp)
 							{
 								case 0: /*species 0*/
-									species[sp].N[0, x, y] = 50.0 * drand48();
-									species[sp].N[1, x, y] = 10.0 * drand48();
+									species[sp].N[0, x, y] = 100.0 * drand48();
+									species[sp].N[1, x, y] = 30.0 * drand48();
 									species[sp].N[2, x, y] = 0.0 * drand48();
 									break;
 
 								case 1:/*species 1*/
-									species[sp].N[0, x, y] = 20.0 * drand48();
-									species[sp].N[1, x, y] = 5.0 * drand48();
-									species[sp].N[2, x, y] = 1.0 * drand48();
+									species[sp].N[0, x, y] = 40.0 * drand48();
+									species[sp].N[1, x, y] = 15.0 * drand48();
+									species[sp].N[2, x, y] = 4.0 * drand48();
 									break;
 							}
 
@@ -403,6 +403,15 @@ namespace ShallowSeasServer
 					for (x = 0; x < xmax; ++x)
 						for (y = 0; y < ymax; ++y) species[sp].sumN[i] += species[sp].newN[i, x, y];
 				}
+		}
+
+		internal void removeFish(int sp, int i, int x, int y, double amount)
+		{
+			amount = Math.Min(amount, species[sp].N[i, x, y]);
+
+			species[sp].N[i, x, y] -= amount;
+			species[sp].sumN[i] -= amount;
+			community.N[i, x, y] -= amount;
 		}
 
 

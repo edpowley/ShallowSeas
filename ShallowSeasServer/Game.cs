@@ -231,6 +231,14 @@ namespace ShallowSeasServer
 				m_ecologicalModel.iterate();
 		}
 
+		internal void removeFish(int x, int y, Dictionary<FishType, int> fish)
+		{
+			foreach (var kv in fish)
+			{
+				m_ecologicalModel.removeFish(kv.Key.species, kv.Key.stage, x, y, kv.Value * m_settings.depletionFactor);
+			}
+		}
+
 		void loadMap()
 		{
 			Bitmap bmp = new Bitmap("water.png");

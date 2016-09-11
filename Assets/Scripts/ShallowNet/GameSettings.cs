@@ -37,6 +37,7 @@ namespace ShallowNet
 
 		public float roundLength;
 		public float modelUpdateFreq;
+		public float depletionFactor;
 		public float maxFuel;
 		public int maxCatch;
 		public List<GearInfo> gear;
