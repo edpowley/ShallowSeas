@@ -426,6 +426,37 @@ namespace ShallowSeasServer
 			/***Update state of system through movement***/
 			newgrid_move(t);
 
+			// noise
+			const double noiseRange = 0.1;
+			for (int sp=0;sp< nspp;sp++)
+			{
+				for(int i=0;i<nstage;i++)
+				{
+					for(int x=0;x<xmax;x++)
+					{
+						for(int y=0;y<ymax;y++)
+						{
+							species[sp].N[i, x, y] *= (rng.NextDouble() - 0.5) * noiseRange + 1.0;
+						}
+					}
+				}
+			}
+
+			// Write densities
+			StringBuilder sb = new StringBuilder("Fish densities:");
+			for (int sp = 0; sp < nspp; ++sp)
+				for (int i = 0; i < nstage; ++i)
+				{
+					double count = 0.0;
+					for (int x = 0; x < xmax; ++x)
+						for (int y = 0; y < ymax; ++y)
+							count += species[sp].N[i, x, y];
+
+					sb.AppendFormat(" {0:0.0}", count);
+				}
+
+			Log.log(Log.Category.Debug, sb.ToString());
+
 			/***Update time***/
 			t += dt;
 

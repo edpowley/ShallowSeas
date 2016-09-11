@@ -161,14 +161,23 @@ namespace ShallowSeasServer
 						for (int y = 0; y < game.m_mapHeight; y++)
 						{
 							float density = game.getFishDensity(x, y)[ft];
-							int colourIndex = (int)density;
 							Color colour;
-							if (colourIndex < 0)
+							if (density < 0)
 								colour = m_fishMapColours[0];
-							else if (colourIndex >= m_fishMapColours.Length)
+							else if (density >= m_fishMapColours.Length - 1)
 								colour = m_fishMapColours[m_fishMapColours.Length - 1];
 							else
-								colour = m_fishMapColours[colourIndex];
+							{
+								int index = (int)density;
+								Color colourA = m_fishMapColours[index];
+								Color colourB = m_fishMapColours[index + 1];
+								double p = density - index;
+								colour = Color.FromArgb(
+									(int)(colourA.R * (1 - p) + colourB.R * p),
+									(int)(colourA.G * (1 - p) + colourB.G * p),
+									(int)(colourA.B * (1 - p) + colourB.B * p)
+								);
+							}
 
 							for (int px = x * pixelSize; px < (x + 1) * pixelSize; px++)
 								for (int py = y * pixelSize; py < (y + 1) * pixelSize; py++)
